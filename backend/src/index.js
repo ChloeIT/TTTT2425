@@ -1,10 +1,14 @@
 const express = require("express");
+const { json } = require("express");
 
+const cors = require("cors");
 const { PrismaClient } = require("./generated/prisma");
 const authRoute = require("./routes/auth.router");
 const app = express();
 const PORT = 5000;
 
+app.use(json());
+app.use(cors());
 const prisma = new PrismaClient();
 
 app.get("/hello", (req, res) => {

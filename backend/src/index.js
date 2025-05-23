@@ -1,21 +1,34 @@
 const express = require("express");
-const { json } = require("express");
-
+const { json, urlencoded } = require("express");
 const cors = require("cors");
-const { PrismaClient } = require("./generated/prisma");
 const authRoute = require("./routes/auth.router");
-const app = express();
+require("./libs/prisma");
+
 const PORT = 5000;
 
-app.use(json());
+const app = express();
+
 app.use(cors());
-const prisma = new PrismaClient();
+app.use(json());
+app.use(
+  urlencoded({
+    extended: true,
+  })
+);
 
 app.get("/hello", (req, res) => {
   res.send("Hello world");
 });
 
 app.use(authRoute);
+
+app.use((err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({
+      error: err.message,
+    });
+  }
+});
 
 app.listen(PORT, (error) => {
   if (!error)
@@ -24,6 +37,3 @@ app.listen(PORT, (error) => {
     );
   else console.log("Error occurred, server can't start", error);
 });
-module.exports = {
-  prisma,
-};

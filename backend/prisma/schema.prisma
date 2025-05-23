@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  fullName   String
+  username   String   @unique
+  email      String   @unique
+  password   String
+  department String
+  role       Role
+  createdAt  DateTime @default(now())
+  upDatedAt  DateTime @updatedAt
+
+  exams        Exam[]
+  approvalUser Approval[]
+  documnents   Document[]
+
+  notifications Notification[]
+}
+
+enum Role {
+  BAN_GIAM_HIEU
+  TRUONG_KHOA
+  GIANG_VIEN_RA_DE
+  THU_KY
+  USER
+}
+
+model Exam {
+  id    Int    @id @default(autoincrement())
+  title String
+
+  createdById  Int
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  status       ExamStatus
+  questionFile String
+  answerFile   String
+  createdAt    DateTime   @default(now())
+  upDatedAt    DateTime   @updatedAt
+
+  approval      Approval?
+  notifications Notification[]
+}
+
+enum ExamStatus {
+  DANG_CHO
+  DA_DUYET
+  TU_CHOI
+  DA_THI
+}
+
+model Approval {
+  id Int @id @default(autoincrement())
+
+  examId Int  @unique
+  exam   Exam @relation(fields: [examId], references: [id])
+
+  approvedById Int
+  approvedBy   User @relation(fields: [approvedById], references: [id])
+
+  comment String
+
+  approvedAt DateTime @default(now())
+}
+
+model Notification {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  examId Int
+  exam   Exam @relation(fields: [examId], references: [id])
+
+  message   String
+  isRead    Boolean
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id           Int      @id @default(autoincrement())
+  questionFile String
+  answerFile   String
+  retention    String
+  uploadedById Int
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+}

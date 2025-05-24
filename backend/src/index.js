@@ -2,6 +2,7 @@ const express = require("express");
 const { json, urlencoded } = require("express");
 const cors = require("cors");
 const authRoute = require("./routes/auth.router");
+const examRouter = require("./routes/exam.router");
 require("./libs/prisma");
 
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.use(authRoute);
+app.use("/exams", examRouter);
 
 app.use((err, req, res, next) => {
   if (err) {

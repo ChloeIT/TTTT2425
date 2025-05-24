@@ -2,6 +2,7 @@ const { ZodError } = require("zod");
 
 function validateData(schema) {
   return (req, res, next) => {
+    console.log("req.body inside validateData:", req.body);
     try {
       schema.parse(req.body);
       next();

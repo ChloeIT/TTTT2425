@@ -1,0 +1,189 @@
+const prisma = require("../libs/prisma");
+
+const LIMIT = 10;
+
+const userSelect = {
+  id: true,
+  fullName: true,
+  username: true,
+  email: true,
+  department: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+};
+const userService = {
+  userSelect,
+
+  updateUser: async function (
+    userId,
+    { fullName, username, email, department }
+  ) {
+    const user = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        fullName,
+        username,
+        email,
+        department,
+      },
+      select: {
+        ...userSelect,
+      },
+    });
+    return user;
+  },
+  findByUsername: async (username) => {
+    return await prisma.user.findUnique({
+      where: { username },
+      select: {
+        ...userSelect,
+      },
+    });
+  },
+  findByEmail: async (email) => {
+    return await prisma.user.findUnique({
+      where: { email },
+      select: {
+        ...userSelect,
+      },
+    });
+  },
+  findById: async (id) => {
+    return await prisma.user.findUnique({
+      where: { id },
+      select: {
+        ...userSelect,
+      },
+    });
+  },
+  findByIdWithPassword: async (id) => {
+    return await prisma.user.findUnique({
+      where: { id },
+    });
+  },
+
+  createNewUser: async ({
+    fullName,
+    username,
+    email,
+    password,
+    department,
+    role,
+  }) => {
+    const create = await prisma.user.create({
+      data: {
+        department,
+        email,
+        fullName,
+        password,
+        role,
+        username,
+      },
+      select: {
+        ...userSelect,
+      },
+    });
+    return create;
+  },
+  resetPassword: async function (userId, newPassword) {
+    const user = await prisma.user.update({
+      data: {
+        password: newPassword,
+      },
+      where: {
+        id: userId,
+      },
+      select: {
+        ...userSelect,
+      },
+    });
+    return user;
+  },
+  getUsers: async ({ page = 1, query }) => {
+    const [data, count] = await prisma.$transaction([
+      prisma.user.findMany({
+        take: LIMIT,
+        skip: (page - 1) * LIMIT,
+        where: {
+          ...(query && {
+            OR: [
+              {
+                fullName: {
+                  contains: query,
+                },
+              },
+              {
+                email: {
+                  contains: query,
+                },
+              },
+            ],
+          }),
+        },
+        select: {
+          ...userSelect,
+        },
+      }),
+      prisma.user.count({
+        where: {
+          ...(query && {
+            OR: [
+              {
+                fullName: {
+                  contains: query,
+                },
+              },
+              {
+                email: {
+                  contains: query,
+                },
+              },
+            ],
+          }),
+        },
+      }),
+    ]);
+    const totalPage = Math.ceil(count / LIMIT);
+    return {
+      data,
+      totalPage,
+    };
+  },
+  updateUserRole: async (userId, role) => {
+    return await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        role,
+      },
+      select: {
+        ...userSelect,
+      },
+    });
+  },
+  activeUser: async (userId) => {
+    return await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        isActive: true,
+      },
+    });
+  },
+  inactiveUser: async (userId) => {
+    return await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        isActive: false,
+      },
+    });
+  },
+};
+module.exports = userService;

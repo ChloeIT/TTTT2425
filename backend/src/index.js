@@ -3,6 +3,7 @@ const { json, urlencoded } = require("express");
 const cors = require("cors");
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
+const userRoute = require("./routes/user.router");
 require("./libs/prisma");
 
 const PORT = process.env.PORT || 5000;
@@ -23,9 +24,10 @@ app.get("/hello", (req, res) => {
 
 app.use(authRoute);
 app.use("/exams", examRouter);
+app.use("/users", userRoute);
 
 app.use((err, req, res, next) => {
-  if (err) {
+  if (err.message) {
     return res.status(400).json({
       error: err.message,
     });

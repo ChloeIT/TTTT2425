@@ -1,13 +1,79 @@
 import { z } from "zod";
+
+export const userRoleEnum = [
+  "BAN_GIAM_HIEU",
+  "TRUONG_KHOA",
+  "GIANG_VIEN_RA_DE",
+  "THU_KY",
+  "USER",
+];
+export const userRole = {
+  BAN_GIAM_HIEU: "Ban giám hiệu",
+  TRUONG_KHOA: "Trưởng khoa",
+  GIANG_VIEN_RA_DE: "Giảng viên ra đề",
+  THU_KY: "Thư ký",
+  USER: "Giảng viên",
+};
 export const userSchema = {
-  userRegistrationSchema: z.object({
-    username: z.string(),
-    email: z.string().email(),
-    password: z.string().min(8),
+  registerSchema: z.object({
+    username: z
+      .string({
+        required_error: "username là trường bắt buộc phải điền",
+        invalid_type_error: "username bắt buộc phải là chuỗi ký tự",
+      })
+      .min(6, "Độ dài của username ít nhất 6 ký tự")
+      .max(20, "Độ dài của username tối đa 20 ký tự"),
+    email: z
+      .string({
+        required_error: "Địa chỉ email là trường bắt buộc phải điền",
+        invalid_type_error: "Địa chỉ email bắt buộc phải là chuỗi ký tự",
+      })
+      .email({
+        message: "Địa chỉ email không hợp lệ",
+      }),
+    password: z
+      .string({
+        required_error: "Mật khẩu là trường bắt buộc phải điền",
+        invalid_type_error: "Mật khẩu bắt buộc phải là chuỗi ký tự",
+      })
+      .min(6, "Độ dài tối thiểu của mật khẩu là 6 ký tự"),
+    fullName: z
+      .string({
+        required_error: "Họ tên người dùng là trường bắt buộc phải điền",
+        invalid_type_error: "Họ tên người dùng bắt buộc phải là chuỗi ký tự",
+      })
+      .min(6, "Độ dài tối thiểu của họ tên người dùng là 6 ký tự"),
+    department: z
+      .string({
+        required_error: "Tên phòng ban là trường bắt buộc phải điền",
+        invalid_type_error: "Tên phòng bang bắt buộc phải là chuỗi ký tự",
+      })
+      .min(3, "Độ dài tối thiểu của tên phòng bang là 3 ký tự"),
+    role: z
+      .enum(userRoleEnum, {
+        message: "Vai trò của người dùng không hợp lệ",
+      })
+      .optional(),
   }),
 
-  userLoginSchema: z.object({
-    username: z.string(),
-    password: z.string().min(8),
+  loginSchema: z.object({
+    username: z
+      .string({
+        required_error: "username là trường bắt buộc phải điền",
+        invalid_type_error: "username bắt buộc phải là chuỗi ký tự",
+      })
+      .min(6, "Độ dài của username ít nhất 6 ký tự")
+      .max(20, "Độ dài của username tối đa 20 ký tự"),
+    password: z
+      .string({
+        required_error: "Mật khẩu là trường bắt buộc phải điền",
+        invalid_type_error: "Mật khẩu bắt buộc phải là chuỗi ký tự",
+      })
+      .min(6, "Độ dài tối thiểu của mật khẩu là 6 ký tự"),
+  }),
+  editRoleSchema: z.object({
+    role: z.enum(userRoleEnum, {
+      message: "Vai trò của người dùng không hợp lệ",
+    }),
   }),
 };

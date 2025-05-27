@@ -11,6 +11,7 @@ const userSelect = {
   role: true,
   createdAt: true,
   updatedAt: true,
+  isActive: true,
 };
 const userService = {
   userSelect,

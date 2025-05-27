@@ -64,16 +64,14 @@ const userController = {
 
   getUserTable: async (req, res, next) => {
     try {
-      const { q, page } = req.query;
+      const { query, page } = req.query;
       const { data, totalPage } = await userService.getUsers({
         page,
-        query: q,
+        query,
       });
       return res.status(200).json({
-        data: {
-          data,
-          totalPage,
-        },
+        data,
+        totalPage,
       });
     } catch (error) {
       next(error);

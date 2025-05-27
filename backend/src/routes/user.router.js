@@ -23,27 +23,27 @@ userRoute.patch(
 
 userRoute.get(
   "/",
-  requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  // requireLogin,
+  // permitRoles(Role.BAN_GIAM_HIEU),
   userController.getUserTable
 );
 userRoute.patch(
   "/:id/editRole",
-  requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  // requireLogin,
+  // permitRoles(Role.BAN_GIAM_HIEU),
   validateData(userSchema.editRoleSchema),
   userController.editRole
 );
 userRoute.patch(
   "/:id/active",
-  requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  // requireLogin,
+  // permitRoles(Role.BAN_GIAM_HIEU),
   userController.activeUser
 );
 userRoute.patch(
   "/:id/inactive",
-  requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  // requireLogin,
+  // permitRoles(Role.BAN_GIAM_HIEU),
   userController.inactiveUser
 );
 

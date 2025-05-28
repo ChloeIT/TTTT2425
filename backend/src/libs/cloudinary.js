@@ -12,7 +12,8 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "exam_files",
-    allowed_formats: ["pdf", "doc", "docx"],
+    resource_type: "auto",
+    access_mode: "public",
   },
 });
 

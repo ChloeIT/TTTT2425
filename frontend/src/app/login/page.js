@@ -16,7 +16,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = userSchema.userLoginSchema.safeParse(formData);
+    const result = userSchema.loginSchema.safeParse(formData);
 
     if (!result.success) {
       const fieldErrors = {};

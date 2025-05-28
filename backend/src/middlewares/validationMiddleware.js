@@ -4,12 +4,13 @@ function validateData(schema) {
   return (req, res, next) => {
     console.log("req.body inside validateData:", req.body);
     try {
-      schema.parse(req.body);
+      req.body = schema.parse(req.body);
       next();
     } catch (error) {
       if (error instanceof ZodError) {
         const errorMessages = error.errors.map((issue) => ({
-          message: `${issue.path.join(".")} is ${issue.message}`,
+          message: issue.message,
+          field: issue.path.join("."),
         }));
 
         res.status(400).json({ error: "Invalid data", details: errorMessages });

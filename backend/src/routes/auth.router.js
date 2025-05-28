@@ -17,5 +17,6 @@ authRoute.post(
 );
 
 authRoute.get("/currentUser", requireLogin, authController.currentUser);
+
 authRoute.get("/logout", requireLogin, authController.logout);
 module.exports = authRoute;

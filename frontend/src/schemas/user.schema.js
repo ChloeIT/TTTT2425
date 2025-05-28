@@ -8,6 +8,6 @@ export const userSchema = {
 
   userLoginSchema: z.object({
     username: z.string(),
-    password: z.string().min(8),
+    password: z.string().min(6),
   }),
 };

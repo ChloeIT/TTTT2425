@@ -21,7 +21,8 @@ app.get("/hello", (req, res) => {
   res.send("Hello world");
 });
 
-app.use(authRoute);
+app.use("/api/auth", authRoute);
+
 app.use("/exams", examRouter);
 
 app.use((err, req, res, next) => {

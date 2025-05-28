@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const moment = require("moment");
+const userService = require("./user.service");
 
 const TOKEN_EXPIRED_IN = 30 * 60;
 
@@ -32,6 +33,7 @@ const authService = {
     const user = await prisma.user.findUnique({
       where: {
         id: data.userId,
+        isActive: true,
         sessions: {
           some: {
             isExpired: false,
@@ -42,6 +44,9 @@ const authService = {
           },
         },
       },
+      select: {
+        ...userService.userSelect,
+      },
     });
 
     return user;
@@ -49,43 +54,17 @@ const authService = {
 
   findWithCredentials: async function ({ username, password }) {
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { username, isActive: true },
     });
     if (!user) {
-      return null;
+      throw new Error("username hoặc mật khẩu không hợp lệ");
     }
     const isMatch = await this.matchPassword(password, user.password);
     if (!isMatch) {
-      return null;
+      throw new Error("username hoặc mật khẩu không hợp lệ");
     }
-    return user;
-  },
-  findByUsername: async (username) => {
-    return await prisma.user.findUnique({ where: { username } });
-  },
-  findByEmail: async (email) => {
-    return await prisma.user.findUnique({ where: { email } });
-  },
-
-  createNewUser: async ({
-    fullName,
-    username,
-    email,
-    password,
-    department,
-    role,
-  }) => {
-    const create = await prisma.user.create({
-      data: {
-        department,
-        email,
-        fullName,
-        password,
-        role,
-        username,
-      },
-    });
-    return create;
+    const { password: pw, ...other } = user;
+    return other;
   },
 
   expiredSession: async (token) => {
@@ -98,6 +77,16 @@ const authService = {
       },
     });
     return session;
+  },
+  expiredAllSession: async (userId) => {
+    return await prisma.session.updateMany({
+      where: {
+        userId,
+      },
+      data: {
+        isExpired: true,
+      },
+    });
   },
 };
 

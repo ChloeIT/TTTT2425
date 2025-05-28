@@ -21,9 +21,11 @@ model User {
   email      String   @unique
   password   String
   department String
-  role       Role
+  role       Role     @default(USER)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  isActive Boolean @default(true)
 
   exams        Exam[]
   approvalUser Approval[]
@@ -54,9 +56,9 @@ enum Role {
 }
 
 model Exam {
-  id    Int    @id @default(autoincrement())
-  title String
-  password String?
+  id           Int        @id @default(autoincrement())
+  title        String
+  password     String?
   createdById  Int
   createdBy    User       @relation(fields: [createdById], references: [id])
   status       ExamStatus

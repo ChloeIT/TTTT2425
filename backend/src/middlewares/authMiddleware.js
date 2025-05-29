@@ -2,11 +2,10 @@ const authService = require("../services/auth.service");
 
 const requireLogin = async (req, res, next) => {
   try {
-    if (!req.header("Authorization")) {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
       res.status(401).json({ error: "Cần đăng nhập để thực hiện" });
     }
-    const token = req.header("Authorization").replace("Bearer ", "");
-
     const user = await authService.verifySession(token);
     if (!user) {
       res.status(401).json({ error: "Cần đăng nhập để thực hiện" });

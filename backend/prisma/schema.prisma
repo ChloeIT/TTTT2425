@@ -15,15 +15,15 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   fullName   String
-  username   String   @unique
-  email      String   @unique
+  username   String     @unique
+  email      String     @unique
   password   String
-  department String
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  department Department @default(MAC_DINH)
+  role       Role       @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   isActive Boolean @default(true)
 
@@ -34,6 +34,13 @@ model User {
   notifications Notification[]
 
   sessions Session[]
+}
+
+enum Department {
+  LY_LUAN_CO_SO
+  XAY_DUNG_DANG
+  NHA_NUOC_PHAP_LUAT
+  MAC_DINH
 }
 
 model Session {

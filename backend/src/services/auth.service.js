@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const userService = require("./user.service");
 
-const TOKEN_EXPIRED_IN = 30 * 60;
+const TOKEN_EXPIRED_IN = 60 * 60;
 
 const authService = {
   hashPassword: async (password) => {

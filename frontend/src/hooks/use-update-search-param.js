@@ -28,7 +28,6 @@ export const useUpdateSearchParam = (key, defaultParam) => {
   };
   return {
     updateSearchParam: handleChange,
-    initialParam: initialParam ? initialParam : undefined,
   };
 };
 

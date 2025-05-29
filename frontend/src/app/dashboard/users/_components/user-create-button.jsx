@@ -1,6 +1,6 @@
 "use client";
 
-import { userRole, userSchema } from "@/schemas/user.schema";
+import { userDepartment, userRole, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +60,7 @@ export const UserCreateButton = () => {
     resolver: zodResolver(userSchema.registerSchema),
     defaultValues: {
       email: "",
-      department: "",
+      department: undefined,
       fullName: "",
       password: "",
       username: "",
@@ -201,14 +201,25 @@ export const UserCreateButton = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Khoa công tác</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={"Nhập khoa công tác của người dùng"}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn vai trò cho người dùng" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.keys(userDepartment).map((key) => {
+                        return (
+                          <SelectItem value={key} key={key}>
+                            {userDepartment[key]}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
 
                   <FormMessage />
                 </FormItem>

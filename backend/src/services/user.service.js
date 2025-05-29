@@ -166,6 +166,19 @@ const userService = {
       },
     });
   },
+  updateUserDepartment: async (userId, department) => {
+    return await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        department,
+      },
+      select: {
+        ...userSelect,
+      },
+    });
+  },
   activeUser: async (userId) => {
     return await prisma.user.update({
       where: {

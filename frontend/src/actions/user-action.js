@@ -15,7 +15,9 @@ export const createUser = async (values) => {
   } catch (error) {
     return {
       ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
+      message: error.response
+        ? error.response.data.error
+        : "Lỗi hệ thống, vui lòng thử lại sau",
     };
   }
 };
@@ -52,7 +54,47 @@ export const editUserRole = async (userId, values) => {
   } catch (error) {
     return {
       ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
+      message: error.response
+        ? error.response.data.error
+        : "Lỗi hệ thống, vui lòng thử lại sau",
+    };
+  }
+};
+export const editUserDepartment = async (userId, values) => {
+  try {
+    const res = await instanceAPI.patch(
+      `/users/${userId}/editDepartment`,
+      values
+    );
+    revalidatePath("/users");
+    return {
+      ok: true,
+      ...res.data,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.response
+        ? error.response.data.error
+        : "Lỗi hệ thống, vui lòng thử lại sau",
+    };
+  }
+};
+export const editCurrentUser = async (values, path) => {
+  try {
+    const res = await instanceAPI.patch(`/users/edit`, values);
+
+    revalidatePath(path ?? "/dashboard");
+    return {
+      ok: true,
+      ...res.data,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.response
+        ? error.response.data.error
+        : "Lỗi hệ thống, vui lòng thử lại sau",
     };
   }
 };
@@ -73,7 +115,9 @@ export const activeUser = async (userId, isActive) => {
   } catch (error) {
     return {
       ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
+      message: error.response
+        ? error.response.data.error
+        : "Lỗi hệ thống, vui lòng thử lại sau",
     };
   }
 };

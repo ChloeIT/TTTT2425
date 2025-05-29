@@ -4,12 +4,14 @@ const cors = require("cors");
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
+const cookieParser = require("cookie-parser");
+
 require("./libs/prisma");
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-
+app.use(cookieParser());
 app.use(cors());
 app.use(json());
 app.use(

@@ -2,7 +2,6 @@
 
 import { NavPagination } from "@/components/nav-pagination";
 import { SearchBar } from "@/components/search-bar";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -14,6 +13,8 @@ import {
 
 import { UserEditRoleButton } from "./user-edit-role-button";
 import { UserActiveButton } from "./user-active-buton";
+import { userDepartment } from "@/schemas/user.schema";
+import { UserEditDepartmentButton } from "./user-edit-department-button";
 
 export const UsersTable = ({ data = [], totalPage }) => {
   return (
@@ -40,7 +41,9 @@ export const UsersTable = ({ data = [], totalPage }) => {
               <TableRow key={item.id}>
                 <TableCell>{item.fullName}</TableCell>
                 <TableCell>{item.email}</TableCell>
-                <TableCell>{item.department}</TableCell>
+                <TableCell>
+                  <UserEditDepartmentButton data={item} />
+                </TableCell>
                 <TableCell>
                   <UserEditRoleButton data={item} />
                 </TableCell>

@@ -11,6 +11,7 @@ const authController = {
         password,
       });
       const session = await authService.generateSession(user.id);
+
       return res.status(200).json({
         data: {
           user,

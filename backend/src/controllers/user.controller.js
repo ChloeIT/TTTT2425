@@ -99,6 +99,25 @@ const userController = {
       next(error);
     }
   },
+  editDepartment: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id);
+      const { department } = req.body;
+
+      const user = await userService.findById(userId);
+      if (!user) {
+        throw new Error("Người dùng không tồn tại");
+      }
+
+      await userService.updateUserDepartment(userId, department);
+
+      return res.status(200).json({
+        message: "Đã cập nhật khoa công tác cho người dùng thành công",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
   activeUser: async (req, res, next) => {
     try {

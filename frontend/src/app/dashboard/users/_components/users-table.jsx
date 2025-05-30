@@ -13,7 +13,6 @@ import {
 
 import { UserEditRoleButton } from "./user-edit-role-button";
 import { UserActiveButton } from "./user-active-buton";
-import { userDepartment } from "@/schemas/user.schema";
 import { UserEditDepartmentButton } from "./user-edit-department-button";
 
 export const UsersTable = ({ data = [], totalPage }) => {
@@ -57,7 +56,7 @@ export const UsersTable = ({ data = [], totalPage }) => {
       </Table>
       {!data.length && (
         <div className="my-4 text-muted-foreground flex justify-center">
-          No results.
+          Không có dữ liệu...
         </div>
       )}
       <div className="py-4">

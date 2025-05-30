@@ -2,23 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 
-const { default: instanceAPI } = require("@/lib/axios");
+const {
+  default: instanceAPI,
+  successResponse,
+  errorResponse,
+} = require("@/lib/axios");
 
 export const createUser = async (values) => {
   try {
     const res = await instanceAPI.post("/register", values);
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response
-        ? error.response.data.error
-        : "Lỗi hệ thống, vui lòng thử lại sau",
-    };
+    return errorResponse(error);
   }
 };
 
@@ -47,17 +43,9 @@ export const editUserRole = async (userId, values) => {
   try {
     const res = await instanceAPI.patch(`/users/${userId}/editRole`, values);
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response
-        ? error.response.data.error
-        : "Lỗi hệ thống, vui lòng thử lại sau",
-    };
+    return errorResponse(error);
   }
 };
 export const editUserDepartment = async (userId, values) => {
@@ -67,35 +55,18 @@ export const editUserDepartment = async (userId, values) => {
       values
     );
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response
-        ? error.response.data.error
-        : "Lỗi hệ thống, vui lòng thử lại sau",
-    };
+    return errorResponse(error);
   }
 };
 export const editCurrentUser = async (values, path) => {
   try {
     const res = await instanceAPI.patch(`/users/edit`, values);
 
-    revalidatePath(path ?? "/dashboard");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response
-        ? error.response.data.error
-        : "Lỗi hệ thống, vui lòng thử lại sau",
-    };
+    return errorResponse(error);
   }
 };
 export const activeUser = async (userId, isActive) => {
@@ -108,16 +79,8 @@ export const activeUser = async (userId, isActive) => {
     }
 
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response
-        ? error.response.data.error
-        : "Lỗi hệ thống, vui lòng thử lại sau",
-    };
+    return errorResponse(error);
   }
 };

@@ -1,17 +1,18 @@
 "use client";
 
 import { logout } from "@/actions/auth-action";
-import { Button } from "@/components/ui/button";
+import { useAction } from "@/hooks/use-action";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 
 export const LogoutButton = () => {
-  const [isPending, startTransition] = useTransition();
+  const { action, isPending } = useAction();
   const router = useRouter();
   const handleLogout = () => {
-    startTransition(() => {
-      logout();
-      router.replace("/");
+    action({
+      fn: logout,
+      onSuccess: () => {
+        router.replace("/");
+      },
     });
   };
   return (

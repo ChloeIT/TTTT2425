@@ -4,7 +4,6 @@ import { userDepartment, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import {
   Form,
@@ -15,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,34 +31,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { editUserDepartment } from "@/actions/user-action";
+import { useAction } from "@/hooks/use-action";
 
 export const UserEditDepartmentButton = ({ data }) => {
   const [isOpen, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  const { action, isPending } = useAction();
   const onSubmit = (values) => {
-    startTransition(() => {
-      editUserDepartment(data.id, values)
-        .then(({ message, ok }) => {
-          if (ok) {
-            form.reset();
-            setOpen(false);
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: editUserDepartment,
+        onSuccess: () => {
+          form.reset();
+          setOpen(false);
+        },
+      },
+      data.id,
+      values
+    );
   };
   const form = useForm({
     resolver: zodResolver(userSchema.editDepartmentSchema),
-    defaultValues: {
-      department: data.department,
-    },
   });
+  useEffect(() => {
+    if (data) {
+      form.setValue("department", data.department);
+    }
+  }, [data, isOpen]);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>

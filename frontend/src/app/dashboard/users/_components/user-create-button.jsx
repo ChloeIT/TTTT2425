@@ -4,7 +4,6 @@ import { userDepartment, userRole, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import {
   Form,
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,27 +33,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createUser } from "@/actions/user-action";
+import { useAction } from "@/hooks/use-action";
 
 export const UserCreateButton = () => {
   const [isOpen, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  const { action, isPending } = useAction();
   const onSubmit = (values) => {
-    startTransition(() => {
-      createUser(values)
-        .then(({ message, ok }) => {
-          if (ok) {
-            form.reset();
-            setOpen(false);
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: createUser,
+        onSuccess: () => {
+          form.reset();
+          setOpen(false);
+        },
+      },
+      values
+    );
   };
   const form = useForm({
     resolver: zodResolver(userSchema.registerSchema),

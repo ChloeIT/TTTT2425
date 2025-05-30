@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const { default: axios } = require("axios");
 
@@ -24,25 +25,28 @@ instanceAPI.interceptors.request.use(
         },
       };
     }
-
     return config;
   },
   function (error) {
     return Promise.reject(error);
   }
 );
-instanceAPI.interceptors.response.use(
-  function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
 
-    return response;
-  },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
+export const successResponse = (res) => {
+  return {
+    ok: true,
+    status: res.status,
+    ...res.data,
+  };
+};
+export const errorResponse = (error) => {
+  return {
+    ok: false,
+    status: error.status,
+    error: error.response
+      ? error.response?.data?.error
+      : "Lỗi hệ thống, vui lòng thử lại sau",
+  };
+};
 
-    return Promise.reject(error);
-  }
-);
 export default instanceAPI;

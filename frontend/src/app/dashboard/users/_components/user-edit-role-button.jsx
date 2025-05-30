@@ -4,7 +4,6 @@ import { userRole, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import {
   Form,
@@ -15,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,34 +31,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { editUserRole } from "@/actions/user-action";
+import { useAction } from "@/hooks/use-action";
 
 export const UserEditRoleButton = ({ data }) => {
   const [isOpen, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const { action, isPending } = useAction();
   const onSubmit = (values) => {
-    startTransition(() => {
-      editUserRole(data.id, values)
-        .then(({ message, ok }) => {
-          if (ok) {
-            form.reset();
-            setOpen(false);
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: editUserRole,
+        onSuccess: () => {
+          form.reset();
+          setOpen(false);
+        },
+      },
+      data.id,
+      values
+    );
   };
   const form = useForm({
     resolver: zodResolver(userSchema.editRoleSchema),
-    defaultValues: {
-      role: data.role,
-    },
   });
+  useEffect(() => {
+    if (data) {
+      form.setValue("role", data.role);
+    }
+  }, [data, isOpen]);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>

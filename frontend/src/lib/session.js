@@ -1,6 +1,6 @@
-import { currentUser } from "@/actions/auth-action";
 import { cookies } from "next/headers";
 import instanceAPI from "./axios";
+import { redirect } from "next/navigation";
 
 export const createSession = async (token) => {
   const cookieStore = await cookies();
@@ -15,10 +15,11 @@ export const deleteSession = async () => {
   const cookieStore = await cookies();
   cookieStore.delete("token");
 };
+
 export const auth = async () => {
   try {
     const res = await instanceAPI.get("/currentUser");
-    return res.data.data.user;
+    return res.data?.data?.user;
   } catch (error) {
     deleteSession();
     return null;

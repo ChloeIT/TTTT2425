@@ -3,7 +3,6 @@ import { userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import {
   Form,
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useTransition } from "react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,27 +23,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { editCurrentUser } from "@/actions/user-action";
-import { usePathname } from "next/navigation";
-export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
-  const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
-  const onSubmit = (values) => {
-    startTransition(() => {
-      editCurrentUser(values, pathname)
-        .then(({ message, ok }) => {
-          if (ok) {
-            setOpen(false);
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
+import { useAction } from "@/hooks/use-action";
 
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
+  const { isPending, action } = useAction();
+
+  const onSubmit = (values) => {
+    action(
+      {
+        fn: editCurrentUser,
+        onSuccess: () => {
+          setOpen(false);
+        },
+        onError: () => {},
+      },
+      values
+    );
   };
   const form = useForm({
     resolver: zodResolver(userSchema.updateSchema),
@@ -55,7 +49,7 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
       form.setValue("fullName", data.fullName);
       form.setValue("username", data.username);
     }
-  }, [data]);
+  }, [data, isOpen]);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">

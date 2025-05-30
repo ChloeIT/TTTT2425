@@ -5,6 +5,9 @@ const protectedRoutes = ["/dashboard"];
 const publicRoutes = ["/"];
 
 export default async function middleware(req) {
+  if (req.method !== "GET") {
+    return NextResponse.next();
+  }
   // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isProtectedRoute =
@@ -18,6 +21,8 @@ export default async function middleware(req) {
   // 4. Redirect to /login if the user is not authenticated
 
   if (isProtectedRoute && !user) {
+    console.log(req.nextUrl);
+    // bị lỗi ở chỗ này, nếu comment mục 4 đi thì không có lỗi
     return NextResponse.redirect(new URL("/", req.nextUrl));
   }
 

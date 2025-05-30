@@ -118,4 +118,32 @@ export const userSchema = {
       message: "Khoa công tác của người dùng không hợp lệ",
     }),
   }),
+  resetPasswordSchema: z
+    .object({
+      password: z
+        .string({
+          required_error: "Mật khẩu là trường bắt buộc phải điền",
+          invalid_type_error: "Mật khẩu bắt buộc phải là chuỗi ký tự",
+        })
+        .min(6, "Độ dài tối thiểu của mật khẩu là 6 ký tự"),
+      newPassword: z
+        .string({
+          required_error: "Mật khẩu mới là trường bắt buộc phải điền",
+          invalid_type_error: "Mật khẩu mới bắt buộc phải là chuỗi ký tự",
+        })
+        .min(6, "Độ dài tối thiểu của mật khẩu mới là 6 ký tự"),
+      newPasswordConfirmed: z.string({
+        required_error: "Xác nhận mật khẩu mới là trường bắt buộc phải điền",
+        invalid_type_error:
+          "Xác nhận mật khẩu mới bắt buộc phải là chuỗi ký tự",
+      }),
+    })
+    .superRefine(({ newPassword, newPasswordConfirmed }, ctx) => {
+      if (newPassword !== newPasswordConfirmed) {
+        ctx.addIssue({
+          message: "Xác nhận mật khẩu mới không khớp với mật khẩu mới",
+          path: ["newPasswordConfirmed"],
+        });
+      }
+    }),
 };

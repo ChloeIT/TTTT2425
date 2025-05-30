@@ -14,9 +14,11 @@ import { User } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { EditProfileButton, EditProfileDialog } from "./edit-profile";
 import { useState } from "react";
+import { ResetPasswordButton, ResetPasswordDialog } from "./reset-password";
 
 export const ProfileButton = () => {
   const [isEditProfile, setEditProfile] = useState(false);
+  const [isResetPassword, setResetPassword] = useState(false);
   const [user] = useCurrentUser();
   return (
     <>
@@ -24,6 +26,10 @@ export const ProfileButton = () => {
         data={user}
         isOpen={isEditProfile}
         setOpen={setEditProfile}
+      />
+      <ResetPasswordDialog
+        isOpen={isResetPassword}
+        setOpen={setResetPassword}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -46,6 +52,9 @@ export const ProfileButton = () => {
           <DropdownMenuGroup>
             <DropdownMenuItem>
               <EditProfileButton setOpen={() => setEditProfile(true)} />
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <ResetPasswordButton setOpen={() => setResetPassword(true)} />
             </DropdownMenuItem>
             <DropdownMenuItem>
               <LogoutButton />

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,19 +21,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { editCurrentUser } from "@/actions/user-action";
+import { resetUserPassword } from "@/actions/user-action";
 import { useAction } from "@/hooks/use-action";
-import { User2 } from "lucide-react";
+import { Key } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
+export const ResetPasswordDialog = ({ isOpen, setOpen }) => {
   const { isPending, action } = useAction();
-
+  const router = useRouter();
   const onSubmit = (values) => {
     action(
       {
-        fn: editCurrentUser,
+        fn: resetUserPassword,
         onSuccess: () => {
           setOpen(false);
+          router.replace("/");
         },
         onError: () => {},
       },
@@ -42,36 +44,39 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
     );
   };
   const form = useForm({
-    resolver: zodResolver(userSchema.updateSchema),
+    resolver: zodResolver(userSchema.resetPasswordSchema),
+    defaultValues: {
+      newPassword: "",
+      newPasswordConfirmed: "",
+      password: "",
+    },
   });
   useEffect(() => {
-    if (data) {
-      form.setValue("email", data.email);
-      form.setValue("fullName", data.fullName);
-      form.setValue("username", data.username);
-    }
-  }, [data, isOpen]);
+    form.reset();
+  }, []);
+
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Cập nhật tài khoản</DialogTitle>
-          <DialogDescription>Cập nhật thông tin tài khoản</DialogDescription>
+          <DialogTitle>Đổi mật khẩu</DialogTitle>
+          <DialogDescription>Đổi mật khẩu tài khoản</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="username"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Mật khẩu củ</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={"Nhập username"}
+                      placeholder={"Nhập mật khẩu củ"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}
+                      type="password"
                     />
                   </FormControl>
 
@@ -81,16 +86,17 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
             />
             <FormField
               control={form.control}
-              name="email"
+              name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Mật khẩu mới</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={"Nhập email người dùng"}
+                      placeholder={"Nhập mật khẩu mới"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}
+                      type="password"
                     />
                   </FormControl>
 
@@ -100,16 +106,17 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
             />
             <FormField
               control={form.control}
-              name="fullName"
+              name="newPasswordConfirmed"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Họ và tên</FormLabel>
+                  <FormLabel>Xác nhận mật khẩu mới</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={"Nhập họ và tên người dùng"}
+                      placeholder={"Xác nhận mật khẩu mới"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}
+                      type="password"
                     />
                   </FormControl>
 
@@ -139,11 +146,11 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
   );
 };
 
-export const EditProfileButton = ({ setOpen }) => {
+export const ResetPasswordButton = ({ setOpen }) => {
   return (
     <button onClick={setOpen} className="flex gap-x-2">
-      <User2 className="h-4 w-4" />
-      Cập nhật tài khoản
+      <Key className="h-4 w-4" />
+      Đổi mật khẩu
     </button>
   );
 };

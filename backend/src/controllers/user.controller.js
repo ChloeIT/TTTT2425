@@ -55,7 +55,7 @@ const userController = {
 
       await authService.expiredAllSession(user.id);
       return res.status(200).json({
-        message: "Đã đổi mật khẩu thành công",
+        message: "Đã đổi mật khẩu thành công. Vui lòng đăng nhập lại",
       });
     } catch (error) {
       next(error);

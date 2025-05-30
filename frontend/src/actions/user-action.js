@@ -60,9 +60,18 @@ export const editUserDepartment = async (userId, values) => {
     return errorResponse(error);
   }
 };
-export const editCurrentUser = async (values, path) => {
+export const editCurrentUser = async (values) => {
   try {
     const res = await instanceAPI.patch(`/users/edit`, values);
+
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+export const resetUserPassword = async (values) => {
+  try {
+    const res = await instanceAPI.patch(`/users/resetPassword`, values);
 
     return successResponse(res);
   } catch (error) {

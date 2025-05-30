@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAction } from "@/hooks/use-action";
 import { userSchema } from "@/schemas/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -25,25 +26,18 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export const LoginForm = () => {
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { action, isPending } = useAction();
   const onSubmit = (values) => {
-    startTransition(() => {
-      login(values)
-        .then(({ message, ok }) => {
-          if (ok) {
-            form.reset();
-            router.push("/dashboard");
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: login,
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+      },
+      values
+    );
   };
   const form = useForm({
     resolver: zodResolver(userSchema.loginSchema),
@@ -102,6 +96,7 @@ export const LoginForm = () => {
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}
+                      type="password"
                     />
                   </FormControl>
 

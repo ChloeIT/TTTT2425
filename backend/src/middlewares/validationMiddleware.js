@@ -13,9 +13,11 @@ function validateData(schema) {
           field: issue.path.join("."),
         }));
 
-        res.status(400).json({ error: "Invalid data", details: errorMessages });
+        res
+          .status(400)
+          .json({ error: "Dữ liệu không hợp lệ", details: errorMessages });
       } else {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Lỗi hệ thống, vui lòng thử lại sau" });
       }
     }
   };

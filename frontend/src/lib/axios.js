@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const { default: axios } = require("axios");
 
 const instanceAPI = axios.create({
   baseURL: "http://localhost:5000/",
-  timeout: 1000,
+  timeout: 3000,
   transformResponse: [
     function (data) {
       return JSON.parse(data);
@@ -40,10 +39,17 @@ export const successResponse = (res) => {
   };
 };
 export const errorResponse = (error) => {
+  if (error.code === "ECONNABORTED") {
+    return {
+      ok: false,
+      status: 500,
+      message: "Lỗi hệ thống, vui lòng thử lại sau",
+    };
+  }
   return {
     ok: false,
     status: error.status,
-    error: error.response
+    message: error.response
       ? error.response?.data?.error
       : "Lỗi hệ thống, vui lòng thử lại sau",
   };

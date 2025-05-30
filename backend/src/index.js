@@ -5,6 +5,7 @@ const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
 const cookieParser = require("cookie-parser");
+const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
 
 require("./libs/prisma");
 
@@ -20,6 +21,7 @@ app.use(
   })
 );
 
+app.use(checkPrismaHealth);
 app.get("/hello", (req, res) => {
   res.send("Hello world");
 });
@@ -29,7 +31,7 @@ app.use("/exams", examRouter);
 app.use("/users", userRoute);
 
 app.use((err, req, res, next) => {
-  if (err.message) {
+  if (err?.message) {
     return res.status(400).json({
       error: err.message,
     });

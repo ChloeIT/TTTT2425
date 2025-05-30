@@ -11,7 +11,7 @@ const {
 export const login = async (values) => {
   try {
     const res = await instanceAPI.post("/login", values);
-    await createSession(res.data.data.session.token);
+    await createSession(res.data.data?.session?.token);
 
     return successResponse(res);
   } catch (error) {

@@ -4,8 +4,10 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import { userSchema } from "../../schemas/user.schema";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation"; // import useRouter
 
 const LoginPage = () => {
+  const router = useRouter(); // khởi tạo router
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
 
@@ -52,6 +54,9 @@ const LoginPage = () => {
         }
 
         toast.success("Đăng nhập thành công!");
+
+        // Chuyển hướng về trang Home
+        router.push("/home");
       }
     } catch (error) {
       toast.error("Lỗi kết nối tới server");

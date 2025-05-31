@@ -1,9 +1,9 @@
 import { currentUser } from "@/actions/auth-action";
 import { useEffect, useState } from "react";
 
-export const useCurrentUser = () => {
+export const useProfile = () => {
   const [user, setUser] = useState(null);
-
+  const [isProfileUpdated, setProfileUpdated] = useState(true);
   useEffect(() => {
     async function fetchCurrentUser() {
       const { ok, data } = await currentUser();
@@ -11,7 +11,13 @@ export const useCurrentUser = () => {
         setUser(data.user);
       }
     }
-    fetchCurrentUser();
-  }, []);
-  return [user];
+    if (isProfileUpdated) {
+      fetchCurrentUser();
+      setProfileUpdated(false);
+    }
+  }, [isProfileUpdated]);
+  return {
+    user,
+    setProfileUpdated,
+  };
 };

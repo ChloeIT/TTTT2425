@@ -27,8 +27,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.use(authRoute);
-app.use("/exams", examRouter);
 app.use("/users", userRoute);
+app.use("/exams", examRouter);
 
 app.use((err, req, res, next) => {
   if (err?.message) {

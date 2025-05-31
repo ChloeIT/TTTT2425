@@ -1,6 +1,6 @@
 "use client";
 
-import { userDepartment, userRole, userSchema } from "@/schemas/user.schema";
+import { userDepartment, userRole } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { createUser } from "@/actions/user-action";
 import { useAction } from "@/hooks/use-action";
+import { authSchema } from "@/schemas/auth.schema";
 
 export const UserCreateButton = () => {
   const [isOpen, setOpen] = useState(false);
@@ -52,7 +53,7 @@ export const UserCreateButton = () => {
     );
   };
   const form = useForm({
-    resolver: zodResolver(userSchema.registerSchema),
+    resolver: zodResolver(authSchema.registerSchema),
     defaultValues: {
       email: "",
       department: undefined,

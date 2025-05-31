@@ -1,5 +1,5 @@
 "use client";
-import { userSchema } from "@/schemas/user.schema";
+import { userDepartment, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,33 +22,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { editCurrentUser } from "@/actions/user-action";
+import { editProfile } from "@/actions/user-action";
 import { useAction } from "@/hooks/use-action";
 import { User2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePathname } from "next/navigation";
 
-export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
+export const EditProfileDialog = ({
+  isOpen,
+  setOpen,
+  data,
+  setProfileUpdated,
+}) => {
   const { isPending, action } = useAction();
-
+  const pathname = usePathname();
   const onSubmit = (values) => {
     action(
       {
-        fn: editCurrentUser,
+        fn: editProfile,
         onSuccess: () => {
           setOpen(false);
+          setProfileUpdated(true);
         },
         onError: () => {},
       },
-      values
+      values,
+      pathname
     );
   };
   const form = useForm({
-    resolver: zodResolver(userSchema.updateSchema),
+    resolver: zodResolver(userSchema.editProfileSchema),
   });
   useEffect(() => {
     if (data) {
-      form.setValue("email", data.email);
       form.setValue("fullName", data.fullName);
       form.setValue("username", data.username);
+      form.setValue("department", data.department);
     }
   }, [data, isOpen]);
   return (
@@ -79,25 +94,7 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={"Nhập email người dùng"}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                    />
-                  </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="fullName"
@@ -112,6 +109,37 @@ export const EditProfileDialog = ({ isOpen, setOpen, data }) => {
                       disabled={isPending}
                     />
                   </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="department"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Khoa công tác</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn vai trò cho người dùng" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.keys(userDepartment).map((key) => {
+                        return (
+                          <SelectItem value={key} key={key}>
+                            {userDepartment[key]}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
 
                   <FormMessage />
                 </FormItem>

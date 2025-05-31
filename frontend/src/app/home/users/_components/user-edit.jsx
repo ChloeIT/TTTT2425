@@ -1,6 +1,6 @@
 "use client";
 
-import { userDepartment, userSchema } from "@/schemas/user.schema";
+import { userDepartment, userRole, userSchema } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,17 +30,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { editUserDepartment } from "@/actions/user-action";
+import { editUser } from "@/actions/user-action";
 import { useAction } from "@/hooks/use-action";
+import { Edit2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-export const UserEditDepartmentButton = ({ data }) => {
+export const UserEditButton = ({ data }) => {
   const [isOpen, setOpen] = useState(false);
-
   const { action, isPending } = useAction();
   const onSubmit = (values) => {
     action(
       {
-        fn: editUserDepartment,
+        fn: editUser,
         onSuccess: () => {
           form.reset();
           setOpen(false);
@@ -51,36 +52,79 @@ export const UserEditDepartmentButton = ({ data }) => {
     );
   };
   const form = useForm({
-    resolver: zodResolver(userSchema.editDepartmentSchema),
+    resolver: zodResolver(userSchema.editUserSchema),
   });
   useEffect(() => {
     if (data) {
+      form.setValue("role", data.role);
+      form.setValue("email", data.email);
       form.setValue("department", data.department);
     }
   }, [data, isOpen]);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant={"outline"}
-          size={"sm"}
-          disabled={isPending}
-          className="min-w-[150px]"
-        >
-          <span className="text-sm font-semibold">
-            {userDepartment[data.department] || "Mặc định"}
-          </span>
+        <Button variant={"outline"} disabled={isPending}>
+          <Edit2 className="h-4 w-4 mr-2" />
+          Chỉnh sửa
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Cập nhật khoa công tác</DialogTitle>
-          <DialogDescription>
-            Cập nhật khoa công tác của người dùng
-          </DialogDescription>
+          <DialogTitle>Cập nhật thông tin</DialogTitle>
+          <DialogDescription>Cập nhật thông tin người dùng</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={"Nhập email người dùng"}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vai trò trong hệ thống</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn vai trò cho người dùng" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.keys(userRole).map((key) => {
+                        return (
+                          <SelectItem value={key} key={key}>
+                            {userRole[key]}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="department"

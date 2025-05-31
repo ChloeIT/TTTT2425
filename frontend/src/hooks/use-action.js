@@ -9,9 +9,9 @@ export const useAction = () => {
   const action = ({ fn, onSuccess, onError }, ...args) => {
     startTransition(() => {
       fn(...args)
-        .then(({ message, ok, status }) => {
+        .then(({ message, ok, status, data }) => {
           if (ok) {
-            onSuccess?.();
+            onSuccess?.(data);
             toast.success(message);
           } else {
             onError?.();

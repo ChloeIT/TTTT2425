@@ -1,7 +1,7 @@
-import { useCurrentUser } from "./use-current-user";
+import { useProfile } from "./use-profile";
 
 export const useRole = (...roles) => {
-  const [user] = useCurrentUser();
+  const { user } = useProfile();
 
   if (!user) {
     return false;

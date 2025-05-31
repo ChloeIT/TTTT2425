@@ -8,16 +8,6 @@ const {
   errorResponse,
 } = require("@/lib/axios");
 
-export const createUser = async (values) => {
-  try {
-    const res = await instanceAPI.post("/register", values);
-    revalidatePath("/users");
-    return successResponse(res);
-  } catch (error) {
-    return errorResponse(error);
-  }
-};
-
 export const getUsers = async ({ page = 1, query }) => {
   try {
     const res = await instanceAPI.get("/users", {
@@ -39,31 +29,30 @@ export const getUsers = async ({ page = 1, query }) => {
   }
 };
 
-export const editUserRole = async (userId, values) => {
+export const createUser = async (values) => {
   try {
-    const res = await instanceAPI.patch(`/users/${userId}/editRole`, values);
+    const res = await instanceAPI.post("/register", values);
     revalidatePath("/users");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
   }
 };
-export const editUserDepartment = async (userId, values) => {
-  try {
-    const res = await instanceAPI.patch(
-      `/users/${userId}/editDepartment`,
-      values
-    );
-    revalidatePath("/users");
-    return successResponse(res);
-  } catch (error) {
-    return errorResponse(error);
-  }
-};
-export const editCurrentUser = async (values) => {
-  try {
-    const res = await instanceAPI.patch(`/users/edit`, values);
 
+export const editUser = async (userId, values) => {
+  try {
+    const res = await instanceAPI.patch(`/users/${userId}/edit`, values);
+    revalidatePath("/users");
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+
+export const editProfile = async (values, pathname) => {
+  try {
+    const res = await instanceAPI.patch(`/users/editProfile`, values);
+    revalidatePath(pathname);
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);

@@ -1,7 +1,7 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { ProfileButton } from "./profile-button";
 
-export const NavBar = () => {
+export const NavBar = async () => {
   return (
     <div
       className="

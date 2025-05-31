@@ -33,7 +33,21 @@ model User {
 
   notifications Notification[]
 
-  sessions Session[]
+  sessions        Session[]
+  forgotPasswords ForgotPassword[]
+}
+
+model ForgotPassword {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+  otp    String
+  token  String @unique @default(uuid())
+
+  isActive     Boolean  @default(true)
+  attemptCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  expiredAt    DateTime
 }
 
 enum Department {

@@ -10,6 +10,7 @@ const requireLogin = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: "Cần đăng nhập để thực hiện" });
     }
+
     req.user = user;
     req.token = token;
     next();

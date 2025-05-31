@@ -11,9 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { UserEditRoleButton } from "./user-edit-role-button";
+import { UserEditButton } from "./user-edit";
 import { UserActiveButton } from "./user-active-buton";
-import { UserEditDepartmentButton } from "./user-edit-department-button";
+import { userDepartment, userRole } from "@/schemas/user.schema";
 
 export const UsersTable = ({ data = [], totalPage }) => {
   return (
@@ -29,8 +29,10 @@ export const UsersTable = ({ data = [], totalPage }) => {
           <TableRow>
             <TableHead>Họ và tên</TableHead>
             <TableHead>Địa chỉ email</TableHead>
-            <TableHead>Khoa công tác</TableHead>
             <TableHead>Vai trò</TableHead>
+            <TableHead>Khoa công tác</TableHead>
+
+            <TableHead>Hành động</TableHead>
             <TableHead>Trạng thái</TableHead>
           </TableRow>
         </TableHeader>
@@ -40,11 +42,10 @@ export const UsersTable = ({ data = [], totalPage }) => {
               <TableRow key={item.id}>
                 <TableCell>{item.fullName}</TableCell>
                 <TableCell>{item.email}</TableCell>
+                <TableCell>{userRole[item.role]}</TableCell>
+                <TableCell>{userDepartment[item.department]}</TableCell>
                 <TableCell>
-                  <UserEditDepartmentButton data={item} />
-                </TableCell>
-                <TableCell>
-                  <UserEditRoleButton data={item} />
+                  <UserEditButton data={item} />
                 </TableCell>
                 <TableCell>
                   <UserActiveButton data={item} />

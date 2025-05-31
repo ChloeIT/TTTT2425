@@ -1,5 +1,6 @@
 "use client";
-import { login } from "@/actions/auth-action";
+
+import { createForgotPasswordOtp } from "@/actions/auth-action";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,37 +21,37 @@ import { Input } from "@/components/ui/input";
 import { useAction } from "@/hooks/use-action";
 import { authSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-export const LoginForm = () => {
+export const ForgotPasswordGetOtpForm = () => {
   const router = useRouter();
   const { action, isPending } = useAction();
   const onSubmit = (values) => {
     action(
       {
-        fn: login,
-        onSuccess: () => {
-          router.push("/home");
+        fn: createForgotPasswordOtp,
+        onSuccess: (data) => {
+          if (data?.token) {
+            router.push(`/forgotPassword/verify?token=${data.token}`);
+          }
         },
       },
       values
     );
   };
   const form = useForm({
-    resolver: zodResolver(authSchema.loginSchema),
+    resolver: zodResolver(authSchema.getForgotPasswordOtpSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      email: "",
     },
   });
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Đăng nhập</CardTitle>
+        <CardTitle className="text-2xl">Quên mật khẩu</CardTitle>
         <CardDescription>
-          Nhập tài khoản và mật khẩu để đăng nhập tài khoản
+          Nhập email để xác nhận đổi mật khẩu mới
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,13 +59,13 @@ export const LoginForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tài khoản</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={"Nhập username hoặc email của tài khoản"}
+                      placeholder={"Nhập email của tài khoản"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}
@@ -75,38 +76,9 @@ export const LoginForm = () => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center">
-                    <FormLabel>Mật khẩu</FormLabel>
-                    <Link
-                      href={"/forgotPassword"}
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      Quên mật khẩu?
-                    </Link>
-                  </div>
-                  <FormControl>
-                    <Input
-                      placeholder={"Nhập mật khẩu của tài khoản"}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                      type="password"
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex items-center justify-center gap-2 p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
               <Button type="submit" disabled={isPending} variant={"blue"}>
-                Đăng nhập
+                Xác nhận
               </Button>
             </div>
           </form>

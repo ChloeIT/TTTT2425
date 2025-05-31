@@ -16,26 +16,6 @@ const userSelect = {
 const userService = {
   userSelect,
 
-  updateUser: async function (
-    userId,
-    { fullName, username, email, department }
-  ) {
-    const user = await prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        fullName,
-        username,
-        email,
-        department,
-      },
-      select: {
-        ...userSelect,
-      },
-    });
-    return user;
-  },
   findByUsername: async (username) => {
     return await prisma.user.findUnique({
       where: { username },
@@ -89,7 +69,7 @@ const userService = {
     });
     return create;
   },
-  resetPassword: async function (userId, newPassword) {
+  updateNewPassword: async function (userId, newPassword) {
     const user = await prisma.user.update({
       data: {
         password: newPassword,
@@ -153,25 +133,28 @@ const userService = {
       totalPage,
     };
   },
-  updateUserRole: async (userId, role) => {
+  updateUserProfile: async (userId, { fullName, username }) => {
     return await prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        role,
+        fullName,
+        username,
       },
       select: {
         ...userSelect,
       },
     });
   },
-  updateUserDepartment: async (userId, department) => {
+  updateUser: async (userId, { email, role, department }) => {
     return await prisma.user.update({
       where: {
         id: userId,
       },
       data: {
+        email,
+        role,
         department,
       },
       select: {
@@ -179,7 +162,8 @@ const userService = {
       },
     });
   },
-  activeUser: async (userId) => {
+
+  activateUser: async (userId) => {
     return await prisma.user.update({
       where: {
         id: userId,
@@ -189,7 +173,7 @@ const userService = {
       },
     });
   },
-  inactiveUser: async (userId) => {
+  inactivateUser: async (userId) => {
     return await prisma.user.update({
       where: {
         id: userId,

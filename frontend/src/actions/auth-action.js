@@ -35,3 +35,36 @@ export const currentUser = async () => {
     return errorResponse(error);
   }
 };
+export const createForgotPasswordOtp = async (values) => {
+  try {
+    const res = await instanceAPI.post(`forgotPassword/createOtp`, values);
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+export const verifyForgotPasswordToken = async (token) => {
+  try {
+    const res = await instanceAPI.get(`forgotPassword/verifyToken`, {
+      params: {
+        token,
+      },
+    });
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+
+export const resetForgotPasswordOtp = async (token, values) => {
+  try {
+    const res = await instanceAPI.post(`forgotPassword/verifyOtp`, values, {
+      params: {
+        token,
+      },
+    });
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};

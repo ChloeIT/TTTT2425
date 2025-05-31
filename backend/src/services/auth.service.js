@@ -4,8 +4,10 @@ const jwt = require("jsonwebtoken");
 
 const moment = require("moment");
 const userService = require("./user.service");
+const transporter = require("../libs/mail");
 
 const TOKEN_EXPIRED_IN = 60 * 60;
+const MAX_ATTEMPT_COUNT = 5;
 
 const authService = {
   hashPassword: async (password) => {
@@ -30,38 +32,41 @@ const authService = {
   verifySession: async (token) => {
     const data = jwt.verify(token, process.env.JWT_KEY);
 
-    const user = await prisma.user.findUnique({
+    const session = await prisma.session.findUnique({
       where: {
-        id: data.userId,
-        isActive: true,
-        sessions: {
-          some: {
-            isExpired: false,
-            token,
-            expiredAt: {
-              gt: new Date(),
-            },
+        isExpired: false,
+        token,
+        expiredAt: {
+          gt: new Date(),
+        },
+        userId: data.userId,
+      },
+      include: {
+        user: {
+          select: {
+            ...userService.userSelect,
           },
         },
       },
-      select: {
-        ...userService.userSelect,
-      },
     });
-
-    return user;
+    return session?.user;
   },
 
   findWithCredentials: async function ({ username, password }) {
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { username, isActive: true },
     });
     if (!user) {
-      throw new Error("username hoặc mật khẩu không hợp lệ");
+      user = await prisma.user.findUnique({
+        where: { email: username, isActive: true },
+      });
+    }
+    if (!user) {
+      throw new Error("Tài khoản hoặc mật khẩu không hợp lệ");
     }
     const isMatch = await this.matchPassword(password, user.password);
     if (!isMatch) {
-      throw new Error("username hoặc mật khẩu không hợp lệ");
+      throw new Error("Tài khoản hoặc mật khẩu không hợp lệ");
     }
     const { password: pw, ...other } = user;
     return other;
@@ -87,6 +92,100 @@ const authService = {
         isExpired: true,
       },
     });
+  },
+
+  generateOTP: () => {
+    return Math.floor(100000 + Math.random() * 900000);
+  },
+
+  sendEmailForgotPasswordOtp: async (email, otp) => {
+    await transporter.sendMail({
+      from: `<${process.env.GOOGLE_APP_ACCOUNT}>`,
+      to: email,
+      subject: "Quên mật khẩu",
+      text: `Mã OTP của bạn là ${otp} sẽ có hiệu lực trong vòng 5 phút`,
+    });
+  },
+  createForgotPasswordOtp: async function (userId, email) {
+    const oldForgotPassword = await prisma.forgotPassword.findFirst({
+      where: {
+        userId,
+        expiredAt: {
+          gt: new Date(),
+        },
+      },
+    });
+    if (oldForgotPassword) {
+      // not send email
+      throw new Error(
+        "Không thể thực hiện chức năng quên mật khẩu liên tục trong một thời gian ngắn"
+      );
+    }
+    const forgotPassword = await prisma.forgotPassword.create({
+      data: {
+        userId,
+        otp: this.generateOTP().toString(),
+        expiredAt: moment().add(5, "minutes"),
+      },
+    });
+
+    this.sendEmailForgotPasswordOtp(email, forgotPassword.otp);
+    // send otp  to user
+    return forgotPassword;
+  },
+  verifyForgotPasswordToken: async function (token) {
+    const forgotPassword = await prisma.forgotPassword.findUnique({
+      where: {
+        token,
+        expiredAt: {
+          gt: new Date(),
+        },
+        isActive: true,
+        attemptCount: {
+          lt: MAX_ATTEMPT_COUNT,
+        },
+      },
+    });
+    return forgotPassword;
+  },
+  verifyForgotPasswordOtp: async function (id, otp) {
+    const forgotPassword = await prisma.forgotPassword.findUnique({
+      where: {
+        id,
+        otp,
+      },
+    });
+    if (!forgotPassword) {
+      await prisma.forgotPassword.update({
+        where: {
+          id,
+        },
+        data: {
+          attemptCount: {
+            increment: 1,
+          },
+        },
+      });
+    }
+    return forgotPassword;
+  },
+  updateForgotPasswordOtp: async (id) => {
+    const updatedForgotPassword = await prisma.forgotPassword.update({
+      where: {
+        id,
+      },
+      data: {
+        isActive: false,
+      },
+      include: {
+        user: {
+          select: {
+            ...userService.userSelect,
+          },
+        },
+      },
+    });
+    return updatedForgotPassword;
   },
 };
 

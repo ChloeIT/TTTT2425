@@ -2,7 +2,6 @@
 
 import { NavPagination } from "@/components/nav-pagination";
 import { SearchBar } from "@/components/search-bar";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -12,8 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { UserEditRoleButton } from "./user-edit-role-button";
+import { UserEditButton } from "./user-edit";
 import { UserActiveButton } from "./user-active-buton";
+import { userDepartment, userRole } from "@/schemas/user.schema";
 
 export const UsersTable = ({ data = [], totalPage }) => {
   return (
@@ -29,8 +29,10 @@ export const UsersTable = ({ data = [], totalPage }) => {
           <TableRow>
             <TableHead>Họ và tên</TableHead>
             <TableHead>Địa chỉ email</TableHead>
-            <TableHead>Khoa công tác</TableHead>
             <TableHead>Vai trò</TableHead>
+            <TableHead>Khoa công tác</TableHead>
+
+            <TableHead>Hành động</TableHead>
             <TableHead>Trạng thái</TableHead>
           </TableRow>
         </TableHeader>
@@ -40,9 +42,10 @@ export const UsersTable = ({ data = [], totalPage }) => {
               <TableRow key={item.id}>
                 <TableCell>{item.fullName}</TableCell>
                 <TableCell>{item.email}</TableCell>
-                <TableCell>{item.department}</TableCell>
+                <TableCell>{userRole[item.role]}</TableCell>
+                <TableCell>{userDepartment[item.department]}</TableCell>
                 <TableCell>
-                  <UserEditRoleButton data={item} />
+                  <UserEditButton data={item} />
                 </TableCell>
                 <TableCell>
                   <UserActiveButton data={item} />
@@ -54,7 +57,7 @@ export const UsersTable = ({ data = [], totalPage }) => {
       </Table>
       {!data.length && (
         <div className="my-4 text-muted-foreground flex justify-center">
-          No results.
+          Không có dữ liệu...
         </div>
       )}
       <div className="py-4">

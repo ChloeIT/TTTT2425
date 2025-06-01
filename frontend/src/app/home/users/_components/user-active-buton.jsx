@@ -1,9 +1,7 @@
 "use client";
 
-import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { activeUser } from "@/actions/user-action";
 import {
   AlertDialog,
@@ -15,25 +13,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAction } from "@/hooks/use-action";
 
 export const UserActiveButton = ({ data }) => {
   const [isOpen, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  const { action, isPending } = useAction();
   const handleActiveUser = () => {
-    startTransition(() => {
-      activeUser(data.id, data.isActive)
-        .then(({ message, ok }) => {
-          if (ok) {
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: activeUser,
+      },
+      data.id,
+      data.isActive
+    );
   };
 
   return (

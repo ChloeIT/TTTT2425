@@ -2,23 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-const { default: instanceAPI } = require("@/lib/axios");
-
-export const createUser = async (values) => {
-  try {
-    const res = await instanceAPI.post("/register", values);
-    revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
-    };
-  }
-};
+const {
+  default: instanceAPI,
+  successResponse,
+  errorResponse,
+} = require("@/lib/axios");
 
 export const getUsers = async ({ page = 1, query }) => {
   try {
@@ -41,19 +29,42 @@ export const getUsers = async ({ page = 1, query }) => {
   }
 };
 
-export const editUserRole = async (userId, values) => {
+export const createUser = async (values) => {
   try {
-    const res = await instanceAPI.patch(`/users/${userId}/editRole`, values);
+    const res = await instanceAPI.post("/register", values);
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
-    };
+    return errorResponse(error);
+  }
+};
+
+export const editUser = async (userId, values) => {
+  try {
+    const res = await instanceAPI.patch(`/users/${userId}/edit`, values);
+    revalidatePath("/users");
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+
+export const editProfile = async (values, pathname) => {
+  try {
+    const res = await instanceAPI.patch(`/users/editProfile`, values);
+    revalidatePath(pathname);
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+export const resetUserPassword = async (values) => {
+  try {
+    const res = await instanceAPI.patch(`/users/resetPassword`, values);
+
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
   }
 };
 export const activeUser = async (userId, isActive) => {
@@ -66,14 +77,8 @@ export const activeUser = async (userId, isActive) => {
     }
 
     revalidatePath("/users");
-    return {
-      ok: true,
-      ...res.data,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      ok: false,
-      message: error.response ? error.response.data.error : "Error from server",
-    };
+    return errorResponse(error);
   }
 };

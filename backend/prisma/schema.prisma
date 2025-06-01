@@ -15,15 +15,15 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   fullName   String
-  username   String   @unique
-  email      String   @unique
+  username   String     @unique
+  email      String     @unique
   password   String
-  department String
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  department Department @default(MAC_DINH)
+  role       Role       @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   isActive Boolean @default(true)
 
@@ -33,7 +33,28 @@ model User {
 
   notifications Notification[]
 
-  sessions Session[]
+  sessions        Session[]
+  forgotPasswords ForgotPassword[]
+}
+
+model ForgotPassword {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+  otp    String
+  token  String @unique @default(uuid())
+
+  isActive     Boolean  @default(true)
+  attemptCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  expiredAt    DateTime
+}
+
+enum Department {
+  LY_LUAN_CO_SO
+  XAY_DUNG_DANG
+  NHA_NUOC_PHAP_LUAT
+  MAC_DINH
 }
 
 model Session {

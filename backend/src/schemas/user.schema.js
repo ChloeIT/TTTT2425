@@ -1,64 +1,8 @@
 const { z } = require("zod");
-const { Role } = require("../generated/prisma");
+const { Role, Department } = require("../generated/prisma");
 
 const userSchema = {
-  registerSchema: z.object({
-    username: z
-      .string({
-        required_error: "username là trường bắt buộc phải điền",
-        invalid_type_error: "username bắt buộc phải là chuỗi ký tự",
-      })
-      .min(6, "Độ dài của username ít nhất 6 ký tự")
-      .max(20, "Độ dài của username tối đa 20 ký tự"),
-    email: z
-      .string({
-        required_error: "Địa chỉ email là trường bắt buộc phải điền",
-        invalid_type_error: "Địa chỉ email bắt buộc phải là chuỗi ký tự",
-      })
-      .email({
-        message: "Địa chỉ email không hợp lệ",
-      }),
-    password: z
-      .string({
-        required_error: "Mật khẩu là trường bắt buộc phải điền",
-        invalid_type_error: "Mật khẩu bắt buộc phải là chuỗi ký tự",
-      })
-      .min(6, "Độ dài tối thiểu của mật khẩu là 6 ký tự"),
-    fullName: z
-      .string({
-        required_error: "Họ tên người dùng là trường bắt buộc phải điền",
-        invalid_type_error: "Họ tên người dùng bắt buộc phải là chuỗi ký tự",
-      })
-      .min(6, "Độ dài tối thiểu của họ tên người dùng là 6 ký tự"),
-    department: z
-      .string({
-        required_error: "Tên phòng ban là trường bắt buộc phải điền",
-        invalid_type_error: "Tên phòng bang bắt buộc phải là chuỗi ký tự",
-      })
-      .min(3, "Độ dài tối thiểu của tên phòng bang là 3 ký tự"),
-    role: z
-      .nativeEnum(Role, {
-        message: "Vai trò của người dùng không hợp lệ",
-      })
-      .optional(),
-  }),
-
-  loginSchema: z.object({
-    username: z
-      .string({
-        required_error: "username là trường bắt buộc phải điền",
-        invalid_type_error: "username bắt buộc phải là chuỗi ký tự",
-      })
-      .min(6, "Độ dài của username ít nhất 6 ký tự")
-      .max(20, "Độ dài của username tối đa 20 ký tự"),
-    password: z
-      .string({
-        required_error: "Mật khẩu là trường bắt buộc phải điền",
-        invalid_type_error: "Mật khẩu bắt buộc phải là chuỗi ký tự",
-      })
-      .min(6, "Độ dài tối thiểu của mật khẩu là 6 ký tự"),
-  }),
-  updateSchema: z.object({
+  editProfileSchema: z.object({
     username: z
       .string({
         required_error: "username là trường bắt buộc phải điền",
@@ -66,30 +10,14 @@ const userSchema = {
       })
       .min(6, "Độ dài của username ít nhất 6 ký tự")
       .max(20, "Độ dài của username tối đa 20 ký tự")
-      .optional(),
-    email: z
-      .string({
-        required_error: "Địa chỉ email là trường bắt buộc phải điền",
-        invalid_type_error: "Địa chỉ email bắt buộc phải là chuỗi ký tự",
-      })
-      .email({
-        message: "Địa chỉ email không hợp lệ",
-      })
-      .optional(),
+      .nullish(),
     fullName: z
       .string({
         required_error: "Họ tên người dùng là trường bắt buộc phải điền",
         invalid_type_error: "Họ tên người dùng bắt buộc phải là chuỗi ký tự",
       })
       .min(6, "Độ dài tối thiểu của họ tên người dùng là 6 ký tự")
-      .optional(),
-    department: z
-      .string({
-        required_error: "Tên phòng ban là trường bắt buộc phải điền",
-        invalid_type_error: "Tên phòng bang bắt buộc phải là chuỗi ký tự",
-      })
-      .min(3, "Độ dài tối thiểu của tên phòng bang là 3 ký tự")
-      .optional(),
+      .nullish(),
   }),
   resetPasswordSchema: z
     .object({
@@ -120,10 +48,26 @@ const userSchema = {
       }
     }),
 
-  editRoleSchema: z.object({
-    role: z.nativeEnum(Role, {
-      message: "Vai trò của người dùng không hợp lệ",
-    }),
+  editUserSchema: z.object({
+    email: z
+      .string({
+        required_error: "Địa chỉ email là trường bắt buộc phải điền",
+        invalid_type_error: "Địa chỉ email bắt buộc phải là chuỗi ký tự",
+      })
+      .email({
+        message: "Địa chỉ email không hợp lệ",
+      })
+      .nullish(),
+    department: z
+      .nativeEnum(Department, {
+        message: "Khoa công tác của người dùng không hợp lệ",
+      })
+      .nullish(),
+    role: z
+      .nativeEnum(Role, {
+        message: "Vai trò của người dùng không hợp lệ",
+      })
+      .nullish(),
   }),
 };
 module.exports = userSchema;

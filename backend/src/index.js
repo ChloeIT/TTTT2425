@@ -4,12 +4,15 @@ const cors = require("cors");
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
+const cookieParser = require("cookie-parser");
+const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
+
 require("./libs/prisma");
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-
+app.use(cookieParser());
 app.use(cors());
 app.use(json());
 app.use(
@@ -18,16 +21,17 @@ app.use(
   })
 );
 
+app.use(checkPrismaHealth);
 app.get("/hello", (req, res) => {
   res.send("Hello world");
 });
 
 app.use(authRoute);
-app.use("/exams", examRouter);
 app.use("/users", userRoute);
+app.use("/exams", examRouter);
 
 app.use((err, req, res, next) => {
-  if (err.message) {
+  if (err?.message) {
     return res.status(400).json({
       error: err.message,
     });

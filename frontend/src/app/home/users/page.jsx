@@ -23,7 +23,6 @@ const UsersPage = async ({ searchParams }) => {
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
-      <ModeToggle />
       <Card>
         <CardHeader>
           <CardTitle>Quản lý người dùng</CardTitle>

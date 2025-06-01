@@ -1,10 +1,9 @@
 "use client";
 
-import { userRole, userSchema } from "@/schemas/user.schema";
+import { userDepartment, userRole } from "@/schemas/user.schema";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import {
   Form,
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,33 +33,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createUser } from "@/actions/user-action";
+import { useAction } from "@/hooks/use-action";
+import { authSchema } from "@/schemas/auth.schema";
 
 export const UserCreateButton = () => {
   const [isOpen, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  const { action, isPending } = useAction();
   const onSubmit = (values) => {
-    startTransition(() => {
-      createUser(values)
-        .then(({ message, ok }) => {
-          if (ok) {
-            form.reset();
-            setOpen(false);
-            toast.success(message);
-          } else {
-            toast.error(message);
-          }
-        })
-        .catch((error) => {
-          //error from server
-          toast.error("Lỗi hệ thống, vui lòng thử lại sau");
-        });
-    });
+    action(
+      {
+        fn: createUser,
+        onSuccess: () => {
+          form.reset();
+          setOpen(false);
+        },
+      },
+      values
+    );
   };
   const form = useForm({
-    resolver: zodResolver(userSchema.registerSchema),
+    resolver: zodResolver(authSchema.registerSchema),
     defaultValues: {
       email: "",
-      department: "",
+      department: undefined,
       fullName: "",
       password: "",
       username: "",
@@ -201,14 +197,25 @@ export const UserCreateButton = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Khoa công tác</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={"Nhập khoa công tác của người dùng"}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn vai trò cho người dùng" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.keys(userDepartment).map((key) => {
+                        return (
+                          <SelectItem value={key} key={key}>
+                            {userDepartment[key]}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
 
                   <FormMessage />
                 </FormItem>

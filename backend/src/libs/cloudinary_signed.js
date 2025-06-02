@@ -1,28 +1,3 @@
-// const cloudinary = require("cloudinary").v2;
-// const { CloudinaryStorage } = require("multer-storage-cloudinary");
-// const multer = require("multer");
-
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
-
-// const storage = new CloudinaryStorage({
-//   cloudinary,
-//   params: {
-//     folder: "exam_files",
-//     resource_type: "auto",
-//     access_mode: "public",
-//   },
-// });
-
-// const parser = multer({ storage });
-
-// module.exports = { cloudinary, parser };
-
-
-
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
@@ -42,7 +17,7 @@ const storage = new CloudinaryStorage({
     const timestamp = Date.now();
 
     return {
-      folder: "exam_files",
+      folder: "exam_signed",
       resource_type: "raw", // đặt raw để upload file tài liệu
       public_id: `${timestamp}${ext.replace(".", "_")}`, // thay '.' bằng '_' hoặc giữ nguyên nếu muốn
       // hoặc nếu giữ dấu '.' thì để `${timestamp}${ext}`

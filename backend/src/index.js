@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
+const signRoute = require("./routes/sign.router");
 require("./libs/prisma");
 
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,7 @@ app.get("/hello", (req, res) => {
 app.use(authRoute);
 app.use("/exams", examRouter);
 app.use("/users", userRoute);
+app.use("/sign", signRoute);
 
 app.use((err, req, res, next) => {
   if (err.message) {

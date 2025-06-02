@@ -44,7 +44,6 @@ const signService = {
   },
 
   insertSignature: async (pdfPath, signaturePath, signatureOriginalName,exam_id,fileType) => {
-    console.log(exam_id)
     const pdfBytes = fs.readFileSync(pdfPath);
     const imageBytes = fs.readFileSync(signaturePath);
     const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");

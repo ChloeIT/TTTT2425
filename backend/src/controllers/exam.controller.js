@@ -54,7 +54,6 @@ const examController = {
       const id = Number(req.params.id);
       const userId = req.user.id;
       const { password } = req.body;
-
       if (!password || password.length < 6) {
         return res
           .status(400)

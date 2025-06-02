@@ -49,7 +49,7 @@ const examService = {
   approveExam: async (id, rawPassword, userId) => {
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-    return await prisma.exam.update({
+    const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
         status: "DA_DUYET",
@@ -57,6 +57,22 @@ const examService = {
         updatedAt: new Date(),
       },
     });
+
+    const title = updatedExam.title;
+
+    // Tạo thông báo notification
+    await prisma.notification.create({
+      data: {
+        userId,
+        examId: id,
+        message: `Đề thi "${title}" đã được duyệt.`,
+        isRead: false,
+        createdAt: new Date(),
+        
+      },
+    });
+
+    return updatedExam;
   },
 
   verifyPassword: async (id, rawPassword) => {

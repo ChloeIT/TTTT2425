@@ -46,12 +46,15 @@ export const errorResponse = (error) => {
       message: "Lỗi hệ thống, vui lòng thử lại sau",
     };
   }
+
   return {
     ok: false,
-    status: error.status,
-    message: error.response
-      ? error.response?.data?.error
-      : "Lỗi hệ thống, vui lòng thử lại sau",
+    status: error?.response?.status || 500,
+    message:
+      error?.response?.data?.error ||
+      error?.response?.data?.message || // thêm nếu backend trả `message`
+      error?.message ||
+      "Lỗi hệ thống, vui lòng thử lại sau",
   };
 };
 

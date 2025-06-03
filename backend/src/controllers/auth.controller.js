@@ -29,14 +29,14 @@ const authController = {
 
   register: async (req, res, next) => {
     try {
-      const { fullName, username, email, password, department, role } =
-        req.body;
+      const { fullName, username, email, password, department, role } = req.body;
 
       // username exist and email exist?
       const [usernameExist, emailExist] = await Promise.all([
         userService.findByUsername(username),
         userService.findByEmail(email),
       ]);
+      console.log(usernameExist)
       if (usernameExist) {
         throw new Error("username đã được sử dụng");
       } else if (emailExist) {

@@ -12,12 +12,25 @@ export const login = async (values) => {
   try {
     const res = await instanceAPI.post("/login", values);
     await createSession(res.data.data?.session?.token);
-
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
   }
 };
+
+export const register = async (values) => {
+  try {
+    const res = await instanceAPI.post("/register", values);
+    
+    return successResponse(res);
+  } catch (error) {
+    const err = errorResponse(error);
+    throw new Error(err.message || "Lỗi hệ thống"); // ✅ THÊM DÒNG NÀY
+  }
+};
+
+
+
 export const logout = async () => {
   try {
     const res = await instanceAPI.get("/logout");

@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast"; 
+
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
         >
           {children}
           <Sonner />
-          <Toaster position="top-center" reverseOrder={false} />{" "}
+       
         </ThemeProvider>
       </body>
     </html>

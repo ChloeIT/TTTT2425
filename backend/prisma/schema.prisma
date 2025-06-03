@@ -85,6 +85,7 @@ model Exam {
   status       ExamStatus
   questionFile String
   answerFile   String
+  note         String?     // Thêm trường ghi chú
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 

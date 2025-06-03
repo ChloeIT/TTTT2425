@@ -4,10 +4,14 @@ const { default: axios } = require("axios");
 
 const instanceAPI = axios.create({
   baseURL: "http://localhost:5000/",
-  timeout: 3000,
+  timeout: 10000,
   transformResponse: [
     function (data) {
-      return JSON.parse(data);
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        return data;
+      }
     },
   ],
 });

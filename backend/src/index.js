@@ -31,11 +31,20 @@ app.use("/users", userRoute);
 app.use("/exams", examRouter);
 
 app.use((err, req, res, next) => {
+  console.error("Global error handler:", err);
+  console.error("Error stack:", err.stack);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
   if (err?.message) {
     return res.status(400).json({
       error: err.message,
     });
   }
+
+  res.status(500).json({ error: "Lỗi hệ thống, vui lòng thử lại sau" });
 });
 
 app.listen(PORT, (error) => {

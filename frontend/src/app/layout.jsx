@@ -1,8 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast"; 
+import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { InitDeviceId } from "./_components/init-device-id";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <InitDeviceId />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

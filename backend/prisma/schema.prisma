@@ -58,10 +58,13 @@ enum Department {
 }
 
 model Session {
-  id     Int    @id @default(autoincrement())
-  token  String @unique
+  id    Int    @id @default(autoincrement())
+  token String @unique
+
+  deviceId String?
+
   userId Int
-  user   User   @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
 
   loginAt   DateTime @default(now())
   expiredAt DateTime
@@ -88,8 +91,7 @@ model Exam {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  approval      Approval?
-  notifications Notification[]
+  approval Approval?
 }
 
 enum ExamStatus {
@@ -117,11 +119,9 @@ model Notification {
   id     Int  @id @default(autoincrement())
   userId Int
   user   User @relation(fields: [userId], references: [id])
-  examId Int
-  exam   Exam @relation(fields: [examId], references: [id])
 
   message   String
-  isRead    Boolean
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 

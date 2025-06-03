@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const moment = require("moment");
 const userService = require("./user.service");
-const transporter = require("../libs/mail");
+const mail = require("../libs/mail");
 
 const TOKEN_EXPIRED_IN = 60 * 60;
 const MAX_ATTEMPT_COUNT = 5;
@@ -16,7 +16,7 @@ const authService = {
   matchPassword: async (password, hashPassword) => {
     return await bcrypt.compare(password, hashPassword);
   },
-  generateSession: async (userId) => {
+  generateSession: async (userId, deviceId) => {
     const token = jwt.sign({ userId }, process.env.JWT_KEY, {
       expiresIn: TOKEN_EXPIRED_IN,
     });
@@ -25,9 +25,23 @@ const authService = {
         userId,
         token,
         expiredAt: moment().add(TOKEN_EXPIRED_IN, "seconds"),
+        deviceId,
       },
     });
     return session;
+  },
+  checkSessionIsNewDevice: async (userId, deviceId) => {
+    if (!deviceId) {
+      // thiết bị không xác định → xem như mới
+      return true;
+    }
+    const session = await prisma.session.findFirst({
+      where: {
+        deviceId,
+        userId,
+      },
+    });
+    return session ? false : true;
   },
   verifySession: async (token) => {
     const data = jwt.verify(token, process.env.JWT_KEY);
@@ -99,7 +113,7 @@ const authService = {
   },
 
   sendEmailForgotPasswordOtp: async (email, otp) => {
-    await transporter.sendMail({
+    await mail.sendMail({
       from: `<${process.env.GOOGLE_APP_ACCOUNT}>`,
       to: email,
       subject: "Quên mật khẩu",

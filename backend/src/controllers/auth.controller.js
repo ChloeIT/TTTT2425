@@ -1,5 +1,5 @@
-const { forgotPassword } = require("../libs/prisma");
 const authService = require("../services/auth.service");
+const notificationService = require("../services/notification.service");
 const userService = require("../services/user.service");
 
 const authController = {
@@ -11,10 +11,20 @@ const authController = {
         username,
         password,
       });
-      const session = await authService.generateSession(user.id);
+
+      const deviceId = req.cookies["deviceId"];
 
       //TODO: Kiểm tra đăng nhập có phải cùng một thiết bị hay không
       // nếu khác có thể gửi email thông báo đã đăng nhập
+      const isNewDevice = await authService.checkSessionIsNewDevice(
+        user.id,
+        deviceId
+      );
+      if (isNewDevice) {
+        notificationService.notifyLoginNewDevice(user.id, user.email);
+      }
+      const session = await authService.generateSession(user.id, deviceId);
+
       return res.status(200).json({
         data: {
           user,
@@ -23,6 +33,8 @@ const authController = {
         message: "Đã đăng nhập thành công",
       });
     } catch (error) {
+      console.log(error);
+
       next(error);
     }
   },
@@ -53,7 +65,6 @@ const authController = {
         role,
       });
 
-      //TODO: Notify for ALL BAN_GIAM_HIEU when creating new user account
       return res.status(201).json({
         data: {
           user,

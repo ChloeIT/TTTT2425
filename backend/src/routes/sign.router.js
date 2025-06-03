@@ -21,7 +21,7 @@ signRouter.post(
   "/signdocument",
   requireLogin,
   upload.fields([{ name: "signatureImage", maxCount: 1 }]),
-  validateData(signExamSchema),
+
   signController.signDocument,
   
 );
@@ -32,7 +32,6 @@ signRouter.post(
   requireLogin,
   uploadSignature.single("signatureImage"),
 
-  validateData(uploadSignatureSchema),
   signController.uploadSignature
 );
 

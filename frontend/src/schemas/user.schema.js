@@ -27,6 +27,19 @@ export const userRole = {
   USER: "Giảng viên",
 };
 export const userSchema = {
+  userRegistrationSchema: z.object({
+    fullName: z.string().min(1, "Vui lòng nhập họ tên"),
+    username: z.string().min(1, "Vui lòng nhập tên đăng nhập"),
+    email: z.string().email("Email không hợp lệ"),
+    password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+    department: z.enum(departmentEnum, {
+      required_error: "Vui lòng chọn phòng ban",
+    }),
+    role: z.enum(userRoleEnum, {
+      required_error: "Vui lòng chọn vai trò",
+    }),
+  }),
+
   editProfileSchema: z.object({
     username: z
       .string({

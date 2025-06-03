@@ -49,7 +49,17 @@ const signService = {
     const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
 
     const data = new Uint8Array(pdfBytes);
-    const loadingTask = pdfjsLib.getDocument({ data });
+
+   
+
+    const loadingTask = pdfjsLib.getDocument({
+      data,
+      standardFontDataUrl: path.join(
+        __dirname,
+        "../../node_modules/pdfjs-dist/standard_fonts/"
+      ),
+    });
+    
     const pdf = await loadingTask.promise;
     const page = await pdf.getPage(1);
     const textContent = await page.getTextContent();

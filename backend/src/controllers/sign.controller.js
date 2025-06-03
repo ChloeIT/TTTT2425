@@ -82,13 +82,17 @@ const signController = {
       if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
 
       return res.status(200).json({
+        success: true,
         message: "Tệp đã được ký thành công!",
         signedFile: `${req.protocol}://${req.get("host")}${signedPath}`,
-        exam_id, 
+        exam_id,
       });
     } catch (err) {
       console.error("Lỗi controller signDocument:", err);
-      return res.status(500).json({ message: "Lỗi server!" });
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi server!",
+      });
     }
   },
 

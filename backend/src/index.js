@@ -4,8 +4,12 @@ const cors = require("cors");
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
+const signRoute = require("./routes/sign.router");
 const cookieParser = require("cookie-parser");
 const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
+
+
+
 
 require("./libs/prisma");
 
@@ -28,7 +32,11 @@ app.get("/hello", (req, res) => {
 
 app.use(authRoute);
 app.use("/users", userRoute);
+
 app.use("/exams", examRouter);
+
+app.use("/sign", signRoute);
+
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);

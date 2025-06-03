@@ -14,6 +14,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Signature {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique  
+  path     String
+  password String
+  user     User   @relation(fields: [userId], references: [id])
+}
+
 model User {
   id         Int        @id @default(autoincrement())
   fullName   String
@@ -30,10 +38,10 @@ model User {
   exams        Exam[]
   approvalUser Approval[]
   documents    Document[]
-
   notifications Notification[]
+  sessions     Session[]
+ signatures   Signature[] 
 
-  sessions        Session[]
   forgotPasswords ForgotPassword[]
 }
 
@@ -55,7 +63,9 @@ enum Department {
   XAY_DUNG_DANG
   NHA_NUOC_PHAP_LUAT
   MAC_DINH
+
 }
+
 
 model Session {
   id     Int    @id @default(autoincrement())

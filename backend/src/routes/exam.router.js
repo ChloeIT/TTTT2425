@@ -1,7 +1,10 @@
 const { Router } = require("express");
 const examController = require("../controllers/exam.controller");
 const requireLogin = require("../middlewares/authMiddleware");
-const validateData = require("../middlewares/validationMiddleware");
+const {
+  validateData,
+  validateExam,
+} = require("../middlewares/validationMiddleware");
 const permitRoles = require("../middlewares/roleMiddleware");
 const { parser } = require("../libs/cloudinary");
 
@@ -20,11 +23,19 @@ examRouter.post(
     { name: "questionFile", maxCount: 1 },
     { name: "answerFile", maxCount: 1 },
   ]),
-  validateData(createExamSchema),
+  validateExam,
   examController.createExam
 );
 
+examRouter.get(
+  "/all",
+  requireLogin,
+  permitRoles("BAN_GIAM_HIEU"),
+  examController.getAllExams
+);
+
 examRouter.get("/", requireLogin, examController.getExams);
+
 examRouter.get("/:id", requireLogin, examController.getExamById);
 
 examRouter.patch(

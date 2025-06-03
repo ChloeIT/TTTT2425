@@ -1,8 +1,8 @@
 const { ZodError } = require("zod");
+const { createExamSchema } = require("../schemas/exam.schema");
 
 function validateData(schema) {
   return (req, res, next) => {
-    console.log("req.body inside validateData:", req.body);
     try {
       req.body = schema.parse(req.body);
       next();
@@ -23,4 +23,33 @@ function validateData(schema) {
   };
 }
 
-module.exports = validateData;
+function validateExam(req, res, next) {
+  try {
+    createExamSchema.parse(req.body);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const errorMessages = error.errors.map((issue) => ({
+        message: issue.message,
+        field: issue.path.join("."),
+      }));
+
+      return res
+        .status(400)
+        .json({ error: "Dữ liệu không hợp lệ", details: errorMessages });
+    }
+    return res
+      .status(500)
+      .json({ error: "Lỗi hệ thống, vui lòng thử lại sau" });
+  }
+
+  if (!req.files || !req.files.questionFile || !req.files.answerFile) {
+    return res.status(400).json({ error: "Missing question or answer file" });
+  }
+
+  next();
+}
+
+module.exports = {
+  validateData,
+  validateExam,
+};

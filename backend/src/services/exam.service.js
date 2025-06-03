@@ -20,6 +20,13 @@ const examService = {
     });
   },
 
+  getExamsByUserId: async (userId) => {
+    return await prisma.exam.findMany({
+      where: { createdById: userId },
+      include: { createdBy: true, approval: true, notifications: true },
+    });
+  },
+
   getAllExams: async () => {
     return await prisma.exam.findMany({
       include: { createdBy: true, approval: true, notifications: true },

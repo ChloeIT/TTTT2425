@@ -23,7 +23,23 @@ const examController = {
         answerFile,
       });
 
-      res.status(201).json({ data: exam });
+      // Log exam vừa tạo
+      console.log("Created exam:", exam);
+
+      // Gửi response thành công
+      return res.status(201).json({ data: exam });
+    } catch (error) {
+      // Trả lỗi rõ ràng, không gọi next() nữa
+      return res
+        .status(500)
+        .json({ error: "Lỗi hệ thống, vui lòng thử lại sau1" });
+    }
+  },
+
+  getAllExams: async (req, res, next) => {
+    try {
+      const exams = await examService.getAllExams();
+      res.status(200).json({ data: exams });
     } catch (error) {
       next(error);
     }
@@ -31,7 +47,8 @@ const examController = {
 
   getExams: async (req, res, next) => {
     try {
-      const exams = await examService.getAllExams();
+      const userId = req.user.id;
+      const exams = await examService.getExamsByUserId(userId);
       res.status(200).json({ data: exams });
     } catch (error) {
       next(error);

@@ -14,11 +14,12 @@ const notificationService = {
       text: message,
     });
   },
-  createNotification: async ({ userId, message }) => {
+  createNotification: async ({ userId, title, message }) => {
     return await prisma.notification.create({
       data: {
         userId,
         message,
+        title,
       },
     });
   },
@@ -30,9 +31,14 @@ const notificationService = {
         },
         take: LIMIT,
         skip: (page - 1) * LIMIT,
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: [
+          {
+            isRead: "asc",
+          },
+          {
+            createdAt: "desc",
+          },
+        ],
       }),
       prisma.notification.count({
         where: {
@@ -62,23 +68,23 @@ const notificationService = {
 
   notifyLoginNewDevice: async function (userId, email) {
     const message = `Có phải bạn đã đăng nhập vào lúc ${this.getToday()}. Nếu không phải bạn, vui lòng kiểm tra lại`;
+    const title = "Đăng nhập trên thiết bị mới";
     await this.createNotification({
       userId,
+      title,
       message,
     });
-    await this.sendNotificationMail(
-      email,
-      "Đăng nhập trên thiết bị mới",
-      message
-    );
+    await this.sendNotificationMail(email, title, message);
   },
   notifyChangePassword: async function (userId, email) {
     const message = `Bạn đã đổi mật khẩu đăng nhập vào lúc ${this.getToday()}. Nếu không phải bạn, vui lòng kiểm tra lại `;
+    const title = "Đổi mật khẩu";
     await this.createNotification({
       userId,
+      title,
       message,
     });
-    await this.sendNotificationMail(email, "Đổi mật khẩu", message);
+    await this.sendNotificationMail(email, title, message);
   },
 };
 

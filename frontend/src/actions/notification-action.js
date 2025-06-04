@@ -1,6 +1,7 @@
 "use server";
 
-import instanceAPI from "@/lib/axios";
+import instanceAPI, { errorResponse, successResponse } from "@/lib/axios";
+import { revalidatePath } from "next/cache";
 
 export const getNotifications = async ({ page = 1 }) => {
   try {
@@ -28,14 +29,8 @@ export const updateReadNotifications = async (ids) => {
       ids,
     });
 
-    return {
-      data: res.data.data,
-      totalPage: res.data.totalPage,
-    };
+    return successResponse(res);
   } catch (error) {
-    return {
-      data: [],
-      totalPage: 0,
-    };
+    return errorResponse(error);
   }
 };

@@ -1,5 +1,6 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { ProfileButton } from "./profile-button";
+import { NotificationButton } from "./notification-button";
 
 export const NavBar = async () => {
   return (
@@ -11,7 +12,9 @@ export const NavBar = async () => {
       right-0 border-r border-t border-b-2 rounded-sm"
     >
       <div className="flex flex-1 gap-x-2 items-center justify-end">
+        <NotificationButton />
         <ModeToggle />
+
         <ProfileButton />
       </div>
     </div>

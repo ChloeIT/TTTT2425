@@ -38,7 +38,7 @@ export const EditProfileDialog = ({
   isOpen,
   setOpen,
   data,
-  setProfileUpdated,
+  setUserUpdated,
 }) => {
   const { isPending, action } = useAction();
   const pathname = usePathname();
@@ -46,9 +46,10 @@ export const EditProfileDialog = ({
     action(
       {
         fn: editProfile,
-        onSuccess: () => {
+        onSuccess: (data) => {
+          setUserUpdated(data.user);
+
           setOpen(false);
-          setProfileUpdated(true);
         },
         onError: () => {},
       },

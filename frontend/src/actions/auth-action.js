@@ -30,8 +30,12 @@ export const logout = async () => {
 export const currentUser = async () => {
   try {
     const res = await instanceAPI.get("/currentUser");
+    console.log(res);
+
     return successResponse(res);
   } catch (error) {
+    console.log(error);
+
     return errorResponse(error);
   }
 };

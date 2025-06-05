@@ -87,6 +87,25 @@ const examController = {
       next(error);
     }
   },
+  rejectExam: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const { message } = req.body;
+
+      if (!message || message.trim() === "") {
+        return res.status(400).json({ error: "Ghi chú không được bỏ trống" });
+      }
+
+      if (!["BAN_GIAM_HIEU"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+
+      const updatedExam = await examService.rejectExam(id, message);
+      res.status(200).json({ data: updatedExam });
+    } catch (error) {
+      next(error);
+    }
+  },
 
   openExam: async (req, res, next) => {
     try {

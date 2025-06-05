@@ -11,6 +11,7 @@ const { parser } = require("../libs/cloudinary");
 const {
   createExamSchema,
   approveExamSchema,
+  rejectExamSchema,
   openExamSchema,
 } = require("../schemas/exam.schema");
 
@@ -41,9 +42,17 @@ examRouter.get("/:id", requireLogin, examController.getExamById);
 examRouter.patch(
   "/:id/approve",
   requireLogin,
-  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
+  permitRoles("BAN_GIAM_HIEU"),
   validateData(approveExamSchema),
   examController.approveExam
+);
+
+examRouter.patch(
+  "/:id/reject",
+  requireLogin,
+  permitRoles("BAN_GIAM_HIEU"),
+  validateData(rejectExamSchema),
+  examController.rejectExam
 );
 
 examRouter.patch(

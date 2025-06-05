@@ -1,5 +1,6 @@
 const prisma = require("../libs/prisma");
 const bcrypt = require("bcrypt");
+const { encrypt, decrypt } = require("../libs/encrypt");
 const notificationService = require("./notification.service");
 
 const examService = {
@@ -55,13 +56,13 @@ const examService = {
   },
 
   approveExam: async (id, rawPassword, userId) => {
-    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    const encryptedPassword = encrypt(rawPassword);
 
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
         status: "DA_DUYET",
-        password: hashedPassword,
+        password: encryptedPassword,
         updatedAt: new Date(),
       },
     });
@@ -73,11 +74,41 @@ const examService = {
 
     return updatedExam;
   },
+  rejectExam: async (id, message) => {
+    const updatedExam = await prisma.exam.update({
+      where: { id },
+      data: {
+        status: "TU_CHOI",
+        note: message,
+        updatedAt: new Date(),
+      },
+    });
+    const title = updatedExam.title;
+    const userId = updatedExam.createdById;
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        message: `Lý do từ chối: ${message}`,
+        isRead: false,
+        createdAt: new Date(),
+        title: `Đề thi ${title} bị từ chối`,
+      },
+    });
+
+    return updatedExam;
+  },
 
   verifyPassword: async (id, rawPassword) => {
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || !exam.password) return false;
-    return await bcrypt.compare(rawPassword, exam.password);
+
+    try {
+      const decryptedPassword = decrypt(exam.password);
+      return decryptedPassword === rawPassword;
+    } catch (error) {
+      return false;
+    }
   },
 
   openExam: async (id, userId) => {

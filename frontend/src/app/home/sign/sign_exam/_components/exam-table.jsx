@@ -4,6 +4,8 @@ import { useState } from "react";
 import ExamAnswer from "./exam-answer";
 import Exam from "./exam";
 import ApproveButton from "./approve-button";
+import RejectButton from "./reject-button";
+
 
 import {
   Table,
@@ -22,6 +24,7 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [pendingApproveExam, setPendingApproveExam] = useState(null);
+  const [pendingRejectExam, setPendingRejectExam] = useState(null);
 
   
   if (!exams || exams.length === 0) return <p>Không có đề thi nào.</p>;
@@ -138,12 +141,20 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
     </Button>
 
     {exam.status === "DANG_CHO" && (
-  <ApproveButton
-    exam={exam}
-    pendingApproveExam={pendingApproveExam}
-    setPendingApproveExam={setPendingApproveExam}
-  />
+  <>
+    <ApproveButton
+      exam={exam}
+      pendingApproveExam={pendingApproveExam}
+      setPendingApproveExam={setPendingApproveExam}
+    />
+    <RejectButton
+      exam={exam}
+      pendingRejectExam={pendingRejectExam}
+      setPendingRejectExam={setPendingRejectExam}
+    />
+  </>
 )}
+
 
   </div>
 </TableCell>

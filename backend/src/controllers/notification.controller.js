@@ -5,13 +5,14 @@ const notificationController = {
     try {
       const page = Number(req.query.page) || 1;
 
-      const { data, totalPage } =
+      const { data, totalPage, haveNotReadCount } =
         await notificationService.getNotificationPagination(req.user.id, {
           page,
         });
       return res.status(200).json({
         data,
         totalPage,
+        haveNotReadCount,
       });
     } catch (error) {
       next(error);
@@ -19,15 +20,11 @@ const notificationController = {
   },
   updateReadNotifications: async (req, res, next) => {
     try {
-      const { ids } = req.body;
-
-      await notificationService.setIsReadNotifications(req.user.id, ids);
+      await notificationService.setIsReadNotifications(req.user.id);
       res.status(200).json({
-        message: "Đã đánh dấu thông báo đã đọc",
+        message: "Đã đánh dấu tất cả thông báo đã đọc",
       });
     } catch (error) {
-      console.log(error);
-
       next(error);
     }
   },

@@ -24,7 +24,7 @@ const notificationService = {
     });
   },
   getNotificationPagination: async (userId, { page = 1 }) => {
-    const [data, count] = await prisma.$transaction([
+    const [data, count, haveNotReadCount] = await prisma.$transaction([
       prisma.notification.findMany({
         where: {
           userId,
@@ -45,20 +45,24 @@ const notificationService = {
           userId,
         },
       }),
+      prisma.notification.count({
+        where: {
+          userId,
+          isRead: false,
+        },
+      }),
     ]);
     const totalPage = Math.ceil(count / LIMIT);
     return {
       data,
       totalPage,
+      haveNotReadCount,
     };
   },
-  setIsReadNotifications: async (userId, notificationIds) => {
+  setIsReadNotifications: async (userId) => {
     return await prisma.notification.updateMany({
       where: {
         userId,
-        id: {
-          in: notificationIds,
-        },
       },
       data: {
         isRead: true,

@@ -1,8 +1,6 @@
 const { Router } = require("express");
 const requireLogin = require("../middlewares/authMiddleware");
 const notificationController = require("../controllers/notification.controller");
-const notificationSchema = require("../schemas/notification.schema");
-const validateData = require("../middlewares/validationMiddleware");
 const notificationRoute = Router();
 
 notificationRoute.get(
@@ -11,10 +9,10 @@ notificationRoute.get(
   notificationController.getNotifications
 );
 
-notificationRoute.post(
+notificationRoute.patch(
   "/read",
   requireLogin,
-  validateData(notificationSchema.setReadSchema),
+
   notificationController.updateReadNotifications
 );
 module.exports = notificationRoute;

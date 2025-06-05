@@ -6,21 +6,25 @@ export const useNotification = () => {
   const [totalPage, setTotalPage] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
+  const [haveNotReadCount, setHaveNotReadCount] = useState(0);
 
   useEffect(() => {
     const fetchNotification = () => {
       startTransition(() => {
         getNotifications({ page: currentPage })
-          .then(({ data, totalPage }) => {
+          .then(({ data, totalPage, haveNotReadCount }) => {
             setData((prev) => [...prev, ...data]);
             setTotalPage(totalPage);
+            setHaveNotReadCount(haveNotReadCount);
           })
           .catch(() => {
             setData([]);
             setTotalPage(0);
+            setHaveNotReadCount(0);
           });
       });
     };
+
     fetchNotification();
   }, [currentPage]);
   const hasNextPage = useCallback(() => {
@@ -35,32 +39,26 @@ export const useNotification = () => {
       setCurrentPage((prev) => prev + 1);
     }
   };
-  const getNotificationIdsHaveNotRead = useCallback(() => {
-    return data.filter((item) => item.isRead === false).map((item) => item.id);
-  }, [data]);
 
-  const markNotificationHaveRead = (ids = []) => {
+  const markNotificationHaveRead = () => {
     setData((prev) => {
       return prev.map((item) => {
-        if (ids.includes(item.id)) {
-          return {
-            ...item,
-            isRead: true,
-          };
-        } else {
-          return item;
-        }
+        return {
+          ...item,
+          isRead: true,
+        };
       });
     });
+    setHaveNotReadCount(0);
   };
 
   return {
     data,
     totalPage,
+    haveNotReadCount,
     isPending,
     hasNextPage,
     getNextPage,
-    getNotificationIdsHaveNotRead,
     markNotificationHaveRead,
   };
 };

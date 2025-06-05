@@ -1,7 +1,6 @@
 "use server";
 
 import instanceAPI, { errorResponse, successResponse } from "@/lib/axios";
-import { revalidatePath } from "next/cache";
 
 export const getNotifications = async ({ page = 1 }) => {
   try {
@@ -14,20 +13,20 @@ export const getNotifications = async ({ page = 1 }) => {
     return {
       data: res.data.data,
       totalPage: res.data.totalPage,
+      haveNotReadCount: res.data.haveNotReadCount,
     };
   } catch (error) {
     return {
       data: [],
       totalPage: 0,
+      haveNotReadCount: 0,
     };
   }
 };
 
-export const updateReadNotifications = async (ids) => {
+export const updateReadNotifications = async () => {
   try {
-    const res = await instanceAPI.post("/notifications/read", {
-      ids,
-    });
+    const res = await instanceAPI.patch("/notifications/read");
 
     return successResponse(res);
   } catch (error) {

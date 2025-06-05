@@ -2,6 +2,7 @@
 
 import { updateReadNotifications } from "@/actions/notification-action";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -54,7 +55,7 @@ const LoadMoreNotificationButton = ({ onClick, disabled }) => {
 const MarkReadNotificationButton = ({ onClick, disabled }) => {
   return (
     <Button variant="edit" size="sm" onClick={onClick} disabled={disabled}>
-      Đánh dấu tất cả đã đọc
+      Đánh dấu đã đọc
     </Button>
   );
 };
@@ -62,32 +63,36 @@ const MarkReadNotificationButton = ({ onClick, disabled }) => {
 export const NotificationButton = () => {
   const {
     data,
+    haveNotReadCount,
     hasNextPage,
     getNextPage,
-    getNotificationIdsHaveNotRead,
     markNotificationHaveRead,
   } = useNotification();
-  const haveNotReadIds = getNotificationIdsHaveNotRead();
 
   const { action } = useAction();
 
-  const handleMarkRead = (ids) => {
-    action(
-      {
-        fn: updateReadNotifications,
-        onSuccess: () => {
-          markNotificationHaveRead(ids);
-        },
+  const handleMarkRead = () => {
+    action({
+      fn: updateReadNotifications,
+      onSuccess: () => {
+        markNotificationHaveRead();
       },
-      ids
-    );
+    });
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size={"icon"} variant="outline">
+        <Button size={"icon"} variant="outline" className="relative">
           <Bell />
+          {haveNotReadCount > 0 && (
+            <div
+              className="absolute -top-1 -right-1 text-xs 
+          rounded-full bg-red-500 w-[18px] h-[18px] flex justify-center items-center text-white"
+            >
+              {haveNotReadCount}
+            </div>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" alignOffset={10} sideOffset={10} asChild>
@@ -112,8 +117,8 @@ export const NotificationButton = () => {
           </div>
           <div className="flex justify-between">
             <MarkReadNotificationButton
-              disabled={haveNotReadIds.length === 0}
-              onClick={() => handleMarkRead(haveNotReadIds)}
+              disabled={haveNotReadCount === 0}
+              onClick={() => handleMarkRead()}
             />
             <LoadMoreNotificationButton
               onClick={() => getNextPage()}

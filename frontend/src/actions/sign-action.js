@@ -5,12 +5,10 @@ import instanceAPI from "@/lib/axios";
 
 export const getExams = async ({ page = 1, query }) => {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
+    // không cần thêm bearer đã config sẵn rồi
 
     const res = await instanceAPI.get("/exams/all", {
       params: { page, query },
-      headers: { Authorization: `Bearer ${token}` },
     });
 
     return {
@@ -31,12 +29,8 @@ export const getExams = async ({ page = 1, query }) => {
 
 export const ApprovedExamsList = async ({ page = 1, query }) => {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
-
     const res = await instanceAPI.get("/exams", {
       params: { page, query },
-      headers: { Authorization: `Bearer ${token}` },
     });
 
     const allExams = res.data.data || [];
@@ -67,13 +61,6 @@ export const uploadSignature = async (file, password) => {
       return { ok: false, message: "Password là bắt buộc" };
     }
 
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) {
-      return { ok: false, message: "Không tìm thấy token xác thực" };
-    }
-
     // Tạo FormData
     const formData = new FormData();
     formData.append("signatureImage", file);
@@ -81,7 +68,6 @@ export const uploadSignature = async (file, password) => {
 
     const res = await instanceAPI.post("/sign/uploadsignature", formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
       },
     });
@@ -102,20 +88,13 @@ export const signDocument = async ({ pdfUrl, exam_id, fileType }) => {
     const payload = { pdfUrl, exam_id, fileType };
     console.log("Sending payload to sign_exam:", payload);
 
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
-    if (!token) {
-      throw new Error("Không tìm thấy token xác thực");
-    }
-
     const res = await instanceAPI.post("/sign/signdocument", payload, {
       timeout: 12000,
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
-  
+
     if (res.data.success) {
       console.log("Ký thành công:", res.data.message);
       return res.data;
@@ -134,18 +113,11 @@ export const signDocument = async ({ pdfUrl, exam_id, fileType }) => {
 
 export const approveExam = async (examId, password) => {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) {
-      return { ok: false, message: "Không tìm thấy token xác thực" };
-    }
     const res = await instanceAPI.patch(
       `/exams/${examId}/approve`,
       { password },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       }

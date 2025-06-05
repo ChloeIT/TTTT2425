@@ -23,20 +23,20 @@ const examService = {
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: { createdById: userId },
-      include: { createdBy: true, approval: true, notifications: true },
+      include: { createdBy: true, approval: true },
     });
   },
 
   getAllExams: async () => {
     return await prisma.exam.findMany({
-      include: { createdBy: true, approval: true, notifications: true },
+      include: { createdBy: true, approval: true },
     });
   },
 
   getExamById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
-      include: { createdBy: true, approval: true, notifications: true },
+      include: { createdBy: true, approval: true },
     });
   },
 
@@ -75,7 +75,6 @@ const examService = {
         message: `Đề thi "${title}" đã được duyệt.`,
         isRead: false,
         createdAt: new Date(),
-        
       },
     });
 

@@ -28,22 +28,20 @@ const UsersPage = async ({ searchParams }) => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4 py-4 h-full max-w-6xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Quản lý người dùng</CardTitle>
-          <CardDescription>
-            Quản lý thông tin tài khoản người dùng
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-end">
-            <UserCreateButton />
-          </div>
-          <UsersTable data={data} totalPage={totalPage} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Quản lý người dùng</CardTitle>
+        <CardDescription>
+          Quản lý thông tin tài khoản người dùng
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-end">
+          <UserCreateButton />
+        </div>
+        <UsersTable data={data} totalPage={totalPage} />
+      </CardContent>
+    </Card>
   );
 };
 

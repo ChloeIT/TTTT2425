@@ -1,19 +1,19 @@
-'use client'
-import { useRouter } from 'next/navigation'
+"use client";
+import { useRouter } from "next/navigation";
 
 const DashboardPage = () => {
   const router = useRouter();
 
   const cards = [
-    { title: "Soạn đề ", icon: "📘" ,link:"/examsUpload"}, 
-    { title: "Duyệt đề ", icon: "📊", link: "/sign/sign_exam"},
-    { title: "Đề thi", icon: "📄", link: "/exam" },
-    { title: "Đáp án", icon: "📝" , link: "/answer"},
+    { title: "Soạn đề ", icon: "📘", link: "/home/examsUpload" },
+    { title: "Duyệt đề ", icon: "📊", link: "/home/sign/sign_exam" },
+    { title: "Đề thi", icon: "📄", link: "/home/exam" },
+    { title: "Đáp án", icon: "📝", link: "/home/answer" },
   ];
 
   // Xử lý khi click vào card
   const handleCardClick = (link) => {
-      router.push(link);
+    router.push(link);
   };
 
   return (

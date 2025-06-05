@@ -1,5 +1,6 @@
 const prisma = require("../libs/prisma");
 const bcrypt = require("bcrypt");
+const notificationService = require("./notification.service");
 
 const examService = {
   createExam: async ({
@@ -68,15 +69,7 @@ const examService = {
     const title = updatedExam.title;
 
     // Tạo thông báo notification
-    await prisma.notification.create({
-      data: {
-        userId,
-        examId: id,
-        message: `Đề thi "${title}" đã được duyệt.`,
-        isRead: false,
-        createdAt: new Date(),
-      },
-    });
+    notificationService.notifyApproveExam(userId, title);
 
     return updatedExam;
   },
@@ -115,15 +108,8 @@ const examService = {
     });
 
     // Tạo thông báo mở đề
-    await prisma.notification.create({
-      data: {
-        userId,
-        examId: id,
-        message: `Đề thi "${exam.title}" đã được mở.`,
-        isRead: false,
-        createdAt: new Date(),
-      },
-    });
+
+    notificationService.notifyOpenExam(userId, exam.title);
 
     return updatedExam;
   },

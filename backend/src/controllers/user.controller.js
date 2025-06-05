@@ -77,7 +77,7 @@ const userController = {
       await authService.expiredAllSession(user.id);
 
       //TODO: Thông báo email khi người dùng đổi mật khẩu thành công
-      notificationService.notifyChangePassword(user.id, user.email);
+      notificationService.notifyChangePassword(user.id);
 
       return res.status(200).json({
         message: "Đã đổi mật khẩu thành công. Vui lòng đăng nhập lại",

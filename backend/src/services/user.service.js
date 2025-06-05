@@ -183,5 +183,18 @@ const userService = {
       },
     });
   },
+
+  getAllUserWithRoleBanGiamHieu: async () => {
+    return await prisma.user.findMany({
+      where: {
+        role: "BAN_GIAM_HIEU",
+      },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+      },
+    });
+  },
 };
 module.exports = userService;

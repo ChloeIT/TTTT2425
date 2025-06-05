@@ -14,21 +14,28 @@ const instanceAPI = axios.create({
       }
     },
   ],
+  withCredentials: true,
 });
 instanceAPI.interceptors.request.use(
   async function (config) {
     const cookieStore = await cookies();
-    const hasToken = cookieStore.has("token");
-    if (hasToken) {
-      const token = cookieStore.get("token");
-      return {
-        ...config,
-        headers: {
+
+    const token = cookieStore.get("token");
+    const deviceId = cookieStore.has("deviceId")
+      ? `${cookieStore.get("deviceId").name}=${
+          cookieStore.get("deviceId").value
+        }`
+      : "";
+
+    return {
+      ...config,
+      headers: {
+        ...(token?.value && {
           Authorization: `Bearer ${token.value}`,
-        },
-      };
-    }
-    return config;
+        }),
+        Cookie: deviceId,
+      },
+    };
   },
   function (error) {
     return Promise.reject(error);

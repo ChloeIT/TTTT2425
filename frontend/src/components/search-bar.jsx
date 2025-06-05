@@ -13,10 +13,7 @@ export const SearchBar = ({
   inputClassName,
   pageCursor = "1",
 }) => {
-  const { updateSearchParams } = useUpdateSearchParams({
-    query: undefined,
-    page: undefined,
-  });
+  const { updateSearchParams } = useUpdateSearchParams();
   const handleSearch = useDebounceCallback((term) => {
     const updatedPage = isPagination ? pageCursor : undefined;
     updateSearchParams({

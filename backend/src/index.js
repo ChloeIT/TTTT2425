@@ -7,6 +7,7 @@ const userRoute = require("./routes/user.router");
 const signRoute = require("./routes/sign.router");
 const cookieParser = require("cookie-parser");
 const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
+const notificationRoute = require("./routes/notification.router");
 
 
 
@@ -31,6 +32,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.use(authRoute);
+app.use("/notifications", notificationRoute);
 app.use("/users", userRoute);
 
 app.use("/exams", examRouter);

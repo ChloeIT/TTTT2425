@@ -21,15 +21,12 @@ export const login = async (values) => {
 export const register = async (values) => {
   try {
     const res = await instanceAPI.post("/register", values);
-    
+
     return successResponse(res);
   } catch (error) {
-    const err = errorResponse(error);
-    throw new Error(err.message || "Lỗi hệ thống"); // ✅ THÊM DÒNG NÀY
+    return errorResponse(error);
   }
 };
-
-
 
 export const logout = async () => {
   try {
@@ -43,6 +40,7 @@ export const logout = async () => {
 export const currentUser = async () => {
   try {
     const res = await instanceAPI.get("/currentUser");
+
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);

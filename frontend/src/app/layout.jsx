@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { InitDeviceId } from "./_components/init-device-id";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <InitDeviceId />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -33,7 +35,6 @@ export default function RootLayout({ children }) {
         >
           {children}
           <Sonner />
-       
         </ThemeProvider>
       </body>
     </html>

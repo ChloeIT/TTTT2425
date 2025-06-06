@@ -2,5 +2,6 @@
 node_modules
 generated
 .env
-uploads
-src/uploads
+
+uploads/
+src/uploads/

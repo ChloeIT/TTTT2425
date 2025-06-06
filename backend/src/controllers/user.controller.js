@@ -1,5 +1,6 @@
 const { Role } = require("../generated/prisma");
 const authService = require("../services/auth.service");
+const notificationService = require("../services/notification.service");
 const userService = require("../services/user.service");
 
 const userController = {
@@ -76,6 +77,8 @@ const userController = {
       await authService.expiredAllSession(user.id);
 
       //TODO: Thông báo email khi người dùng đổi mật khẩu thành công
+      notificationService.notifyChangePassword(user.id);
+
       return res.status(200).json({
         message: "Đã đổi mật khẩu thành công. Vui lòng đăng nhập lại",
       });
@@ -86,7 +89,8 @@ const userController = {
 
   getUsersPagination: async (req, res, next) => {
     try {
-      const { query, page } = req.query;
+      const { query } = req.query;
+      const page = Number(req.query.page) || 1;
       const { data, totalPage } = await userService.getUsers({
         page,
         query,
@@ -109,7 +113,6 @@ const userController = {
       }
       await userService.activateUser(userId);
 
-      //TODO: Thông báo ban giám hiệu khi tài khoản được active
       return res.status(200).json({
         message: "Đã kích hoạt tài khoản người dùng thành công",
       });
@@ -131,7 +134,6 @@ const userController = {
       await userService.inactivateUser(userId);
       await authService.expiredAllSession(userId);
 
-      //TODO: Thông báo ban giám hiệu khi tài khoản inactive
       return res.status(200).json({
         message: "Đã ngừng kích hoạt tài khoản người dùng thành công",
       });

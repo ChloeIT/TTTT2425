@@ -12,14 +12,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-import { signDocument, approveExam } from "@/actions/sign-action";
-import { approveExamSchema, signExamSchema } from "@/schemas/sign.schema";
+import { approveExam } from "@/actions/sign-action";
+import { approveExamSchema } from "@/schemas/sign.schema";
+import { useRouter } from "next/navigation";
+
 
 const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSignAllFiles = async () => {
+  const handleApprove = async () => {
     setLoading(true);
     try {
       // Validate password trước khi approve
@@ -32,56 +35,21 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
         return;
       }
 
-      let resultQ = null;
-      let resultA = null;
+      const approveResult = await approveExam(exam.id.toString(), password);
+      console.log("Kết quả duyệt:", approveResult);
 
-      if (exam.questionFile) {
-        // Validate dữ liệu signDocument theo signExamSchema trước
-        const signQValidation = signExamSchema.safeParse({
-          pdfUrl: exam.questionFile,
-          exam_id: exam.id.toString(),
-          fileType: "question",
-        });
-
-        try {
-          resultQ = await signDocument({
-            pdfUrl: exam.questionFile,
-            exam_id: exam.id.toString(),
-            fileType: "question",
-          });
-          console.log("Ký thành công file câu hỏi:", resultQ.message);
-        } catch (err) {
-          console.warn("Lỗi ký file câu hỏi:", err?.message);
-        }
+      if (approveResult?.success) {
+        toast.success("Đã duyệt đề thi thành công!");
+        setTimeout(() => {
+          router.refresh();
+        }, 1500); 
+        
+      } else {
+        toast.error("Duyệt thất bại: " + (approveResult?.message || "Không rõ lỗi"));
       }
-
-      if (exam.answerFile) {
-        const signAValidation = signExamSchema.safeParse({
-          pdfUrl: exam.answerFile,
-          exam_id: exam.id.toString(),
-          fileType: "answer",
-        });
-
-        resultA = await signDocument({
-          pdfUrl: exam.answerFile,
-          exam_id: exam.id.toString(),
-          fileType: "answer",
-        });
-        console.log("Ký thành công file đáp án:", resultA.message);
-
-        if (resultA?.success) {
-          const approveResult = await approveExam(exam.id.toString(), password);
-          console.log("Kết quả duyệt:", approveResult);
-
-          if (approveResult?.success) {
-            toast.success("Đã duyệt đề thi thành công!");
-          } else {
-            toast.error("Duyệt thất bại: " + (approveResult?.message || "Không rõ lỗi"));
-          }
-        }
-      }
+      
     } catch (err) {
-      console.error("Lỗi khi xử lý ký hoặc duyệt:", err);
+      console.error("Lỗi khi xử lý duyệt:", err);
       toast.error("Có lỗi xảy ra khi duyệt đề thi. Vui lòng thử lại.");
     } finally {
       setPendingApproveExam(null);
@@ -126,7 +94,7 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
           <DialogFooter className="flex justify-end gap-2">
             <Button
               className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleSignAllFiles}
+              onClick={handleApprove}
               disabled={loading}
             >
               {loading ? "Đang xử lý..." : "Xác nhận"}

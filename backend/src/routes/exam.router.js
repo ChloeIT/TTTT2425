@@ -55,4 +55,11 @@ examRouter.patch(
 
 examRouter.delete("/:id", requireLogin, examController.deleteExam);
 
+examRouter.get(
+  "/van-thu/exams",
+  requireLogin,
+  permitRoles("VAN_THU"), // Chỉ cho phép role VAN_THU
+  examController.getExamsForVanThu
+);
+
 module.exports = examRouter;

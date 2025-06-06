@@ -39,7 +39,19 @@ const examService = {
       include: { createdBy: true, approval: true, notifications: true },
     });
   },
-
+  getExamsByStatus: async (statusList) => {
+    return await prisma.exam.findMany({
+      where: {
+        status: {
+          in: statusList,
+        },
+      },
+      include: { createdBy: true, approval: true, notifications: true },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
   updateExamStatus: async (id, status) => {
     return await prisma.exam.update({
       where: { id },

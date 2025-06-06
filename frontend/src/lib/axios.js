@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 const { default: axios } = require("axios");
 
 const instanceAPI = axios.create({
-  baseURL: "http://localhost:5000/",
+  baseURL: "http://localhost:5001/",
   timeout: 10000,
   transformResponse: [
     function (data) {

@@ -49,7 +49,12 @@ export default function VanThuPage() {
   };
 
   return (
-    <div className="p-8 text-center">
+    <div className="p-8 text-center relative">
+      <div className="absolute top-4 left-4">
+        <a href="/home">
+          <Button className="bg-gray-500 text-white">← Trở về</Button>
+        </a>
+      </div>
       <h1 className="text-2xl font-bold mb-6">Trang Văn Thư - Upload Đề Đã Thi</h1>
       <Dialog open={open} onOpenChange={setOpen}>
         <div className="flex justify-between items-center mb-6">

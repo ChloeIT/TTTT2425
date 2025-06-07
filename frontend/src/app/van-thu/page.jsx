@@ -52,14 +52,51 @@ export default function VanThuPage() {
     <div className="p-8 text-center">
       <h1 className="text-2xl font-bold mb-6">Trang Văn Thư - Upload Đề Đã Thi</h1>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="blue">Upload đề đã thi</Button>
-        </DialogTrigger>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-left">Danh sách đề đã thi</h2>
+          <DialogTrigger asChild>
+            <Button variant="blue">Upload đề đã ký</Button>
+          </DialogTrigger>
+        </div>
+
+        <table className="min-w-full bg-white dark:bg-gray-800 rounded shadow">
+          <thead>
+            <tr className="bg-gray-100 dark:bg-gray-700">
+              <th className="px-4 py-2 text-left">#</th>
+              <th className="px-4 py-2 text-left">Tên đề</th>
+              <th className="px-4 py-2 text-left">Người duyệt</th>
+              <th className="px-4 py-2 text-left">Trạng thái</th>
+              <th className="px-4 py-2 text-left">Tải về</th>
+            </tr>
+          </thead>
+          <tbody>
+            {exams.map((exam, index) => (
+              <tr key={exam.id} className="border-b dark:border-gray-700">
+                <td className="px-4 py-2">{index + 1}</td>
+                <td className="px-4 py-2">{exam.title}</td>
+                <td className="px-4 py-2">{exam.approval?.approverName || "Chưa duyệt"}</td>
+                <td className="px-4 py-2">{exam.status}</td>
+                <td className="px-4 py-2">
+                  {exam.questionFile && (
+                    <a
+                      href={exam.questionFile}
+                      target="_blank"
+                      className="text-blue-600 underline"
+                    >
+                      Tải đề
+                    </a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
         <DialogContent className="max-w-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <DialogHeader>
             <DialogTitle>Upload đề thi đã thi</DialogTitle>
             <DialogDescription>
-              Nhập tên và tải lên file đề + đáp án đã thi
+              Nhập tên và tải lên file đề + đáp án đã ký
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -122,29 +159,6 @@ export default function VanThuPage() {
           </form>
         </DialogContent>
       </Dialog>
-      {exams.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Danh sách đề đã thi</h2>
-          <ul className="space-y-4">
-            {exams.map((exam) => (
-                <li key={exam.id} className="border p-4 rounded shadow bg-gray-50 dark:bg-gray-800">                <p className="font-medium">{exam.title}</p>
-                <div className="mt-2 space-x-4">
-                  {exam.questionFile && (
-                    <a href={exam.questionFile} target="_blank" className="text-blue-600 underline">
-                      Tải đề thi
-                    </a>
-                  )}
-                  {exam.answerFile && (
-                    <a href={exam.answerFile} target="_blank" className="text-green-600 underline">
-                      Tải đáp án
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

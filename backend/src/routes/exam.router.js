@@ -71,4 +71,12 @@ examRouter.get(
   examController.getExamsForVanThu
 );
 
+// Lấy danh sách các đề đã duyệt cho Văn Thư
+examRouter.get(
+  "/van-thu/exams/da-duyet",
+  requireLogin,
+  permitRoles("VAN_THU"),
+  examController.getApprovedExamsForVanThu
+);
+
 module.exports = examRouter;

@@ -45,6 +45,9 @@ const examController = {
     }
   },
 
+
+  
+
   getExams: async (req, res, next) => {
     try {
       const userId = req.user.id;
@@ -54,6 +57,18 @@ const examController = {
       next(error);
     }
   },
+   
+  // Lấy danh sách các đề đã duyệt cho Văn Thư
+  getApprovedExamsForVanThu: async (req, res) => {
+  try {
+    const exams = await examService.getExamsByStatus(["DA_DUYET"]);
+    res.json({ success: true, data: exams });
+  } catch (error) {
+    console.error("Lỗi lấy đề DA_DUYET:", error);
+    res.status(500).json({ success: false, message: "Lỗi hệ thống" });
+  }
+}
+,
 
   getExamsForVanThu: async (req, res, next) => {
     try {

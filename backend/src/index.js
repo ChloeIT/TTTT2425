@@ -19,7 +19,11 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // chỗ FE chạy
+  credentials: true
+}));
 app.use(json());
 app.use(
   urlencoded({
@@ -65,3 +69,13 @@ app.listen(PORT, (error) => {
     );
   else console.log("Error occurred, server can't start", error);
 });
+
+const path = require("path");
+
+// Cấu hình để client có thể truy cập file trong folder 'file_approved'
+app.use("/uploads/file_approved", express.static(path.join(__dirname, "uploads", "file_approved")));
+
+/*khi gọi URL như:
+http://localhost:5000/uploads/file_approved/signed_abcxyz.pdf
+sẽ truy ra đúng file nằm ở backend/src/uploads/file_approved/signed_abcxyz.pdf.
+*/

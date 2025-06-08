@@ -22,13 +22,31 @@ export default function VanThuPage() {
   const { uploadExam, loading } = useExamUpload();
   const [exams, setExams] = useState([]);
 
+  // useEffect(() => {
+  //   fetch("http://localhost:5001/exams/van-thu/exams", {
+  //     credentials: "include",
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => setExams(data.data || []));
+  // }, []);
+
   useEffect(() => {
-    fetch("http://localhost:5001/exams/van-thu/exams", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setExams(data.data || []));
-  }, []);
+  const fetchApprovedExams = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/exams/van-thu/exams/da-duyet", {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExams(data.data);
+      }
+    } catch (err) {
+      console.error("Lỗi fetch đề đã duyệt:", err);
+    }
+  };
+  fetchApprovedExams();
+}, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,13 +96,22 @@ export default function VanThuPage() {
                 <td className="px-4 py-2">{exam.status}</td>
                 <td className="px-4 py-2">
                   {exam.questionFile && (
+                    // <a
+                    //   href={exam.questionFile}
+                    //   target="_blank"
+                    //   className="text-blue-600 underline"
+                    // >
+                    //   Tải đề
+                    // </a>
                     <a
-                      href={exam.questionFile}
-                      target="_blank"
-                      className="text-blue-600 underline"
-                    >
-                      Tải đề
-                    </a>
+  href={`http://localhost:5000/uploads/file_approved/${exam.questionFile}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-600 underline"
+>
+  Tải đề
+</a>
+
                   )}
                 </td>
               </tr>

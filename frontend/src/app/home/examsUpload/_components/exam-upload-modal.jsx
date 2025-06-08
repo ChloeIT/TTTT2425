@@ -81,7 +81,7 @@ export default function ExamUploadModal({ onUploadSuccess }) {
             <input
               id="questionFile"
               type="file"
-              accept=".pdf,.doc,.docx"
+              accept=".pdf"
               onChange={(e) => setQuestionFile(e.target.files[0])}
               disabled={loading}
               required
@@ -98,7 +98,7 @@ export default function ExamUploadModal({ onUploadSuccess }) {
             <input
               id="answerFile"
               type="file"
-              accept=".pdf,.doc,.docx"
+              accept=".pdf"
               onChange={(e) => setAnswerFile(e.target.files[0])}
               disabled={loading}
               required

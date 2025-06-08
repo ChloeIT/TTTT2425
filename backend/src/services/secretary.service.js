@@ -5,7 +5,7 @@ const secretaryService = {
   getExamsWithDecryptedPasswords: async () => {
     const exams = await prisma.exam.findMany({
       where: {
-        status: "DA_THI",
+        status: "DA_DUYET",
         password: {
           not: null,
         },

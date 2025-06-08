@@ -25,7 +25,9 @@ export const ProfileButton = () => {
   const [isResetPassword, setResetPassword] = useState(false);
   const { user, setUser: setUserUpdated } = useProfile();
   const isPermitted = useRole("BAN_GIAM_HIEU");
+  const TK_isPermitted = useRole("THU_KY");
 
+  
   return (
     <>
       <EditProfileDialog
@@ -65,6 +67,14 @@ export const ProfileButton = () => {
                 <div className="flex gap-2">
                   <Users className="h-4 w-4" />
                   <Link href={"/home/users"}>Quản lý người dùng</Link>
+                </div>
+              </DropdownMenuItem>
+            )}
+            {TK_isPermitted && (
+              <DropdownMenuItem>
+                <div className="flex gap-2">
+                  <Users className="h-4 w-4" />
+                  <Link href={"/home/signature"}>Quản lý mật khẩu đề thi</Link>
                 </div>
               </DropdownMenuItem>
             )}

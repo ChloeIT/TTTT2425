@@ -132,6 +132,17 @@ const notificationService = {
       })
     );
   },
+
+  notifyRejectExam: async function (userId, examTitle, reason) {
+    const title = `Đề thi ${examTitle} bị từ chối`;
+    const message = `Đề thi của bạn đã bị từ chối vào lúc ${this.getToday()}. Lý do: ${reason}`;
+    await this.createNotification({
+      userId,
+      title,
+      message,
+    });
+    await this.sendNotificationMail(userId, title, message);
+  },
 };
 
 module.exports = notificationService;

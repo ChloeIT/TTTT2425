@@ -1,6 +1,7 @@
 const express = require("express");
 const { json, urlencoded } = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
@@ -9,7 +10,6 @@ const secretaryRoute = require("./routes/secretary.router");
 const cookieParser = require("cookie-parser");
 const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
 const notificationRoute = require("./routes/notification.router");
-
 
 
 

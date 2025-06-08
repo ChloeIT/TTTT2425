@@ -35,6 +35,24 @@ const examService = {
     });
   },
 
+  // getAllExams: async () => {
+  //   return await prisma.exam.findMany({
+  //     include: {
+  //       createdBy: {
+  //         select: {
+  //           id: true,
+  //           fullName: true,
+  //           email: true,
+  //           department: true,
+  //          
+  //         },
+  //       },
+  //       approval: true,
+  //     },
+  //   });
+  // },
+  
+
   getExamById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
@@ -70,11 +88,11 @@ const examService = {
     const title = updatedExam.title;
 
     // Tạo thông báo notification
-    notificationService.notifyApproveExam(userId, title);
+    notificationService.notifyApproveExam(updatedExam.createdById, title);
 
     return updatedExam;
   },
-  rejectExam: async (id, message) => {
+  rejectExam: async (id, message,userId) => {
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
@@ -83,18 +101,25 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    const title = updatedExam.title;
-    const userId = updatedExam.createdById;
+    // const title = updatedExam.title;
+    // const userId = updatedExam.createdById;
 
-    await prisma.notification.create({
-      data: {
-        userId,
-        message: `Lý do từ chối: ${message}`,
-        isRead: false,
-        createdAt: new Date(),
-        title: `Đề thi ${title} bị từ chối`,
-      },
-    });
+    // await prisma.notification.create({
+    //   data: {
+    //     userId,
+    //     message: `Lý do từ chối: ${message}`,
+    //     isRead: false,
+    //     createdAt: new Date(),
+    //     title: `Đề thi ${title} bị từ chối`,
+    //   },
+    // });
+    
+    // Gửi thông báo và email bằng notificationService
+    await notificationService.notifyRejectExam(
+      updatedExam.createdById,
+      updatedExam.title,
+      message
+    );
 
     return updatedExam;
   },

@@ -34,9 +34,9 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
             Chỉnh sửa / Scan hình mới
           </Button> 
           */}
-          <Button onClick={onApprove} className="bg-green-600 hover:bg-green-700 text-white">
+          {/* <Button onClick={onApprove} className="bg-green-600 hover:bg-green-700 text-white">
             Xác nhận duyệt
-          </Button>
+          </Button> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

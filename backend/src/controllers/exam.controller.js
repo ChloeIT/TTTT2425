@@ -91,6 +91,7 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const { message } = req.body;
+      const userId = req.user.id; 
 
       if (!message || message.trim() === "") {
         return res.status(400).json({ error: "Ghi chú không được bỏ trống" });
@@ -100,7 +101,7 @@ const examController = {
         return res.status(403).json({ error: "Forbidden" });
       }
 
-      const updatedExam = await examService.rejectExam(id, message);
+      const updatedExam = await examService.rejectExam(id, message,userId);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);

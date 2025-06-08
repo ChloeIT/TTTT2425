@@ -127,17 +127,6 @@ const examService = {
       },
     });
 
-    // Lưu vào bảng Document
-    await prisma.document.create({
-      data: {
-        questionFile: exam.questionFile,
-        answerFile: exam.answerFile,
-        retention: "Lưu trữ đề thi đã mở",
-        uploadedById: userId,
-        createdAt: new Date(),
-      },
-    });
-
     // Tạo thông báo mở đề
 
     notificationService.notifyOpenExam(userId, exam.title);

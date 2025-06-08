@@ -55,6 +55,15 @@ const examController = {
     }
   },
 
+  getExamsForVanThu: async (req, res, next) => {
+    try {
+      const exams = await examService.getExamsByStatus(["DA_THI"]);
+      res.status(200).json({ data: exams });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   getExamById: async (req, res, next) => {
     try {
       const id = Number(req.params.id);

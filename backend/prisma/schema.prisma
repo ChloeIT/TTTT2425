@@ -87,6 +87,7 @@ enum Role {
   GIANG_VIEN_RA_DE
   THU_KY
   USER
+  VAN_THU
 }
 
 model Exam {

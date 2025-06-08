@@ -5,6 +5,7 @@ export const userRoleEnum = [
   "TRUONG_KHOA",
   "GIANG_VIEN_RA_DE",
   "THU_KY",
+  "VAN_THU",
   "USER",
 ];
 export const departmentEnum = [
@@ -24,6 +25,7 @@ export const userRole = {
   TRUONG_KHOA: "Trưởng khoa",
   GIANG_VIEN_RA_DE: "Giảng viên ra đề",
   THU_KY: "Thư ký",
+  VAN_THU: "Văn thư", 
   USER: "Giảng viên",
 };
 export const userSchema = {

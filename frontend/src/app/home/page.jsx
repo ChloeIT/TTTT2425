@@ -5,10 +5,12 @@ const DashboardPage = () => {
   const router = useRouter();
 
   const cards = [
-    { title: "Soạn đề ", icon: "📘", link: "/home/examsUpload" },
-    { title: "Duyệt đề ", icon: "📊", link: "/home/sign/sign_exam" },
-    { title: "Đề thi", icon: "📄", link: "/home/exam" },
-    { title: "Đáp án", icon: "📝", link: "/home/answer" },
+    { title: "Soạn đề ", icon: "📘" },
+    { title: "Duyệt đề ", icon: "📊" },
+    { title: "Đề thi", icon: "📄" },
+    { title: "Đáp án", icon: "📝" },
+    { title: "Văn Thư", icon: "🏆", link: "/van-thu" },
+   
   ];
 
   // Xử lý khi click vào card
@@ -23,7 +25,6 @@ const DashboardPage = () => {
           {cards.map((card, index) => (
             <div
               key={index}
-              onClick={() => handleCardClick(card.link)}
               className="bg-blue-100 text-blue-800 rounded-lg p-6 flex flex-col items-start justify-between shadow-lg hover:bg-green-500 transition duration-300 cursor-pointer"
             >
               <div className="text-3xl mb-4">{card.icon}</div>

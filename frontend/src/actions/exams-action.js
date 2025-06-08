@@ -8,7 +8,9 @@ const {
 
 export const createExam = async (formData) => {
   try {
-    const res = await instanceAPI.post("/exams", formData);
+    const res = await instanceAPI.post("/exams", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -32,5 +34,14 @@ export const getExams = async () => {
         error.response?.data?.error ||
         "Lỗi hệ thống, không thể lấy danh sách đề thi",
     };
+  }
+};
+
+export const getSignedExamFiles = async (examId) => {
+  try {
+    const res = await instanceAPI.get(`/exams/${examId}/files`);
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
   }
 };

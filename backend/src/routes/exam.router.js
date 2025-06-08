@@ -39,6 +39,13 @@ examRouter.get("/", requireLogin, examController.getExams);
 
 examRouter.get("/:id", requireLogin, examController.getExamById);
 
+examRouter.get(
+  "/:id/files",
+  requireLogin,
+  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"), // Allow BAN_GIAM_HIEU and TRUONG_KHOA
+  examController.getSignedExamFiles
+);
+
 examRouter.post("/verify-password", examController.verifyExamPassword);
 
 examRouter.patch(
@@ -63,9 +70,6 @@ examRouter.patch(
   validateData(openExamSchema),
   examController.openExam
 );
-
-
-
 
 examRouter.delete("/:id", requireLogin, examController.deleteExam);
 

@@ -1,5 +1,4 @@
 const prisma = require("../libs/prisma");
-const bcrypt = require("bcrypt");
 const { encrypt, decrypt } = require("../libs/encrypt");
 const notificationService = require("./notification.service");
 
@@ -11,13 +10,40 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
+    // Correctly extract base URL
+    const extractBaseUrl = (signedUrl) => {
+      try {
+        const url = new URL(signedUrl);
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+        const pathParts = url.pathname.split("/");
+        let adjustedPathParts = pathParts.filter((part) => part);
+        if (adjustedPathParts[0] === cloudName) {
+          adjustedPathParts = adjustedPathParts.slice(1);
+        }
+        adjustedPathParts = adjustedPathParts.filter(
+          (part) =>
+            !part.startsWith("s--") &&
+            !part.startsWith("v") &&
+            part !== "upload" &&
+            part !== "raw"
+        );
+        const publicIdPath = adjustedPathParts.join("/");
+        return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicIdPath}`;
+      } catch (error) {
+        throw new Error("Invalid URL format");
+      }
+    };
+
+    const baseQuestionFile = extractBaseUrl(questionFile);
+    const baseAnswerFile = extractBaseUrl(answerFile);
+
     return await prisma.exam.create({
       data: {
         title,
         status,
         createdById,
-        questionFile,
-        answerFile,
+        questionFile: baseQuestionFile,
+        answerFile: baseAnswerFile,
       },
     });
   },

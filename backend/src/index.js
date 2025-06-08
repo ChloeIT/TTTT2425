@@ -1,3 +1,5 @@
+require("dotenv").config(); // 👈 Nạp biến môi trường từ file .env
+
 const express = require("express");
 const { json, urlencoded } = require("express");
 const cors = require("cors");
@@ -19,7 +21,11 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
 app.use(json());
 app.use(
   urlencoded({

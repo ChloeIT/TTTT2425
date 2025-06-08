@@ -39,6 +39,8 @@ examRouter.get("/", requireLogin, examController.getExams);
 
 examRouter.get("/:id", requireLogin, examController.getExamById);
 
+examRouter.post("/verify-password", examController.verifyExamPassword);
+
 examRouter.patch(
   "/:id/approve",
   requireLogin,
@@ -61,6 +63,9 @@ examRouter.patch(
   validateData(openExamSchema),
   examController.openExam
 );
+
+
+
 
 examRouter.delete("/:id", requireLogin, examController.deleteExam);
 

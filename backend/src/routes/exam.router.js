@@ -46,6 +46,8 @@ examRouter.get(
   examController.getSignedExamFiles
 );
 
+examRouter.post("/verify-password", examController.verifyExamPassword);
+
 examRouter.patch(
   "/:id/approve",
   requireLogin,

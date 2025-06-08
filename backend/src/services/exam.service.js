@@ -64,6 +64,17 @@ const examService = {
   getExamById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
+      select: {
+        id: true,
+        title: true,
+        questionFile: true,
+      },
+    });
+  },
+
+  getExamWithMetaById: async (id) => {
+    return await prisma.exam.findUnique({
+      where: { id },
       include: { createdBy: true, approval: true },
     });
   },
@@ -110,6 +121,7 @@ const examService = {
         updatedAt: new Date(),
       },
     });
+
     const title = updatedExam.title;
     const userId = updatedExam.createdById;
 
@@ -126,16 +138,14 @@ const examService = {
     return updatedExam;
   },
 
-  verifyPassword: async (id, rawPassword) => {
-    const exam = await prisma.exam.findUnique({ where: { id } });
-    if (!exam || !exam.password) return false;
+  verifyPassword: async (examId, inputPassword) => {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+    });
+    if (!exam) return false;
 
-    try {
-      const decryptedPassword = decrypt(exam.password);
-      return decryptedPassword === rawPassword;
-    } catch (error) {
-      return false;
-    }
+    const decryptedPassword = decrypt(exam.password);
+    return decryptedPassword === inputPassword;
   },
 
   openExam: async (id, userId) => {
@@ -154,22 +164,26 @@ const examService = {
       },
     });
 
-    // Lưu vào bảng Document
+    // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
+    /*
     await prisma.document.create({
       data: {
         questionFile: exam.questionFile,
         answerFile: exam.answerFile,
-        retention: "Lưu trữ đề thi đã mở",
-        uploadedById: userId,
+        examId: id,
         createdAt: new Date(),
       },
     });
+    */
 
     // Tạo thông báo mở đề
-
     notificationService.notifyOpenExam(userId, exam.title);
 
-    return updatedExam;
+    return {
+      id: updatedExam.id,
+      title: updatedExam.title,
+      questionFile: exam.questionFile,
+    };
   },
 };
 

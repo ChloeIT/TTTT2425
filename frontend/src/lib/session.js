@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import instanceAPI from "./axios";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation"; // Bạn có thể bật lại nếu cần redirect sau này
 
 export const createSession = async (token) => {
   const cookieStore = await cookies();
@@ -11,6 +11,7 @@ export const createSession = async (token) => {
     httpOnly: true,
   });
 };
+
 export const deleteSession = async () => {
   const cookieStore = await cookies();
   cookieStore.delete("token");

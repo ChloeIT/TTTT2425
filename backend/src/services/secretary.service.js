@@ -1,6 +1,7 @@
 const prisma = require("../libs/prisma");
 const { decrypt } = require("../libs/encrypt");
-
+const notificationService = require("./notification.service");
+const userService=require("./user.service");
 const secretaryService = {
   getExamsWithDecryptedPasswords: async () => {
     const exams = await prisma.exam.findMany({
@@ -11,7 +12,14 @@ const secretaryService = {
         },
       },
       include: {
-        createdBy: true,
+        createdBy: {
+          select: {
+            fullName: true,
+            email: true,
+            department: true,
+            username: true,
+          },
+        },
         approval: true,
       },
     });
@@ -26,6 +34,36 @@ const secretaryService = {
 
     return examsWithDecryptedPasswords;
   },
+
+  getAllUserEmails: async () => {
+    const users = await prisma.user.findMany({
+      select: {
+        email: true,
+      },
+    });
+    // Trả về mảng email (string hoặc null)
+    return users.map((u) => u.email);
+  },
+  
+  notifyUserByEmail: async (email, password, titleExam) => {
+   
+    console.log("báo");
+    const user = await userService.findByEmail(email);
+    if (!user) {
+      throw new Error(`User với email ${email} không tồn tại`);
+    }
+
+    const title = `Thông báo mật khẩu đề thi ${titleExam}`;
+    const message = `Bạn nhận được mật khẩu đề thi: ${password}. Vui lòng bảo mật thông tin này.`;
+    
+    // Tạo notification trong DB và gửi mail
+    await notificationService.createNotificationAndSendMail({
+      userId: user.id,
+      title,
+      message,
+    });
+  },
+
 };
 
 module.exports = secretaryService;

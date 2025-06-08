@@ -5,7 +5,7 @@ import {
     CardTitle,
   } from "@/components/ui/card";
   
-  import { getPasswords } from "@/actions/password-action";
+  import { getPasswords } from "@/actions/secretary-password-action";
   import PasswordList from "./_components/password-table";
   
   export async function generateMetadata() {

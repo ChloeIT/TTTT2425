@@ -13,13 +13,16 @@ const notificationService = {
       // User not found
       return;
     }
-
-    await mail.sendMail({
-      from: `<${process.env.GOOGLE_APP_ACCOUNT}>`,
-      to: user.email,
-      subject,
-      text: message,
-    });
+    try {
+      await mail.sendMail({
+        from: `<${process.env.GOOGLE_APP_ACCOUNT}>`,
+        to: user.email,
+        subject,
+        text: message,
+      });
+    } catch (error) {
+      console.log("Lỗi gửi mail");
+    }
   },
   createNotification: async ({ userId, title, message }) => {
     return await prisma.notification.create({

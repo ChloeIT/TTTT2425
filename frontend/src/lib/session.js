@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import instanceAPI from "./axios";
-import { redirect } from "next/navigation";
 
 export const createSession = async (token) => {
   const cookieStore = await cookies();

@@ -206,6 +206,38 @@ const examController = {
     }
   },
 
+  verifyExamPassword: async (req, res) => {
+  try {
+    
+    const examId = Number(req.body.examId);
+    const password  = req.body.password;
+
+    if (!password) {
+    return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
+  }
+    if (!examId) {
+      return res.status(400).json({ error: "Bài kiểm tra không tồn tại" });
+    }
+
+    const isValid = await examService.verifyPassword(examId, password);
+    if (!isValid) {
+      return res.status(401).json({ error: "Mật khẩu không đúng" });
+    }
+
+    // Lấy URL đề thi sau khi xác thực đúng
+    const exam = await examService.getExamById(examId);
+
+    return res.json({
+      success: true,
+      fileUrl: exam.questionFile,
+    });
+  } catch (error) {
+    console.error("Lỗi xác thực mật khẩu:", error);
+    return res.status(500).json({ error: "Lỗi hệ thống" });
+  }
+},
+
+
   deleteExam: async (req, res, next) => {
     try {
       const id = Number(req.params.id);

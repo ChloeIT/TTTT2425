@@ -47,7 +47,6 @@ const secretaryService = {
   
   notifyUserByEmail: async (email, password, titleExam) => {
    
-    console.log("báo");
     const user = await userService.findByEmail(email);
     if (!user) {
       throw new Error(`User với email ${email} không tồn tại`);

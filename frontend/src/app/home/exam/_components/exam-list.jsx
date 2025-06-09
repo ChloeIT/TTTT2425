@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApprovedExamsList } from "@/actions/sign-action";
+import { ApprovedExamsList } from "@/actions/exams-action";
 import { parseToNumber } from "@/lib/utils";
 import {
   Dialog,

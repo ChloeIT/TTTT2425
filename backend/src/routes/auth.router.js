@@ -14,8 +14,8 @@ authRoute.post(
 );
 authRoute.post(
   "/register",
-  requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  // requireLogin,
+  // permitRoles(Role.BAN_GIAM_HIEU),
   validateData(authSchema.registerSchema),
   authController.register
 );

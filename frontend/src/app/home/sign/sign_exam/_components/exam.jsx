@@ -27,11 +27,7 @@ export default function ExamQuestion({ exam, onClose, onApprove }) {
         />
 
         <DialogFooter className="p-4 border-t flex justify-end gap-2">
-          {/* Uncomment if needed later */}
-          {/* <Button variant="secondary">Chỉnh sửa / Scan hình mới</Button> */}
-          <Button onClick={onApprove} className="bg-green-600 hover:bg-green-700 text-white">
-            Xác nhận duyệt
-          </Button>
+
         </DialogFooter>
       </DialogContent>
     </Dialog>

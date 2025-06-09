@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -16,7 +13,7 @@ datasource db {
 
 model Signature {
   id       Int    @id @default(autoincrement())
-  userId   Int    @unique  
+  userId   Int    @unique
   path     String
   password String
   user     User   @relation(fields: [userId], references: [id])
@@ -32,26 +29,21 @@ model User {
   role       Role       @default(USER)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
 
-  isActive Boolean @default(true)
-
-  exams        Exam[]
-  approvalUser Approval[]
-  documents    Document[]
-  notifications Notification[]
-  sessions     Session[]
- signatures   Signature[] 
-
+  exams           Exam[]
+  notifications   Notification[]
+  sessions        Session[]
+  signatures      Signature[]
   forgotPasswords ForgotPassword[]
 }
 
 model ForgotPassword {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  user   User   @relation(fields: [userId], references: [id])
-  otp    String
-  token  String @unique @default(uuid())
-
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  otp          String
+  token        String   @unique @default(uuid())
   isActive     Boolean  @default(true)
   attemptCount Int      @default(0)
   createdAt    DateTime @default(now())
@@ -63,19 +55,14 @@ enum Department {
   XAY_DUNG_DANG
   NHA_NUOC_PHAP_LUAT
   MAC_DINH
-
 }
 
-
 model Session {
-  id    Int    @id @default(autoincrement())
-  token String @unique
-
-  deviceId String?
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  deviceId  String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   loginAt   DateTime @default(now())
   expiredAt DateTime
   isExpired Boolean  @default(false)
@@ -98,11 +85,11 @@ model Exam {
   status       ExamStatus
   questionFile String
   answerFile   String
-  note         String?     // Thêm trường ghi chú
+  note         String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  approval Approval?
+  document Document?
 }
 
 enum ExamStatus {
@@ -110,20 +97,6 @@ enum ExamStatus {
   DA_DUYET
   TU_CHOI
   DA_THI
-}
-
-model Approval {
-  id Int @id @default(autoincrement())
-
-  examId Int  @unique
-  exam   Exam @relation(fields: [examId], references: [id])
-
-  approvedById Int
-  approvedBy   User @relation(fields: [approvedById], references: [id])
-
-  comment String
-
-  approvedAt DateTime @default(now())
 }
 
 model Notification {
@@ -140,8 +113,7 @@ model Document {
   id           Int      @id @default(autoincrement())
   questionFile String
   answerFile   String
-  retention    String
-  uploadedById Int
-  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  examId       Int      @unique
+  exam         Exam     @relation(fields: [examId], references: [id])
   createdAt    DateTime @default(now())
 }

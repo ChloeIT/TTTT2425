@@ -1,5 +1,4 @@
 const prisma = require("../libs/prisma");
-const bcrypt = require("bcrypt");
 const { encrypt, decrypt } = require("../libs/encrypt");
 const notificationService = require("./notification.service");
 
@@ -11,13 +10,40 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
+    // Correctly extract base URL
+    const extractBaseUrl = (signedUrl) => {
+      try {
+        const url = new URL(signedUrl);
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+        const pathParts = url.pathname.split("/");
+        let adjustedPathParts = pathParts.filter((part) => part);
+        if (adjustedPathParts[0] === cloudName) {
+          adjustedPathParts = adjustedPathParts.slice(1);
+        }
+        adjustedPathParts = adjustedPathParts.filter(
+          (part) =>
+            !part.startsWith("s--") &&
+            !part.startsWith("v") &&
+            part !== "upload" &&
+            part !== "raw"
+        );
+        const publicIdPath = adjustedPathParts.join("/");
+        return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicIdPath}`;
+      } catch (error) {
+        throw new Error("Invalid URL format");
+      }
+    };
+
+    const baseQuestionFile = extractBaseUrl(questionFile);
+    const baseAnswerFile = extractBaseUrl(answerFile);
+
     return await prisma.exam.create({
       data: {
         title,
         status,
         createdById,
-        questionFile,
-        answerFile,
+        questionFile: baseQuestionFile,
+        answerFile: baseAnswerFile,
       },
     });
   },
@@ -35,7 +61,35 @@ const examService = {
     });
   },
 
+  // getAllExams: async () => {
+  //   return await prisma.exam.findMany({
+  //     include: {
+  //       createdBy: {
+  //         select: {
+  //           id: true,
+  //           fullName: true,
+  //           email: true,
+  //           department: true,
+  //
+  //         },
+  //       },
+  //       approval: true,
+  //     },
+  //   });
+  // },
+
   getExamById: async (id) => {
+    return await prisma.exam.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        questionFile: true,
+      },
+    });
+  },
+
+  getExamWithMetaById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
       include: { createdBy: true, approval: true },
@@ -70,11 +124,11 @@ const examService = {
     const title = updatedExam.title;
 
     // Tạo thông báo notification
-    notificationService.notifyApproveExam(userId, title);
+    notificationService.notifyApproveExam(updatedExam.createdById, title);
 
     return updatedExam;
   },
-  rejectExam: async (id, message) => {
+  rejectExam: async (id, message, userId) => {
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
@@ -83,32 +137,37 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    const title = updatedExam.title;
-    const userId = updatedExam.createdById;
+    // const title = updatedExam.title;
+    // const userId = updatedExam.createdById;
 
-    await prisma.notification.create({
-      data: {
-        userId,
-        message: `Lý do từ chối: ${message}`,
-        isRead: false,
-        createdAt: new Date(),
-        title: `Đề thi ${title} bị từ chối`,
-      },
-    });
+    // await prisma.notification.create({
+    //   data: {
+    //     userId,
+    //     message: `Lý do từ chối: ${message}`,
+    //     isRead: false,
+    //     createdAt: new Date(),
+    //     title: `Đề thi ${title} bị từ chối`,
+    //   },
+    // });
+
+    // Gửi thông báo và email bằng notificationService
+    await notificationService.notifyRejectExam(
+      updatedExam.createdById,
+      updatedExam.title,
+      message
+    );
 
     return updatedExam;
   },
 
-  verifyPassword: async (id, rawPassword) => {
-    const exam = await prisma.exam.findUnique({ where: { id } });
-    if (!exam || !exam.password) return false;
+  verifyPassword: async (examId, inputPassword) => {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+    });
+    if (!exam) return false;
 
-    try {
-      const decryptedPassword = decrypt(exam.password);
-      return decryptedPassword === rawPassword;
-    } catch (error) {
-      return false;
-    }
+    const decryptedPassword = decrypt(exam.password);
+    return decryptedPassword === inputPassword;
   },
 
   openExam: async (id, userId) => {
@@ -127,22 +186,26 @@ const examService = {
       },
     });
 
-    // Lưu vào bảng Document
+    // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
+    /*
     await prisma.document.create({
       data: {
         questionFile: exam.questionFile,
         answerFile: exam.answerFile,
-        retention: "Lưu trữ đề thi đã mở",
-        uploadedById: userId,
+        examId: id,
         createdAt: new Date(),
       },
     });
+    */
 
     // Tạo thông báo mở đề
-
     notificationService.notifyOpenExam(userId, exam.title);
 
-    return updatedExam;
+    return {
+      id: updatedExam.id,
+      title: updatedExam.title,
+      questionFile: exam.questionFile,
+    };
   },
 };
 

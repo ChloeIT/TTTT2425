@@ -21,6 +21,13 @@ export const useExamUpload = () => {
       return false;
     }
 
+    const isPdfQuestion = questionFile.type === "application/pdf";
+    const isPdfAnswer = answerFile.type === "application/pdf";
+    if (!isPdfQuestion || !isPdfAnswer) {
+      toast.error("Chỉ chấp nhận file PDF");
+      return false;
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("questionFile", questionFile);

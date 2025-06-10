@@ -1,40 +1,41 @@
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card";
-  
-  import { getPasswords } from "@/actions/secretary-password-action";
-  import PasswordList from "./_components/password-table";
-  
-  export async function generateMetadata() {
-    return {
-      title: "Quản lý mật khẩu đề thi",
-    };
-  }
-  
-  const PasswordManagementPage = async ({ searchParams }) => {
-    // Tạm thời không dùng searchParams
-    // const { page, query } = searchParams;
-    // const currentPage = parseToNumber(page, 1);
-  
-    // Gọi action lấy dữ liệu mật khẩu đề thi, trang 1, query rỗng
-    const { data } = await getPasswords({ page: 1, query: "" });
-  
-    return (
-      <div className="flex flex-col gap-y-4 py-4 h-full">
-        <Card>
-          <CardHeader>
-            <CardTitle>Danh sách mật khẩu đề thi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PasswordList passwords={data} />
-          </CardContent>
-        </Card>
-      </div>
-    );
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { parseToNumber } from "@/lib/utils";
+import { getPasswords } from "@/actions/secretary-password-action";
+import PasswordList from "./_components/password-table";
+
+export async function generateMetadata() {
+  return {
+    title: "Quản lý mật khẩu đề thi",
   };
+}
+
+const PasswordManagementPage = async ({ searchParams }) => {
+  const { page, query } = await searchParams; 
+  const currentPage = parseToNumber(page, 1);
   
-  export default PasswordManagementPage;
-  
+
+  const { data,totalPage } = await getPasswords({ page: currentPage, query });
+
+  return (
+    <div className="flex flex-col gap-y-4 py-4 h-full">
+      <Card>
+        <CardHeader>
+          <CardTitle><h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+          Danh sách mật khẩu đề thi
+        </h1></CardTitle>
+        </CardHeader>
+        <CardContent>
+   
+          <PasswordList passwords={data}  totalPage={totalPage} currentPage={currentPage} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PasswordManagementPage;

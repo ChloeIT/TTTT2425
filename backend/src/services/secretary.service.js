@@ -20,6 +20,11 @@ const secretaryService = {
             username: true,
           },
         },
+
+      },
+      orderBy: {
+        createdAt: "desc",
+
       },
     });
 
@@ -38,14 +43,26 @@ const secretaryService = {
     const users = await prisma.user.findMany({
       select: {
         email: true,
+        department: true,
       },
     });
-    // Trả về mảng email (string hoặc null)
-    return users.map((u) => u.email);
+
+    const groupedEmails = {}; 
+
+    users.forEach((user) => {
+      if (user.email && user.department) {
+        if (!groupedEmails[user.department]) {
+          groupedEmails[user.department] = [];
+        }
+        // Thêm email của người dùng vào mảng email của department tương ứng
+        groupedEmails[user.department].push(user.email);
+      }
+    });
+
+    return groupedEmails;
   },
 
   notifyUserByEmail: async (email, password, titleExam) => {
-    console.log("báo");
     const user = await userService.findByEmail(email);
     if (!user) {
       throw new Error(`User với email ${email} không tồn tại`);

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +9,27 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { getFile } from "@/actions/sign-action";
 
 export default function ExamAnswer({ exam, onClose, onApprove }) {
+  const [signedAnswerFile, setSignedAnswerFile] = useState(null);
+
+  useEffect(() => {
+    const fetchSignedFile = async () => {
+      if (exam?.id) {
+        const res = await getFile(exam.id);
+        if (!res.ok) {
+          console.error("Lỗi khi lấy file:", res.message);
+        } else {
+          console.log("Đã lấy signed file:", res.data);
+          setSignedAnswerFile(res.data.answerFile);
+        }
+      }
+    };
+
+    fetchSignedFile();
+  }, [exam]);
+
   return (
     <Dialog open={!!exam} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-7xl h-[90vh] flex flex-col p-0">
@@ -20,13 +40,10 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
         </DialogHeader>
 
         <iframe
-  src={exam?.answerFile}
-
-  title="Đáp án"
-  className="flex-grow border-0"
-
-/>
-
+          src={signedAnswerFile || exam?.answerFile}
+          title="Đáp án"
+          className="flex-grow border-0"
+        />
 
         <DialogFooter className="p-4 border-t flex justify-end gap-3">
           {/* 

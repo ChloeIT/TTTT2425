@@ -2,10 +2,8 @@
 
 import instanceAPI from "@/lib/axios";
 
-export async function getPasswords({ page = 1, query = "" } = {}) {
+export async function getPasswords({ page = 1, query } = {}) {
   try {
-
-   
     const res = await instanceAPI.get("/secretary/allExams", {
       params: { page, query },
     });
@@ -15,14 +13,13 @@ export async function getPasswords({ page = 1, query = "" } = {}) {
       totalPage: res.data.totalPage || 1,
     };
   } catch (error) {
-    console.error("getPasswords error:", error);
     return {
       data: [],
-      totalPage: 1,
+      totalPage: 0,
     };
   }
 }
-export async function getEmailUsers() {
+export async function getUserEmail() {
   try {
     const res = await instanceAPI.get("/secretary/getEmailUsers");
     console.log("Emails:", res.data.data);

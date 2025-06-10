@@ -208,9 +208,8 @@ const examController = {
 
   verifyExamPassword: async (req, res) => {
   try {
-    
     const examId = Number(req.body.examId);
-    const password  = req.body.password;
+    const password = req.body.password;
 
     if (!password) {
     return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });

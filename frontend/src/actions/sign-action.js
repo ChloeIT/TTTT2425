@@ -6,7 +6,6 @@ import instanceAPI from "@/lib/axios";
 export const getExams = async ({ page = 1, query }) => {
   try {
     // không cần thêm bearer đã config sẵn rồi
-
     const res = await instanceAPI.get("/exams/all", {
       params: { page, query },
     });
@@ -141,4 +140,33 @@ export const rejectExam = async (examId, message) => {
     };
   }
 };
+
+export const getFile = async (examId) => {
+  try {
+    const res = await instanceAPI.get(`/exams/${examId}/files`);
+
+    return {
+      ok: true,
+      success: true,
+      data: res.data.data || [],
+      message: "Lấy file thành công.",
+    };
+  } catch (error) {
+    console.error(
+      "Lỗi khi gọi getFile:",
+      error?.response?.data || error.message
+    );
+
+    return {
+      ok: false,
+      message:
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Không thể lấy file. Vui lòng thử lại sau.",
+    };
+  }
+};
+
+
+
 

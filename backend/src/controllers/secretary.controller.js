@@ -22,7 +22,6 @@ const secretaryController = {
   sendNotification: async (req, res) => {
     try {
       const { email, password ,titleExam } = req.body;
-      console.log(req.body);
       if (!email || !password) {
         return res
           .status(400)
@@ -30,7 +29,6 @@ const secretaryController = {
       }
 
       await secretaryService.notifyUserByEmail(email, password,titleExam);
-      console.log("controller")
       return res.status(200).json({ message: `Đã gửi thông báo tới ${email}` });
     } catch (error) {
       console.error("sendNotification error:", error);

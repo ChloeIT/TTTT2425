@@ -21,28 +21,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getEmailUsers, notifyUserByEmail } from "@/actions/secretary-password-action";
+
+import { getUserEmail, notifyUserByEmail } from "@/actions/secretary-password-action";
 
 const Notify = ({ isOpen, onClose, exam }) => {
-  const [emails, setEmails] = useState([]);
+  const [groupedEmails, setGroupedEmails] = useState({});
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [displayEmails, setDisplayEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState("");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      getEmailUsers()
-        .then((emailList) => {
-          setEmails(emailList);
-          if (emailList.length > 0) {
-            setSelectedEmail(emailList[0]);
+      getUserEmail() 
+        .then((data) => {
+          setGroupedEmails(data); 
+          const departments = Object.keys(data); 
+          if (departments.length > 0) {
+            const firstDepartment = departments[0];
+            setSelectedDepartment(firstDepartment);
+            const emailsForFirstDepartment = data[firstDepartment] || [];
+            setDisplayEmails(emailsForFirstDepartment);
+            if (emailsForFirstDepartment.length > 0) {
+              setSelectedEmail(emailsForFirstDepartment[0]);
+            } else {
+              setSelectedEmail("");
+            }
+          } else {
+            setSelectedDepartment("");
+            setDisplayEmails([]);
+            setSelectedEmail("");
           }
         })
         .catch((err) => {
-          console.error("Lỗi lấy email:", err);
+          console.error("Lỗi khi lấy danh sách email được nhóm:", err);
           toast.error("Lỗi khi lấy danh sách email!");
         });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (selectedDepartment && groupedEmails[selectedDepartment]) {
+      const emailsForSelectedDepartment = groupedEmails[selectedDepartment];
+      setDisplayEmails(emailsForSelectedDepartment); 
+      if (emailsForSelectedDepartment.length > 0) {
+        setSelectedEmail(emailsForSelectedDepartment[0]);
+      } else {
+        setSelectedEmail(""); 
+      }
+    } else {
+      setDisplayEmails([]);
+      setSelectedEmail("");
+    }
+  }, [selectedDepartment, groupedEmails]);
 
   if (!isOpen) return null;
 
@@ -78,22 +109,57 @@ const Notify = ({ isOpen, onClose, exam }) => {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            {/* Dropdown để chọn Phòng ban */}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="department-select">Chọn phòng ban</Label>
+              <Select
+                value={selectedDepartment}
+                onValueChange={setSelectedDepartment}
+                id="department-select"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn phòng ban" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(groupedEmails).length > 0 ? (
+                    Object.keys(groupedEmails).map((department) => (
+                      <SelectItem key={department} value={department}>
+                        {department}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-department" disabled> 
+                      Không có phòng ban nào
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Dropdown để chọn Email */}
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="email-select">Chọn email</Label>
               <Select
                 value={selectedEmail}
                 onValueChange={setSelectedEmail}
                 id="email-select"
+                disabled={!selectedDepartment || displayEmails.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn email" />
                 </SelectTrigger>
                 <SelectContent>
-                  {emails.map((email) => (
-                    <SelectItem key={email} value={email}>
-                      {email}
+                  {displayEmails.length > 0 ? (
+                    displayEmails.map((email) => (
+                      <SelectItem key={email} value={email}>
+                        {email}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-email" disabled> 
+                      Không có email nào cho phòng ban này
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>

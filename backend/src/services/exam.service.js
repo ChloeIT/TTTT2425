@@ -57,10 +57,21 @@ const examService = {
 
   getAllExams: async () => {
     return await prisma.exam.findMany({
-      include: { createdBy: true },
+      include: {
+        createdBy: {
+          select: {
+            username: true,
+            fullName: true,
+            email: true,
+            department: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   },
-
   // getAllExams: async () => {
   //   return await prisma.exam.findMany({
   //     include: {
@@ -84,6 +95,7 @@ const examService = {
         id: true,
         title: true,
         questionFile: true,
+        answerFile: true,
       },
     });
   },

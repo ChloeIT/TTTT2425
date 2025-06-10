@@ -42,7 +42,7 @@ examRouter.get("/:id", requireLogin, examController.getExamById);
 examRouter.get(
   "/:id/files",
   requireLogin,
-  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"), // Allow BAN_GIAM_HIEU and TRUONG_KHOA
+  // permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
   examController.getSignedExamFiles
 );
 

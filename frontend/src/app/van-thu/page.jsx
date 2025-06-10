@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import NavBar from "./_components/NavBar";
+
 import {
   Dialog,
   DialogTrigger,
@@ -67,15 +69,22 @@ export default function VanThuPage() {
   };
 
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-2xl font-bold mb-6">Trang Văn Thư - Upload Đề Đã Thi</h1>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-left">Danh sách đề đã thi</h2>
-          <DialogTrigger asChild>
-            <Button variant="blue">Upload đề đã ký</Button>
-          </DialogTrigger>
-        </div>
+    <>
+      <NavBar />
+      <div className="pt-20 p-8 text-center">
+        <h1 className="text-2xl font-bold mb-6">Trang Văn Thư - Upload Đề Đã Thi</h1>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-left">Danh sách đề đã thi</h2>
+            <DialogTrigger asChild>
+              <button
+                className="text-2xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                title="Upload đề đã ký"
+              >
+                📤
+              </button>
+            </DialogTrigger>
+          </div>
 
         <table className="min-w-full bg-white dark:bg-gray-800 rounded shadow">
           <thead>
@@ -96,22 +105,13 @@ export default function VanThuPage() {
                 <td className="px-4 py-2">{exam.status}</td>
                 <td className="px-4 py-2">
                   {exam.questionFile && (
-                    // <a
-                    //   href={exam.questionFile}
-                    //   target="_blank"
-                    //   className="text-blue-600 underline"
-                    // >
-                    //   Tải đề
-                    // </a>
                     <a
-  href={`http://localhost:5000/uploads/file_approved/${exam.questionFile}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-blue-600 underline"
->
-  Tải đề
-</a>
-
+                       href={`/van-thu/view/${exam.id}`}
+                      className="text-blue-600 underline"
+                      target="_blank"
+           >
+                       Xem đề
+                    </a>
                   )}
                 </td>
               </tr>
@@ -119,73 +119,74 @@ export default function VanThuPage() {
           </tbody>
         </table>
 
-        <DialogContent className="max-w-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <DialogHeader>
-            <DialogTitle>Upload đề thi đã thi</DialogTitle>
-            <DialogDescription>
-              Nhập tên và tải lên file đề + đáp án đã ký
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="title"
-                className="block font-medium mb-1 dark:text-gray-200"
-              >
-                Tên đề thi
-              </label>
-              <Input
-                id="title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                disabled={loading}
-                required
-                className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="questionFile"
-                className="block font-medium mb-1 dark:text-gray-200"
-              >
-                File đề thi (PDF)
-              </label>
-              <input
-                id="questionFile"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setQuestionFile(e.target.files[0])}
-                disabled={loading}
-                required
-                className="block w-full text-sm text-blue-900 border border-blue-400 rounded cursor-pointer bg-blue-50 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="answerFile"
-                className="block font-medium mb-1 dark:text-gray-200"
-              >
-                File đáp án (PDF)
-              </label>
-              <input
-                id="answerFile"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setAnswerFile(e.target.files[0])}
-                disabled={loading}
-                required
-                className="block w-full text-sm text-blue-900 border border-blue-400 rounded cursor-pointer bg-blue-50 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400"
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Đang gửi..." : "Đăng đề thi"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+          <DialogContent className="max-w-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+            <DialogHeader>
+              <DialogTitle>Upload đề thi đã thi</DialogTitle>
+              <DialogDescription>
+                Nhập tên và tải lên file đề + đáp án đã ký
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="title"
+                  className="block font-medium mb-1 dark:text-gray-200"
+                >
+                  Tên đề thi
+                </label>
+                <Input
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  disabled={loading}
+                  required
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="questionFile"
+                  className="block font-medium mb-1 dark:text-gray-200"
+                >
+                  File đề thi (PDF)
+                </label>
+                <input
+                  id="questionFile"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setQuestionFile(e.target.files[0])}
+                  disabled={loading}
+                  required
+                  className="block w-full text-sm text-blue-900 border border-blue-400 rounded cursor-pointer bg-blue-50 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="answerFile"
+                  className="block font-medium mb-1 dark:text-gray-200"
+                >
+                  File đáp án (PDF)
+                </label>
+                <input
+                  id="answerFile"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setAnswerFile(e.target.files[0])}
+                  disabled={loading}
+                  required
+                  className="block w-full text-sm text-blue-900 border border-blue-400 rounded cursor-pointer bg-blue-50 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400"
+                />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Đang gửi..." : "Đăng đề thi"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }

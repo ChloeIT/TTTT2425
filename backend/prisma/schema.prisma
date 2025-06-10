@@ -111,6 +111,7 @@ enum ExamStatus {
   DA_DUYET
   TU_CHOI
   DA_THI
+  DA_KY
 }
 
 model Approval {

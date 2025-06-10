@@ -8,7 +8,7 @@ const DashboardPage = () => {
     { title: "Soạn đề ", icon: "📘", link: "/home/examsUpload" },
     { title: "Duyệt đề ", icon: "📊", link: "/home/sign/sign_exam" },
     { title: "Đề thi", icon: "📄", link: "/home/exam" },
-    { title: "Văn thư", icon: "🗃️", link: "/home/clerical" },
+    { title: "Văn thư", icon: "🗃️", link: "/home/archive" },
     { title: "Đáp án", icon: "📝", link: "/home/answer" },
   ];
 

@@ -107,6 +107,16 @@ const authService = {
       },
     });
   },
+  deleteSession: async (userId) => {
+    await prisma.session.deleteMany({
+      where: {
+        userId,
+        expiredAt: {
+          lt: moment().subtract(7, "days"),
+        },
+      },
+    });
+  },
 
   generateOTP: () => {
     return Math.floor(100000 + Math.random() * 900000);

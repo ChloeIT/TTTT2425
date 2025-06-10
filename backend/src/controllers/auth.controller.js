@@ -25,6 +25,9 @@ const authController = {
       }
       const session = await authService.generateSession(user.id, deviceId);
 
+      // xoa session da qua han 7 ngay
+      authService.deleteSession();
+
       return res.status(200).json({
         data: {
           user,

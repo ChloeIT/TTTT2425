@@ -55,7 +55,7 @@ const examService = {
     });
   },
 
-  etAllExams: async () => {
+  getAllExams: async () => {
     return await prisma.exam.findMany({
       include: {
         createdBy: {

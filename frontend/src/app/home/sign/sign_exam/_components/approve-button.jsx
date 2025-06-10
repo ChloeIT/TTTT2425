@@ -93,7 +93,7 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
 
           <DialogFooter className="flex justify-end gap-2">
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-blue-100 text-blue-700 hover:bg-blue-200"
               onClick={handleApprove}
               disabled={loading}
             >

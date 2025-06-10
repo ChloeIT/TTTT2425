@@ -94,7 +94,7 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
 
           <DialogFooter className="flex justify-end gap-2">
             <Button
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-100 text-red-700 hover:bg-red-20"
               onClick={handleReject}
               disabled={loading}
             >

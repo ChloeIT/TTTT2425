@@ -6,7 +6,6 @@ import instanceAPI from "@/lib/axios";
 export const getExams = async ({ page = 1, query }) => {
   try {
     // không cần thêm bearer đã config sẵn rồi
-
     const res = await instanceAPI.get("/exams/all", {
       params: { page, query },
     });

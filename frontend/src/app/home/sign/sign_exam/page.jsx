@@ -1,4 +1,3 @@
-// app/exams/page.jsx
 import {
     Card,
     CardContent,
@@ -26,7 +25,9 @@ import {
       <div className="flex flex-col gap-y-4 py-4 h-full">
         <Card>
           <CardHeader>
-            <CardTitle>Danh sách đề thi</CardTitle>
+            <CardTitle> <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+          Danh sách đề thi
+        </h1></CardTitle>
             {/* <CardDescription>Quản lý các đề thi trong hệ thống</CardDescription> */}
           </CardHeader>
           <CardContent>

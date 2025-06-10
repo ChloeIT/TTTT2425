@@ -13,9 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, EyeOff } from "lucide-react";
 import Notify from "./notify";
 
-import SearchBar from "../../_components/search-bar"; 
+import SearchBar from "../../_components/search-bar";
 import FilterPanel from "../../_components/filter-department";
-
 
 const PasswordList = ({ passwords }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -25,6 +24,7 @@ const PasswordList = ({ passwords }) => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
+
   if (!passwords || passwords.length === 0) {
     return <p>Không có mật khẩu đề thi nào.</p>;
   }
@@ -76,43 +76,45 @@ const PasswordList = ({ passwords }) => {
     }));
   };
 
-
-  
   const filteredPassword = passwords
-  .filter((exam) =>
-    exam.title?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-  .filter((exam) => {
-    const date = new Date(exam.createdAt);
-    const monthMatches =
-      !selectedMonth || (date.getMonth() + 1).toString().padStart(2, "0") === selectedMonth;
-    const yearMatches = !selectedYear || date.getFullYear().toString() === selectedYear;
-    return monthMatches && yearMatches;
-  })
-  .filter((exam) =>
-    !selectedDepartment || exam.createdBy?.department === selectedDepartment
-  );
+    .filter((exam) =>
+      exam.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((exam) => {
+      const date = new Date(exam.createdAt);
+      const monthMatches =
+        !selectedMonth ||
+        (date.getMonth() + 1).toString().padStart(2, "0") === selectedMonth;
+      const yearMatches =
+        !selectedYear || date.getFullYear().toString() === selectedYear;
+      return monthMatches && yearMatches;
+    })
+    .filter(
+      (exam) =>
+        !selectedDepartment || exam.createdBy?.department === selectedDepartment
+    );
+
   return (
     <>
-          {/* Thanh tìm kiếm + Bộ lọc tháng, năm, phòng ban */}
-  <div className="flex flex-wrap justify-between gap-4 mb-4">
-    <div className="flex-1 min-w-[250px]">
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-    </div>
-    <div className="flex flex-wrap gap-2 items-center">
-      <FilterPanel
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        selectedYear={selectedYear}
-        setSelectedYear={setSelectedYear}
-        selectedDepartment={selectedDepartment}
-        setSelectedDepartment={setSelectedDepartment}
-      />
-    </div>
-  </div>
+      {/* Thanh tìm kiếm + Bộ lọc tháng, năm, phòng ban */}
+      <div className="flex flex-wrap justify-between gap-4 mb-4">
+        <div className="flex-1 min-w-[250px]">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <FilterPanel
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            selectedDepartment={selectedDepartment}
+            setSelectedDepartment={setSelectedDepartment}
+          />
+        </div>
+      </div>
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-20">
             <TableHead>Tên đề thi</TableHead>
             <TableHead>Mật khẩu</TableHead>
             <TableHead>Trạng thái</TableHead>
@@ -121,7 +123,7 @@ const PasswordList = ({ passwords }) => {
             <TableHead>Phòng ban</TableHead>
             <TableHead>Ngày gửi</TableHead>
             <TableHead>Ngày duyệt</TableHead>
-            <TableHead>Hành động</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

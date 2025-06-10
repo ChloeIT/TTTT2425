@@ -17,18 +17,21 @@ export async function generateMetadata() {
 const PasswordManagementPage = async ({ searchParams }) => {
   const { page, query } = await searchParams; 
   const currentPage = parseToNumber(page, 1);
-  const currentQuery = query || ""; 
+  
 
-  const { data } = await getPasswords({ page: currentPage, query: currentQuery });
+  const { data,totalPage } = await getPasswords({ page: currentPage, query });
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách mật khẩu đề thi</CardTitle>
+          <CardTitle><h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+          Danh sách mật khẩu đề thi
+        </h1></CardTitle>
         </CardHeader>
         <CardContent>
-          <PasswordList passwords={data} />
+   
+          <PasswordList passwords={data}  totalPage={totalPage} currentPage={currentPage} />
         </CardContent>
       </Card>
     </div>

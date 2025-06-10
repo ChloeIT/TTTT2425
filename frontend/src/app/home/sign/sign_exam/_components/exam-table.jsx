@@ -5,8 +5,8 @@ import ExamAnswer from "./exam-answer";
 import Exam from "./exam";
 import ApproveButton from "./approve-button";
 import RejectButton from "./reject-button";
-import SearchBar from "./search-bar"; 
-import FilterPanel from "./filter-department";
+import SearchBar from "../../../_components/search-bar"; 
+import FilterPanel from "../../../_components/filter-department";
 
 
 import {
@@ -102,7 +102,7 @@ const [selectedDepartment, setSelectedDepartment] = useState("");
     </div>
   </div>
 
-  {/* Bộ lọc trạng thái dàn ngang, căn giữa */}
+  {/* Bộ lọc trạng thái  */}
   <div className="flex flex-wrap gap-2 mb-6">
     {[
       { key: "ALL", label: "Tất cả" },

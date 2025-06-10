@@ -22,7 +22,7 @@ export async function getPasswords({ page = 1, query = "" } = {}) {
     };
   }
 }
-export async function getEmailUsers() {
+export async function getUserEmail() {
   try {
     const res = await instanceAPI.get("/secretary/getEmailUsers");
     console.log("Emails:", res.data.data);

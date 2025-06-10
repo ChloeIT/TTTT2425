@@ -106,7 +106,7 @@ const examService = {
   getExamWithMetaById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
-      include: { createdBy: true, approval: true },
+      include: { createdBy: true },
     });
   },
 

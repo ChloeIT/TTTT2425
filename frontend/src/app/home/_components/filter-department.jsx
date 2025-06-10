@@ -10,7 +10,7 @@ const FilterPanel = ({
   setSelectedDepartment,
 }) => {
   const months = [
-    { value: "", label: "Tháng" },
+    { value: "", label: "Tất cả tháng" },
     ...Array.from({ length: 12 }, (_, i) => ({
       value: (i + 1).toString().padStart(2, "0"),
       label: `Tháng ${i + 1}`,
@@ -18,7 +18,7 @@ const FilterPanel = ({
   ];
 
   const years = [
-    { value: "", label: "Năm" },
+    { value: "", label: "Tất cả năm" },
     ...[2023, 2024, 2025].map((y) => ({ value: y.toString(), label: `Năm ${y}` })),
   ];
 

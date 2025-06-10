@@ -63,7 +63,7 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
     <>
       <Toaster position="top-right" />
       <Button
-        className="bg-red-600 hover:bg-red-700 text-white"
+        className="bg-red-100 text-red-700 hover:bg-red-200"
         onClick={() => setPendingRejectExam(exam)}
       >
         Từ chối

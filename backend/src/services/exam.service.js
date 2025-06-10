@@ -51,15 +51,28 @@ const examService = {
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: { createdById: userId },
-      include: { createdBy: true, approval: true },
+      include: { createdBy: true},
     });
   },
 
   getAllExams: async () => {
     return await prisma.exam.findMany({
-      include: { createdBy: true, approval: true },
+      include: {
+        createdBy: {
+          select: {
+            username: true,
+            fullName: true,
+            email: true,
+            department: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc", 
+      },
     });
-  },
+  }
+,  
 
   // getAllExams: async () => {
   //   return await prisma.exam.findMany({
@@ -85,6 +98,7 @@ const examService = {
         id: true,
         title: true,
         questionFile: true,
+        answerFile: true,
       },
     });
   },

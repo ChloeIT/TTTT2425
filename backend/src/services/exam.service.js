@@ -190,18 +190,14 @@ const examService = {
     return decryptedPassword === inputPassword;
   },
 
-  openExam: async (id, userId) => {
-    // Kiểm tra trạng thái phải là DA_DUYET
-    const exam = await prisma.exam.findUnique({ where: { id } });
-    if (!exam || exam.status !== "DA_DUYET") {
-      throw new Error("Exam not approved or already opened");
-    }
-
+  changeStatus: async (id, changeStatus) => {
+    console.log(id)
+    console.log(changeStatus)
     // Cập nhật trạng thái sang DA_THI
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
-        status: "DA_THI",
+        status: changeStatus,
         updatedAt: new Date(),
       },
     });
@@ -219,13 +215,13 @@ const examService = {
     */
 
     // Tạo thông báo mở đề
-    notificationService.notifyOpenExam(userId, exam.title);
+    // notificationService.notifyOpenExam(userId, exam.title);
 
-    return {
-      id: updatedExam.id,
-      title: updatedExam.title,
-      questionFile: exam.questionFile,
-    };
+    // return {
+    //   id: updatedExam.id,
+    //   title: updatedExam.title,
+    //   questionFile: exam.questionFile,
+    // };
   },
 };
 

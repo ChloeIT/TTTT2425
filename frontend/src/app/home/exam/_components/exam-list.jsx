@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react";
-import { ApprovedExamsList } from "@/actions/exams-action";
+import { ApprovedExamsList, statusChanged } from "@/actions/exams-action";
 import { parseToNumber } from "@/lib/utils";
 import {
   Dialog,
@@ -22,7 +22,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
-
 const ExamViewList = ({ page, query }) => {
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -43,11 +42,13 @@ const ExamViewList = ({ page, query }) => {
     fetchExams();
   }, [currentPage, query]);
 
-  const handleOpen = (exam) => {
+  const handleOpen = async(exam) => {
+    
     setSelectedExam(exam);
     setInputPassword("");
     setError("");
     setOpen(true);
+    
   };
 
   const handleCheckPassword = async () => {
@@ -69,6 +70,10 @@ const ExamViewList = ({ page, query }) => {
 
       const result = await res.json();
       if (res.ok) {
+        const status = "DA_THI";
+        const changeStatusResult = await statusChanged(selectedExam.id.toString(), status);
+
+        // console.log(changeStatusResult)
         setOpen(false);
         setExamToOpen(selectedExam);
         setOpenedExamIds((prev) => [...prev, selectedExam.id]);
@@ -79,6 +84,7 @@ const ExamViewList = ({ page, query }) => {
     } catch (err) {
       setError("Lỗi kết nối tới server");
     }
+    
   };
 
   const departmentMap = {

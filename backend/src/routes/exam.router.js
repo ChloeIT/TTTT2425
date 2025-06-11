@@ -73,6 +73,13 @@ examRouter.patch(
   examController.openExam
 );
 
+examRouter.patch(
+  "/:examId/changeStatus",
+  requireLogin,
+  // validateData(openExamSchema),
+  examController.changeStatusExam
+);
+
 // examRouter.delete("/:id", requireLogin, examController.deleteExam);
 
 module.exports = examRouter;

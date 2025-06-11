@@ -201,6 +201,7 @@ const examService = {
         updatedAt: new Date(),
       },
     });
+    notificationService.notifyOpenExam(updatedExam.createdById, updatedExam.title)
 
     // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
     /*
@@ -217,11 +218,11 @@ const examService = {
     // Tạo thông báo mở đề
     // notificationService.notifyOpenExam(userId, exam.title);
 
-    // return {
-    //   id: updatedExam.id,
-    //   title: updatedExam.title,
-    //   questionFile: exam.questionFile,
-    // };
+    return {
+      id: updatedExam.id,
+      title: updatedExam.title,
+      questionFile: exam.questionFile,
+    };
   },
 };
 

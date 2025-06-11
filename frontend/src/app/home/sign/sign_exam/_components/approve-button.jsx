@@ -83,12 +83,14 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
           </DialogHeader>
 
           <Input
+            name="approve-exam-password"
             type="password"
             placeholder="Nhập mật khẩu cho đề thi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mb-4"
             autoFocus
+             autoComplete="new-password"
           />
 
           <DialogFooter className="flex justify-end gap-2">

@@ -51,13 +51,13 @@ const examService = {
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: { createdById: userId },
-      include: { createdBy: true, approval: true },
+      include: { createdBy: true },
     });
   },
 
   getAllExams: async () => {
     return await prisma.exam.findMany({
-      include: { createdBy: true, approval: true },
+      include: { createdBy: true },
     });
   },
 
@@ -73,7 +73,7 @@ const examService = {
   //
   //         },
   //       },
-  //       approval: true,
+  //      
   //     },
   //   });
   // },
@@ -92,7 +92,7 @@ const examService = {
   getExamWithMetaById: async (id) => {
     return await prisma.exam.findUnique({
       where: { id },
-      include: { createdBy: true, approval: true },
+      include: { createdBy: true },
     });
   },
 
@@ -185,6 +185,7 @@ const examService = {
         updatedAt: new Date(),
       },
     });
+    
 
     // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
     /*
@@ -197,6 +198,7 @@ const examService = {
       },
     });
     */
+   
 
     // Tạo thông báo mở đề
     notificationService.notifyOpenExam(userId, exam.title);

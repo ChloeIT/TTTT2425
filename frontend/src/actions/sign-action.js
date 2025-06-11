@@ -50,6 +50,7 @@ export const ApprovedExamsList = async ({ page = 1, query }) => {
   }
 };
 
+
 // export const uploadSignature = async (file, password) => {
 //   try {
 //     if (!file) {
@@ -164,4 +165,5 @@ export const rejectExam = async (examId, message) => {
     };
   }
 };
+
 

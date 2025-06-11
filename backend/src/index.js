@@ -12,6 +12,7 @@ const secretaryRoute = require("./routes/secretary.router");
 const cookieParser = require("cookie-parser");
 const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
 const notificationRoute = require("./routes/notification.router");
+const documentRoute = require("./routes/document.router");
 
 
 
@@ -63,7 +64,7 @@ app.use((err, req, res, next) => {
 
   res.status(500).json({ error: "Lỗi hệ thống, vui lòng thử lại sau" });
 });
-
+app.use("/documents", documentRoute);
 app.listen(PORT, (error) => {
   if (!error)
     console.log(

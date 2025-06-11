@@ -17,7 +17,7 @@ import {
   }
   
   const ExamPage = async ({ searchParams }) => {
-    const { page, query } = searchParams;
+    const { page, query } = await searchParams;
     const currentPage = parseToNumber(page, 1);
   
     const { data, totalPage } = await getExams({ page: currentPage, query });

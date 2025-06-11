@@ -73,6 +73,6 @@ examRouter.patch(
   examController.openExam
 );
 
-examRouter.delete("/:id", requireLogin, examController.deleteExam);
+// examRouter.delete("/:id", requireLogin, examController.deleteExam);
 
 module.exports = examRouter;

@@ -22,11 +22,11 @@ const secretaryController = {
   sendNotification: async (req, res) => {
     try {
       const { email, password ,titleExam } = req.body;
-      if (!email || !password) {
-        return res
-          .status(400)
-          .json({ message: "Email và mật khẩu không được để trống" });
-      }
+      // if (!email || !password) {
+      //   return res
+      //     .status(400)
+      //     .json({ message: "Email và mật khẩu không được để trống" });
+      // }
 
       await secretaryService.notifyUserByEmail(email, password,titleExam);
       return res.status(200).json({ message: `Đã gửi thông báo tới ${email}` });

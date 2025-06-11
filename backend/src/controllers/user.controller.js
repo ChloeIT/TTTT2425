@@ -67,7 +67,7 @@ const userController = {
       }
       const isMatch = await authService.matchPassword(password, user.password);
       if (!isMatch) {
-        throw new Error("Mật khẩu củ không chính xác");
+        throw new Error("Mật khẩu cũ không chính xác");
       }
 
       const passwordHash = await authService.hashPassword(newPassword);

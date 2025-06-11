@@ -7,7 +7,7 @@ require("dotenv").config();
 const authRoute = require("./routes/auth.router");
 const examRouter = require("./routes/exam.router");
 const userRoute = require("./routes/user.router");
-const signRoute = require("./routes/sign.router");
+// const signRoute = require("./routes/sign.router");
 const secretaryRoute = require("./routes/secretary.router");
 const cookieParser = require("cookie-parser");
 const checkPrismaHealth = require("./middlewares/prismaHealthMiddleware");
@@ -44,7 +44,7 @@ app.use("/users", userRoute);
 
 app.use("/exams", examRouter);
 
-app.use("/sign", signRoute);
+// app.use("/sign", signRoute);
 app.use("/secretary", secretaryRoute);
 
 app.use((err, req, res, next) => {

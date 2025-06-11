@@ -144,15 +144,6 @@ const examController = {
       const id = Number(req.params.id);
       const userId = req.user.id;
       const { password } = req.body;
-      if (!password || password.length < 6) {
-        return res
-          .status(400)
-          .json({ error: "Password must be at least 6 characters" });
-      }
-
-      if (!["BAN_GIAM_HIEU", "TRUONG_KHOA"].includes(req.user.role)) {
-        return res.status(403).json({ error: "Forbidden" });
-      }
 
       const updatedExam = await examService.approveExam(id, password, userId);
       res.status(200).json({ data: updatedExam });
@@ -166,14 +157,6 @@ const examController = {
       const id = Number(req.params.id);
       const { message } = req.body;
       const userId = req.user.id; 
-
-      if (!message || message.trim() === "") {
-        return res.status(400).json({ error: "Ghi chú không được bỏ trống" });
-      }
-
-      if (!["BAN_GIAM_HIEU"].includes(req.user.role)) {
-        return res.status(403).json({ error: "Forbidden" });
-      }
 
       const updatedExam = await examService.rejectExam(id, message,userId);
       res.status(200).json({ data: updatedExam });

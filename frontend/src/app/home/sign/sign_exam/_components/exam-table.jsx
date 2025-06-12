@@ -49,6 +49,7 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
     DANG_CHO: "Đang chờ",
     DA_DUYET: "Đã duyệt",
     TU_CHOI: "Đã từ chối",
+    DA_THI: "Đã thi"
   };
   const departmentMap = {
     MAC_DINH: "Mặc định",

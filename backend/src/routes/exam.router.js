@@ -35,7 +35,7 @@ examRouter.post(
 examRouter.get(
   "/all",
   requireLogin,
-  permitRoles("BAN_GIAM_HIEU"),
+  // permitRoles("BAN_GIAM_HIEU"),
   examController.getAllExams
 );
 

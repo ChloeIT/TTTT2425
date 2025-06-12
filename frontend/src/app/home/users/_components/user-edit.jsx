@@ -35,7 +35,7 @@ import { useAction } from "@/hooks/use-action";
 import { Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export const UserEditButton = ({ data }) => {
+export const UserEditButton = ({ data, disabled }) => {
   const [isOpen, setOpen] = useState(false);
   const { action, isPending } = useAction();
   const onSubmit = (values) => {
@@ -104,6 +104,7 @@ export const UserEditButton = ({ data }) => {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isPending || disabled}
                   >
                     <FormControl>
                       <SelectTrigger>

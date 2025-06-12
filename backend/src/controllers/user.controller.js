@@ -37,12 +37,10 @@ const userController = {
       if (!user) {
         throw new Error("Người dùng không tồn tại");
       }
-      if (
-        role &&
-        user.role === Role.BAN_GIAM_HIEU &&
-        role !== Role.BAN_GIAM_HIEU
-      ) {
-        throw new Error("Không thể cập nhật vai trò cho người dùng này");
+      // Ban giám hiệu có thể cập nhật vai trò của ban giám hiệu khác
+      // mà không thể cập nhật vai trò của chính mình
+      if (req.user.id == user.id && user.role === Role.BAN_GIAM_HIEU) {
+        throw new Error("Không thể cập nhật vai trò cho chính mình");
       }
       await userService.updateUser(userId, {
         department,
@@ -67,7 +65,7 @@ const userController = {
       }
       const isMatch = await authService.matchPassword(password, user.password);
       if (!isMatch) {
-        throw new Error("Mật khẩu củ không chính xác");
+        throw new Error("Mật khẩu cũ không chính xác");
       }
 
       const passwordHash = await authService.hashPassword(newPassword);
@@ -127,8 +125,12 @@ const userController = {
       if (!user) {
         throw new Error("Người dùng không tồn tại");
       }
-      if (user.role === "BAN_GIAM_HIEU") {
-        throw new Error("Không thể ngừng kích hoạt tài khoản người dùng này");
+      // cho phép ban giám hiệu ngừng kích hoạt tài khoản ban giám hiệu khác, nhưng
+      //không thể ngừng kích hoạt tài khoản ban giám hiệu của mình
+      if (req.user.id === user.id && user.role === "BAN_GIAM_HIEU") {
+        throw new Error(
+          "Không thể ngừng kích hoạt tài khoản người dùng của mình"
+        );
       }
 
       await userService.inactivateUser(userId);

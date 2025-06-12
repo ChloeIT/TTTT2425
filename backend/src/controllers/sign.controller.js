@@ -119,7 +119,7 @@ const signController = {
 
       if (!password) {
         fs.unlinkSync(req.file.path);
-        return res.status(400).json({ error: "Password là bắt buộc" });
+        return res.status(400).json({ error: "Mật khẩu là bắt buộc" });
       }
 
       const savedSignature = await signService.saveSignature({

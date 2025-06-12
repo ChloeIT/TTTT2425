@@ -123,8 +123,20 @@ const examService = {
   },
 
   approveExam: async (id, rawPassword, userId) => {
+    const existingExam = await prisma.exam.findUnique({
+      where: { id },
+    });
+  
+    if (!existingExam) {
+      throw new Error("Không tìm thấy đề thi");
+    }
+  
+    if (existingExam.status !== "DANG_CHO") {
+      throw new Error("Đề thi không hợp lệ");
+    }
+  
     const encryptedPassword = encrypt(rawPassword);
-
+  
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
@@ -133,15 +145,27 @@ const examService = {
         updatedAt: new Date(),
       },
     });
+  
+    notificationService.notifyApproveExam(updatedExam.createdById, updatedExam.title);
+  
+    const { password, ...examWithoutPassword } = updatedExam;
 
-    const title = updatedExam.title;
-
-    // Tạo thông báo notification
-    notificationService.notifyApproveExam(updatedExam.createdById, title);
-
-    return updatedExam;
-  },
+    return examWithoutPassword;
+  }
+,  
   rejectExam: async (id, message, userId) => {
+    const existingExam = await prisma.exam.findUnique({
+      where: { id },
+    });
+
+    if (!existingExam) {
+      throw new Error("Không tìm thấy đề thi");
+    }
+
+    if (existingExam.status !== "DANG_CHO") {
+      throw new Error("Đề thi không hợp lệ");
+    }
+
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
@@ -150,28 +174,12 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    // const title = updatedExam.title;
-    // const userId = updatedExam.createdById;
 
-    // await prisma.notification.create({
-    //   data: {
-    //     userId,
-    //     message: `Lý do từ chối: ${message}`,
-    //     isRead: false,
-    //     createdAt: new Date(),
-    //     title: `Đề thi ${title} bị từ chối`,
-    //   },
-    // });
+    const { password, ...examWithoutPassword } = updatedExam;
 
-    // Gửi thông báo và email bằng notificationService
-    await notificationService.notifyRejectExam(
-      updatedExam.createdById,
-      updatedExam.title,
-      message
-    );
-
-    return updatedExam;
-  },
+    return examWithoutPassword;
+  }
+  ,
 
   verifyPassword: async (examId, inputPassword) => {
     const exam = await prisma.exam.findUnique({
@@ -183,7 +191,29 @@ const examService = {
     return decryptedPassword === inputPassword;
   },
 
-  openExam: async (id, userId) => {
+  changeStatus: async (id, changeStatus) => {
+    console.log(id)
+    console.log(changeStatus)
+    // Cập nhật trạng thái sang DA_THI
+    const updatedExam = await prisma.exam.update({
+      where: { id },
+      data: {
+        status: changeStatus,
+        updatedAt: new Date(),
+      },
+    });
+    notificationService.notifyOpenExam(updatedExam.createdById, updatedExam.title)
+
+    // Tạo thông báo mở đề
+    // notificationService.notifyOpenExam(userId, exam.title);
+
+    return {
+      id: updatedExam.id,
+      title: updatedExam.title,
+      questionFile: exam.questionFile,
+    };
+  },
+    openExam: async (id, userId) => {
     // Kiểm tra trạng thái phải là DA_DUYET
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || exam.status !== "DA_DUYET") {

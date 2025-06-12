@@ -69,10 +69,10 @@ export const ResetPasswordDialog = ({ isOpen, setOpen }) => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mật khẩu củ</FormLabel>
+                  <FormLabel>Mật khẩu cũ</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={"Nhập mật khẩu củ"}
+                      placeholder={"Nhập mật khẩu cũ"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}

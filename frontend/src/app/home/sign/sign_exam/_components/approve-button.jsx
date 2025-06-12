@@ -92,7 +92,11 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
             onChange={(e) => setPassword(e.target.value)}
             className="mb-4"
             autoFocus
+<<<<<<< HEAD
             autoComplete="new-password"
+=======
+             autoComplete="new-password"
+>>>>>>> 1ae891bdeccc0816a4e1b2c01e34940f861b53ce
           />
 
           <DialogFooter className="flex justify-end gap-2">

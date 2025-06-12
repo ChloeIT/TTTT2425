@@ -38,6 +38,36 @@ const secretaryService = {
 
     return examsWithDecryptedPasswords;
   },
+  // getExamsWithEncryptedPasswords: async () => {
+  //   const exams = await prisma.exam.findMany({
+  //     where: {
+  //       status: "DA_DUYET",
+  //       password: {
+  //         not: null,
+  //       },
+  //     },
+  //     include: {
+  //       createdBy: {
+  //         select: {
+  //           fullName: true,
+  //           email: true,
+  //           department: true,
+  //           username: true,
+  //         },
+  //       },
+  //     },
+  //     orderBy: {
+  //       createdAt: "desc",
+  //     },
+  //   });
+
+  //   const examsWithEncryptedPasswords = exams.map((exam) => ({
+  //     ...exam,
+  //     encryptedPassword: exam.password,
+  //   }));
+
+  //   return examsWithEncryptedPasswords;
+  // },
 
   getAllUserEmails: async () => {
     const users = await prisma.user.findMany({

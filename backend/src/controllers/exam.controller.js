@@ -11,7 +11,7 @@ const examController = {
       if (!req.files.questionFile || !req.files.answerFile) {
         return res
           .status(400)
-          .json({ error: "Missing question or answer file" });
+          .json({ error: "Thiếu file đề thi hoặc file đáp án" });
       }
 
       const questionFile = req.files.questionFile[0].path;
@@ -64,7 +64,8 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const exam = await examService.getExamById(id);
-      if (!exam) return res.status(404).json({ error: "Exam not found" });
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
       res.status(200).json({ data: exam });
     } catch (error) {
       next(error);
@@ -75,7 +76,8 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const exam = await examService.getExamById(id);
-      if (!exam) return res.status(404).json({ error: "Exam not found" });
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
 
       // Improved public_id extraction with extension
       const extractPublicId = (url) => {
@@ -146,15 +148,6 @@ const examController = {
       const id = Number(req.params.id);
       const userId = req.user.id;
       const { password } = req.body;
-      if (!password || password.length < 6) {
-        return res
-          .status(400)
-          .json({ error: "Password must be at least 6 characters" });
-      }
-
-      if (!["BAN_GIAM_HIEU", "TRUONG_KHOA"].includes(req.user.role)) {
-        return res.status(403).json({ error: "Forbidden" });
-      }
 
       const updatedExam = await examService.approveExam(id, password, userId);
       res.status(200).json({ data: updatedExam });
@@ -168,14 +161,6 @@ const examController = {
       const id = Number(req.params.id);
       const { message } = req.body;
       const userId = req.user.id;
-
-      if (!message || message.trim() === "") {
-        return res.status(400).json({ error: "Ghi chú không được bỏ trống" });
-      }
-
-      if (!["BAN_GIAM_HIEU"].includes(req.user.role)) {
-        return res.status(403).json({ error: "Forbidden" });
-      }
 
       const updatedExam = await examService.rejectExam(id, message, userId);
       res.status(200).json({ data: updatedExam });
@@ -191,17 +176,38 @@ const examController = {
       const { password } = req.body;
 
       if (!password) {
-        return res
-          .status(400)
-          .json({ error: "Password is required to open exam" });
+        return res.status(400).json({ error: "Cần có mật khẩu để mở đề thi" });
       }
 
       const isPasswordValid = await examService.verifyPassword(id, password);
       if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid password" });
+        return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
       }
 
       const updatedExam = await examService.openExam(id, userId);
+      res.status(200).json({ data: updatedExam });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  changeStatusExam: async (req, res, next) => {
+    try {
+      const examId = Number(req.params.examId);
+      const { changeStatus } = req.body;
+
+      // if (!password) {
+      //   return res
+      //     .status(400)
+      //     .json({ error: "Password is required to open exam" });
+      // }
+
+      // const isPasswordValid = await examService.verifyPassword(id, password);
+      // if (!isPasswordValid) {
+      //   return res.status(401).json({ error: "Invalid password" });
+      // }
+
+      const updatedExam = await examService.changeStatus(examId, changeStatus);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -217,7 +223,7 @@ const examController = {
         return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
       }
       if (!examId) {
-        return res.status(400).json({ error: "Bài kiểm tra không tồn tại" });
+        return res.status(400).json({ error: "Đề thi không tồn tại" });
       }
 
       const isValid = await examService.verifyPassword(examId, password);
@@ -274,7 +280,7 @@ const examController = {
     try {
       const id = Number(req.params.id);
       await examService.deleteExam(id);
-      res.status(200).json({ message: "Exam deleted successfully" });
+      res.status(200).json({ message: "Đã xóa đề thi thành công" });
     } catch (error) {
       next(error);
     }

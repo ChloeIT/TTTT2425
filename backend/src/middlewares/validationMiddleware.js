@@ -46,7 +46,7 @@ function validateExam(req, res, next) {
   }
 
   if (!req.files || !req.files.questionFile || !req.files.answerFile) {
-    return res.status(400).json({ error: "Missing question or answer file" });
+    return res.status(400).json({ error: "Thiếu flie đề thi hoặc file đáp án" });
   }
 
   next();

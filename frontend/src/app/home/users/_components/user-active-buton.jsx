@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAction } from "@/hooks/use-action";
 
-export const UserActiveButton = ({ data }) => {
+export const UserActiveButton = ({ data, disabled }) => {
   const [isOpen, setOpen] = useState(false);
 
   const { action, isPending } = useAction();
@@ -54,7 +54,7 @@ export const UserActiveButton = ({ data }) => {
         <Button
           variant={"success"}
           size={"sm"}
-          disabled={isPending}
+          disabled={isPending || disabled}
           className="min-w-[120px]"
           onClick={() => setOpen(true)}
         >
@@ -64,7 +64,7 @@ export const UserActiveButton = ({ data }) => {
         <Button
           variant={"destructive"}
           size={"sm"}
-          disabled={isPending}
+          disabled={isPending || disabled}
           className="min-w-[120px]"
           onClick={() => setOpen(true)}
         >

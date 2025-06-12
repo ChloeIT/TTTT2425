@@ -55,23 +55,23 @@ export default function ExamTable({ exams, title }) {
       <Table className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
         <TableHeader>
           <TableRow>
-            <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
               Tên đề thi
             </TableHead>
-            <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray- dark:text-gray-200">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray- dark:text-gray-200">
               Nội dung
             </TableHead>
-            <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               Trạng thái
             </TableHead>
-            <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               Ngày tạo
             </TableHead>
-            <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               Ngày cập nhật
             </TableHead>
             {title === "Danh sách đề thi bị từ chối" && (
-              <TableHead className="dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+              <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                 Ghi chú
               </TableHead>
             )}

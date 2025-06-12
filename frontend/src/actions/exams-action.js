@@ -70,3 +70,30 @@ export const getSignedExamFiles = async (examId) => {
     return errorResponse(error);
   }
 };
+
+export const statusChanged = async (examId, changeStatus) => {
+  try {
+    const res = await instanceAPI.patch(
+      `/exams/${examId}/changeStatus`,
+      { changeStatus },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return {
+      ok: true,
+      success: true,
+      data: res.data.data,
+      message: "Duyệt đề thi thành công",
+    };
+  } catch (error) {
+    console.error("Lỗi approveExam:", error?.response?.data || error.message);
+    return {
+      ok: false,
+      message: error?.response?.data?.error || "Đã xảy ra lỗi khi duyệt đề thi",
+    };
+  }
+};

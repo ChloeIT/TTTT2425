@@ -87,6 +87,25 @@ examRouter.patch(
   examController.updateExamDocument
 );
 
-examRouter.delete("/:id", requireLogin, examController.deleteExam);
+examRouter.patch(
+  "/:id/document",
+  requireLogin,
+  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
+  archiveParser.fields([
+    { name: "questionFile", maxCount: 1 },
+    { name: "answerFile", maxCount: 1 },
+  ]),
+  // validateUploadExamDocument,
+  examController.updateExamDocument
+);
+
+examRouter.patch(
+  "/:examId/changeStatus",
+  requireLogin,
+  // validateData(openExamSchema),
+  examController.changeStatusExam
+);
+
+// examRouter.delete("/:id", requireLogin, examController.deleteExam);
 
 module.exports = examRouter;

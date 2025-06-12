@@ -13,15 +13,24 @@ const examController = {
           .json({ error: "Thiếu file đề thi hoặc file đáp án" });
       }
 
-      const questionFile = req.files.questionFile[0].path;
-      const answerFile = req.files.answerFile[0].path;
+      const questionFile = req.files.questionFile[0];
+      const answerFile = req.files.answerFile[0];
+
+      // Kiểm tra đuôi file
+      const isPdf = (file) =>
+        file.mimetype === "application/pdf" ||
+        file.originalname.endsWith(".pdf");
+
+      if (!isPdf(questionFile) || !isPdf(answerFile)) {
+        throw new Error("Chỉ chấp nhận file PDF");
+      }
 
       const exam = await examService.createExam({
         title,
         status: "DANG_CHO",
         createdById,
-        questionFile,
-        answerFile,
+        questionFile: questionFile.path,
+        answerFile: answerFile.path,
       });
 
       // Log exam vừa tạo
@@ -62,7 +71,8 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const exam = await examService.getExamById(id);
-      if (!exam) return res.status(404).json({ error: "Không tìm thấy đề thi" });
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
       res.status(200).json({ data: exam });
     } catch (error) {
       next(error);
@@ -73,7 +83,8 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const exam = await examService.getExamById(id);
-      if (!exam) return res.status(404).json({ error: "Không tìm thấy đề thi" });
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
 
       // Improved public_id extraction with extension
       const extractPublicId = (url) => {
@@ -156,9 +167,9 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const { message } = req.body;
-      const userId = req.user.id; 
+      const userId = req.user.id;
 
-      const updatedExam = await examService.rejectExam(id, message,userId);
+      const updatedExam = await examService.rejectExam(id, message, userId);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -172,9 +183,7 @@ const examController = {
       const { password } = req.body;
 
       if (!password) {
-        return res
-          .status(400)
-          .json({ error: "Cần có mật khẩu để mở đề thi" });
+        return res.status(400).json({ error: "Cần có mật khẩu để mở đề thi" });
       }
 
       const isPasswordValid = await examService.verifyPassword(id, password);
@@ -191,8 +200,8 @@ const examController = {
 
   changeStatusExam: async (req, res, next) => {
     try {
-      const examId  = Number(req.params.examId);
-      const {changeStatus} = req.body;
+      const examId = Number(req.params.examId);
+      const { changeStatus } = req.body;
 
       // if (!password) {
       //   return res
@@ -213,35 +222,34 @@ const examController = {
   },
 
   verifyExamPassword: async (req, res) => {
-  try {
-    const examId = Number(req.body.examId);
-    const password = req.body.password;
+    try {
+      const examId = Number(req.body.examId);
+      const password = req.body.password;
 
-    if (!password) {
-    return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
-  }
-    if (!examId) {
-      return res.status(400).json({ error: "Đề thi không tồn tại" });
+      if (!password) {
+        return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
+      }
+      if (!examId) {
+        return res.status(400).json({ error: "Đề thi không tồn tại" });
+      }
+
+      const isValid = await examService.verifyPassword(examId, password);
+      if (!isValid) {
+        return res.status(401).json({ error: "Mật khẩu không đúng" });
+      }
+
+      // Lấy URL đề thi sau khi xác thực đúng
+      const exam = await examService.getExamById(examId);
+
+      return res.json({
+        success: true,
+        fileUrl: exam.questionFile,
+      });
+    } catch (error) {
+      console.error("Lỗi xác thực mật khẩu:", error);
+      return res.status(500).json({ error: "Lỗi hệ thống" });
     }
-
-    const isValid = await examService.verifyPassword(examId, password);
-    if (!isValid) {
-      return res.status(401).json({ error: "Mật khẩu không đúng" });
-    }
-
-    // Lấy URL đề thi sau khi xác thực đúng
-    const exam = await examService.getExamById(examId);
-
-    return res.json({
-      success: true,
-      fileUrl: exam.questionFile,
-    });
-  } catch (error) {
-    console.error("Lỗi xác thực mật khẩu:", error);
-    return res.status(500).json({ error: "Lỗi hệ thống" });
-  }
-},
-
+  },
 
   deleteExam: async (req, res, next) => {
     try {

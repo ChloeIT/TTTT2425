@@ -12,6 +12,7 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full max-w-sm"
+        autoComplete="off"
       />
     </div>
   );

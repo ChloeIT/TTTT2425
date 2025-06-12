@@ -1,5 +1,6 @@
 const examService = require("../services/exam.service");
 const { cloudinary } = require("../libs/cloudinary");
+const { cloudinary: cloudinaryArchive } = require("../libs/cloudinary_archive");
 
 const examController = {
   createExam: async (req, res, next) => {
@@ -41,7 +42,8 @@ const examController = {
 
   getAllExams: async (req, res, next) => {
     try {
-      const exams = await examService.getAllExams();
+      const { status } = req.query;
+      const exams = await examService.getAllExams({ status });
       res.status(200).json({ data: exams });
     } catch (error) {
       next(error);
@@ -165,7 +167,7 @@ const examController = {
     try {
       const id = Number(req.params.id);
       const { message } = req.body;
-      const userId = req.user.id; 
+      const userId = req.user.id;
 
       if (!message || message.trim() === "") {
         return res.status(400).json({ error: "Ghi chú không được bỏ trống" });
@@ -175,7 +177,7 @@ const examController = {
         return res.status(403).json({ error: "Forbidden" });
       }
 
-      const updatedExam = await examService.rejectExam(id, message,userId);
+      const updatedExam = await examService.rejectExam(id, message, userId);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -207,35 +209,66 @@ const examController = {
   },
 
   verifyExamPassword: async (req, res) => {
-  try {
-    const examId = Number(req.body.examId);
-    const password = req.body.password;
+    try {
+      const examId = Number(req.body.examId);
+      const password = req.body.password;
 
-    if (!password) {
-    return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
-  }
-    if (!examId) {
-      return res.status(400).json({ error: "Bài kiểm tra không tồn tại" });
+      if (!password) {
+        return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
+      }
+      if (!examId) {
+        return res.status(400).json({ error: "Bài kiểm tra không tồn tại" });
+      }
+
+      const isValid = await examService.verifyPassword(examId, password);
+      if (!isValid) {
+        return res.status(401).json({ error: "Mật khẩu không đúng" });
+      }
+
+      // Lấy URL đề thi sau khi xác thực đúng
+      const exam = await examService.getExamById(examId);
+
+      return res.json({
+        success: true,
+        fileUrl: exam.questionFile,
+      });
+    } catch (error) {
+      console.error("Lỗi xác thực mật khẩu:", error);
+      return res.status(500).json({ error: "Lỗi hệ thống" });
     }
+  },
 
-    const isValid = await examService.verifyPassword(examId, password);
-    if (!isValid) {
-      return res.status(401).json({ error: "Mật khẩu không đúng" });
+  updateExamDocument: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const exam = await examService.getExamById(id);
+      if (!exam) return res.status(404).json({ error: "Exam not found" });
+
+      if (!req.files.questionFile || !req.files.answerFile) {
+        return res
+          .status(400)
+          .json({ error: "Missing question or answer file" });
+      }
+
+      const questionFile = req.files.questionFile[0].path;
+      const answerFile = req.files.answerFile[0].path;
+
+      const updatedExam = await examService.updateExamDocument(id, {
+        questionFile,
+        answerFile,
+      });
+
+      return res.status(200).json({ ok: true, data: updatedExam });
+    } catch (error) {
+      console.error("Error in updateExamDocument:", error);
+      if (error.message === "Chỉ chấp nhận file PDF") {
+        return res.status(400).json({ ok: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ ok: false, error: "Lỗi hệ thống, vui lòng thử lại sau" });
     }
-
-    // Lấy URL đề thi sau khi xác thực đúng
-    const exam = await examService.getExamById(examId);
-
-    return res.json({
-      success: true,
-      fileUrl: exam.questionFile,
-    });
-  } catch (error) {
-    console.error("Lỗi xác thực mật khẩu:", error);
-    return res.status(500).json({ error: "Lỗi hệ thống" });
-  }
-},
-
+  },
 
   deleteExam: async (req, res, next) => {
     try {

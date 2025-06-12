@@ -4,15 +4,18 @@ const requireLogin = require("../middlewares/authMiddleware");
 const {
   validateData,
   validateExam,
+  validateUploadExamDocument,
 } = require("../middlewares/validationMiddleware");
 const permitRoles = require("../middlewares/roleMiddleware");
-const { parser } = require("../libs/cloudinary");
+const { parser: examParser } = require("../libs/cloudinary");
+const { parser: archiveParser } = require("../libs/cloudinary_archive");
 
 const {
   createExamSchema,
   approveExamSchema,
   rejectExamSchema,
   openExamSchema,
+  updateExamDocumentSchema,
 } = require("../schemas/exam.schema");
 
 const examRouter = Router();
@@ -20,7 +23,8 @@ const examRouter = Router();
 examRouter.post(
   "/",
   requireLogin,
-  parser.fields([
+  permitRoles("TRUONG_KHOA", "GIANG_VIEN_RA_DE"),
+  examParser.fields([
     { name: "questionFile", maxCount: 1 },
     { name: "answerFile", maxCount: 1 },
   ]),
@@ -46,9 +50,7 @@ examRouter.get(
   examController.getSignedExamFiles
 );
 
-
 examRouter.post("/verify-password", examController.verifyExamPassword);
-
 
 examRouter.patch(
   "/:id/approve",
@@ -71,6 +73,18 @@ examRouter.patch(
   requireLogin,
   validateData(openExamSchema),
   examController.openExam
+);
+
+examRouter.patch(
+  "/:id/document",
+  requireLogin,
+  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
+  archiveParser.fields([
+    { name: "questionFile", maxCount: 1 },
+    { name: "answerFile", maxCount: 1 },
+  ]),
+  // validateUploadExamDocument,
+  examController.updateExamDocument
 );
 
 examRouter.delete("/:id", requireLogin, examController.deleteExam);

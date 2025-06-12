@@ -10,67 +10,63 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useExamUpload } from "@/hooks/use-exam-upload";
+import { useExamDocumentUpload } from "@/hooks/use-document-upload";
 import toast from "react-hot-toast";
 
-export default function ExamUploadModal({ onUploadSuccess }) {
+export default function UploadExamButton({
+  exam,
+  pendingUploadExam,
+  setPendingUploadExam,
+}) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
   const [questionFile, setQuestionFile] = useState(null);
   const [answerFile, setAnswerFile] = useState(null);
-  const { uploadExam, loading } = useExamUpload();
+  const { uploadDocument, loading } = useExamDocumentUpload(exam.id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !questionFile || !answerFile) {
-      toast.error("Vui lòng nhập đủ thông tin");
+    if (!questionFile || !answerFile) {
+      toast.error("Vui lòng chọn cả file đề thi và đáp án");
       return;
     }
 
-    const success = await uploadExam(title, questionFile, answerFile);
+    // Client-side PDF validation
+    const isPdfQuestion = questionFile.type === "application/pdf";
+    const isPdfAnswer = answerFile.type === "application/pdf";
+    if (!isPdfQuestion || !isPdfAnswer) {
+      toast.error("Chỉ chấp nhận file PDF");
+      return;
+    }
+
+    const success = await uploadDocument(questionFile, answerFile);
     if (success) {
-      setTitle("");
       setQuestionFile(null);
       setAnswerFile(null);
       setOpen(false);
       document.getElementById("questionFile").value = "";
       document.getElementById("answerFile").value = "";
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
+      if (setPendingUploadExam) setPendingUploadExam(null);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="blue">Đăng tải đề thi mới</Button>
+        <Button
+          className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+          disabled={loading}
+        >
+          Cập nhật tài liệu
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <DialogHeader>
-          <DialogTitle>Đăng đề thi mới</DialogTitle>
+          <DialogTitle>Cập nhật tài liệu cho {exam.title}</DialogTitle>
           <DialogDescription>
-            Nhập tên và tải lên file đề thi, đáp án
+            Tải lên file đề thi và đáp án (chỉ chấp nhận PDF)
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="title"
-              className="block font-medium mb-1 dark:text-gray-200"
-            >
-              Tên đề thi
-            </label>
-            <Input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={loading}
-              required
-              className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-          </div>
           <div>
             <label
               htmlFor="questionFile"
@@ -107,7 +103,7 @@ export default function ExamUploadModal({ onUploadSuccess }) {
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Đang gửi..." : "Đăng đề thi"}
+              {loading ? "Đang tải..." : "Tải lên"}
             </Button>
           </DialogFooter>
         </form>

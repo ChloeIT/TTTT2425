@@ -83,7 +83,10 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
       {/* Thanh tìm kiếm + Bộ lọc tháng, năm, phòng ban */}
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1 min-w-[250px]">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel
@@ -144,7 +147,9 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
           {filteredExams.map((exam) => (
             <TableRow key={exam.id} className="min-h-[100px]">
               {/* Thêm class text-gray-500 (hoặc text-gray-400) cho các TableCell dữ liệu */}
-              <TableCell  className="text-center py-4 text-gray-500 dark:text-gray-400">{exam.title}</TableCell>
+              <TableCell className="text-center py-4 text-gray-500 dark:text-gray-400">
+                {exam.title}
+              </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
                 <Badge
                   className={
@@ -180,16 +185,22 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
                 <div className="flex flex-wrap justify-center items-center gap-2">
                   <Button
-                    variant={selectedExam?.id === exam.id ? "default" : "outline"}
+                    variant={
+                      selectedExam?.id === exam.id ? "default" : "outline"
+                    }
                     onClick={() =>
-                      setSelectedExam(selectedExam?.id === exam.id ? null : exam)
+                      setSelectedExam(
+                        selectedExam?.id === exam.id ? null : exam
+                      )
                     }
                   >
                     {selectedExam?.id === exam.id ? "Đóng đề thi" : "Đề thi"}
                   </Button>
 
                   <Button
-                    variant={selectedAnswer?.id === exam.id ? "default" : "outline"}
+                    variant={
+                      selectedAnswer?.id === exam.id ? "default" : "outline"
+                    }
                     onClick={() =>
                       setSelectedAnswer(
                         selectedAnswer?.id === exam.id ? null : exam
@@ -232,7 +243,10 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
       <Exam exam={selectedExam} onClose={() => setSelectedExam(null)} />
 
       {/* Modal xem đáp án */}
-      <ExamAnswer exam={selectedAnswer} onClose={() => setSelectedAnswer(null)} />
+      <ExamAnswer
+        exam={selectedAnswer}
+        onClose={() => setSelectedAnswer(null)}
+      />
     </>
   );
 };

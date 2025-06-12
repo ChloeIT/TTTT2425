@@ -16,7 +16,6 @@ import { approveExam } from "@/actions/sign-action";
 import { approveExamSchema } from "@/schemas/sign.schema";
 import { useRouter } from "next/navigation";
 
-
 const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -29,7 +28,8 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
       const approveValidation = approveExamSchema.safeParse({ password });
       if (!approveValidation.success) {
         const errors = approveValidation.error.format();
-        const errorMessage = errors.password?._errors?.[0] || "Mật khẩu không hợp lệ";
+        const errorMessage =
+          errors.password?._errors?.[0] || "Mật khẩu không hợp lệ";
         toast.error(errorMessage);
         setLoading(false);
         return;
@@ -42,12 +42,12 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
         toast.success("Đã duyệt đề thi thành công!");
         setTimeout(() => {
           router.refresh();
-        }, 1500); 
-        
+        }, 1500);
       } else {
-        toast.error("Duyệt thất bại: " + (approveResult?.message || "Không rõ lỗi"));
+        toast.error(
+          "Duyệt thất bại: " + (approveResult?.message || "Không rõ lỗi")
+        );
       }
-      
     } catch (err) {
       console.error("Lỗi khi xử lý duyệt:", err);
       toast.error("Có lỗi xảy ra khi duyệt đề thi. Vui lòng thử lại.");
@@ -79,16 +79,20 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
       >
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="text-center">Xác nhận duyệt đề thi</DialogTitle>
+            <DialogTitle className="text-center">
+              Xác nhận duyệt đề thi
+            </DialogTitle>
           </DialogHeader>
 
           <Input
+            name="approve-exam-password"
             type="password"
             placeholder="Nhập mật khẩu cho đề thi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mb-4"
             autoFocus
+            autoComplete="new-password"
           />
 
           <DialogFooter className="flex justify-end gap-2">

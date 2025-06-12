@@ -55,8 +55,9 @@ const examService = {
     });
   },
 
-  getAllExams: async () => {
+  getAllExams: async ({ status } = {}) => {
     return await prisma.exam.findMany({
+      where: status ? { status } : {},
       include: {
         createdBy: {
           select: {
@@ -66,6 +67,7 @@ const examService = {
             department: true,
           },
         },
+        document: true, // Include the document relation
       },
       orderBy: {
         createdAt: "desc",
@@ -217,6 +219,69 @@ const examService = {
       title: updatedExam.title,
       questionFile: exam.questionFile,
     };
+  },
+
+  updateExamDocument: async (id, { questionFile, answerFile }) => {
+    // Extract base URLs
+    const extractBaseUrl = (signedUrl) => {
+      try {
+        const url = new URL(signedUrl);
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+        const pathParts = url.pathname.split("/");
+        let adjustedPathParts = pathParts.filter((part) => part);
+        if (adjustedPathParts[0] === cloudName) {
+          adjustedPathParts = adjustedPathParts.slice(1);
+        }
+        adjustedPathParts = adjustedPathParts.filter(
+          (part) =>
+            !part.startsWith("s--") &&
+            !part.startsWith("v") &&
+            part !== "upload" &&
+            part !== "raw"
+        );
+        const publicIdPath = adjustedPathParts.join("/");
+        return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicIdPath}`;
+      } catch (error) {
+        throw new Error("Invalid URL format");
+      }
+    };
+
+    const baseQuestionFile = extractBaseUrl(questionFile);
+    const baseAnswerFile = extractBaseUrl(answerFile);
+
+    // Create or update document and link to exam
+    const updatedExam = await prisma.$transaction(async (tx) => {
+      // Check if document exists and update, or create new
+      let document = await tx.document.findUnique({ where: { examId: id } });
+      if (document) {
+        document = await tx.document.update({
+          where: { examId: id },
+          data: {
+            questionFile: baseQuestionFile,
+            answerFile: baseAnswerFile,
+            createdAt: new Date(),
+          },
+        });
+      } else {
+        document = await tx.document.create({
+          data: {
+            questionFile: baseQuestionFile,
+            answerFile: baseAnswerFile,
+            examId: id,
+            createdAt: new Date(),
+          },
+        });
+      }
+
+      // Link document to exam
+      return await tx.exam.update({
+        where: { id },
+        data: { document: { connect: { id: document.id } } },
+        include: { document: true },
+      });
+    });
+
+    return updatedExam;
   },
 };
 

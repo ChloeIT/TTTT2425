@@ -1,4 +1,3 @@
-
 const prisma = require("../libs/prisma");
 const fs = require("fs");
 const path = require("path");
@@ -11,12 +10,9 @@ const { cloudinary } = require("../libs/cloudinary_signed");
 const outputDir = path.join(__dirname, "../uploads/file_approved");
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-
-
 const signService = {
   saveSignature: async ({ userId, filePath, password }) => {
     try {
-  
       const existingSignature = await prisma.signature.findUnique({
         where: { userId },
       });
@@ -24,7 +20,7 @@ const signService = {
       if (existingSignature) {
         throw new Error("Người dùng đã có chữ ký rồi");
       }
-   
+
       const fileName = path.basename(filePath);
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -43,14 +39,18 @@ const signService = {
     }
   },
 
-  insertSignature: async (pdfPath, signaturePath, signatureOriginalName,exam_id,fileType) => {
+  insertSignature: async (
+    pdfPath,
+    signaturePath,
+    signatureOriginalName,
+    exam_id,
+    fileType
+  ) => {
     const pdfBytes = fs.readFileSync(pdfPath);
     const imageBytes = fs.readFileSync(signaturePath);
     const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
 
     const data = new Uint8Array(pdfBytes);
-
-   
 
     const loadingTask = pdfjsLib.getDocument({
       data,
@@ -59,7 +59,7 @@ const signService = {
         "../../node_modules/pdfjs-dist/standard_fonts/"
       ),
     });
-    
+
     const pdf = await loadingTask.promise;
     const page = await pdf.getPage(1);
     const textContent = await page.getTextContent();
@@ -145,14 +145,19 @@ const signService = {
         });
       }
     }
-    
+
     return {
       localPath: `/uploads/file_approved/${filename}`, // local
       cloudinaryUrl: cloudinaryResult.secure_url, // URL file trên Cloudinary
     };
   },
 
-  insertSignatureToDocx: async (docxPath, signaturePath = null,exam_id,fileType) => {
+  insertSignatureToDocx: async (
+    docxPath,
+    signaturePath = null,
+    exam_id,
+    fileType
+  ) => {
     const tempFilePath = docxPath;
     try {
       const content = fs.readFileSync(docxPath, "binary");
@@ -294,7 +299,7 @@ const signService = {
           });
         }
       }
-      
+
       return {
         localPath: `/uploads/file_approved/${filename}`,
         cloudinaryUrl: cloudinaryResult.secure_url,

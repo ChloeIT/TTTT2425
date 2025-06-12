@@ -40,7 +40,7 @@ const ExamList = ({ exams }) => {
     DANG_CHO: "Đang chờ",
     DA_DUYET: "Đã duyệt",
     TU_CHOI: "Đã từ chối",
-    DA_THI: "Đã thi"
+    DA_THI: "Đã thi",
   };
 
   const departmentMap = {
@@ -71,20 +71,32 @@ const ExamList = ({ exams }) => {
       (exam) =>
         !selectedDepartment || exam.createdBy?.department === selectedDepartment
     );
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [searchQuery, filterStatus, selectedMonth, selectedYear, selectedDepartment]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    filterStatus,
+    selectedMonth,
+    selectedYear,
+    selectedDepartment,
+  ]);
   // === Phân trang trên dữ liệu đã lọc ===
   const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentExams = filteredExams.slice(startIndex, startIndex + itemsPerPage);
-    
+  const currentExams = filteredExams.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
   return (
     <>
       {/* Thanh tìm kiếm + Bộ lọc */}
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1 min-w-[250px]">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel
@@ -122,13 +134,23 @@ const ExamList = ({ exams }) => {
       <Table>
         <TableHeader>
           <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-            <TableHead className="min-w-[100px] text-center">Tên đề thi</TableHead>
-            <TableHead className="min-w-[80px] text-center">Trạng thái</TableHead>
-            <TableHead className="min-w-[130px] text-center">Người soạn đề</TableHead>
+            <TableHead className="min-w-[100px] text-center">
+              Tên đề thi
+            </TableHead>
+            <TableHead className="min-w-[80px] text-center">
+              Trạng thái
+            </TableHead>
+            <TableHead className="min-w-[130px] text-center">
+              Người soạn đề
+            </TableHead>
             {/* <TableHead className="text-center">Email người tạo</TableHead> */}
-            <TableHead className="min-w-[130px] text-center">Phòng ban</TableHead>
+            <TableHead className="min-w-[130px] text-center">
+              Phòng ban
+            </TableHead>
             <TableHead className="text-center">Ngày gửi</TableHead>
-            <TableHead className="min-w-[120px] text-center">Ngày xác nhận</TableHead>
+            <TableHead className="min-w-[120px] text-center">
+              Ngày xác nhận
+            </TableHead>
             <TableHead className="text-center">Nội dung</TableHead>
             <TableHead className="text-center">Xác nhận</TableHead>
           </TableRow>
@@ -137,14 +159,18 @@ const ExamList = ({ exams }) => {
         <TableBody className="dark:border-gray-700">
           {currentExams.map((exam) => (
             <TableRow key={exam.id} className="min-h-[100px]">
-              <TableCell className="text-left py-4 text-gray-500 dark:text-gray-400">{exam.title}</TableCell>
+              <TableCell className="text-left py-4 text-gray-500 dark:text-gray-400">
+                {exam.title}
+              </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
                 <Badge
-                  className={{
-                    DANG_CHO: "bg-yellow-500 text-white",
-                    DA_DUYET: "bg-green-500 text-white",
-                    TU_CHOI: "bg-red-500 text-white",
-                  }[exam.status] || "bg-gray-400 text-white"}
+                  className={
+                    {
+                      DANG_CHO: "bg-yellow-500 text-white",
+                      DA_DUYET: "bg-green-500 text-white",
+                      TU_CHOI: "bg-red-500 text-white",
+                    }[exam.status] || "bg-gray-400 text-white"
+                  }
                 >
                   {statusMap[exam.status] || exam.status}
                 </Badge>
@@ -156,25 +182,43 @@ const ExamList = ({ exams }) => {
                 {exam.createdBy?.email || "Không rõ"}
               </TableCell> */}
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {departmentMap[exam.createdBy?.department] || exam.createdBy?.department || "Không rõ"}
+                {departmentMap[exam.createdBy?.department] ||
+                  exam.createdBy?.department ||
+                  "Không rõ"}
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.createdAt ? format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm") : ""}
+                {exam.createdAt
+                  ? format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm")
+                  : ""}
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.updatedAt ? format(new Date(exam.updatedAt), "dd/MM/yyyy HH:mm") : ""}
+                {exam.updatedAt
+                  ? format(new Date(exam.updatedAt), "dd/MM/yyyy HH:mm")
+                  : ""}
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
                 <div className="flex flex-wrap justify-center items-center gap-2">
                   <Button
-                    variant={selectedExam?.id === exam.id ? "default" : "outline"}
-                    onClick={() => setSelectedExam(selectedExam?.id === exam.id ? null : exam)}
+                    variant={
+                      selectedExam?.id === exam.id ? "default" : "outline"
+                    }
+                    onClick={() =>
+                      setSelectedExam(
+                        selectedExam?.id === exam.id ? null : exam
+                      )
+                    }
                   >
                     {selectedExam?.id === exam.id ? "Đóng đề thi" : "Đề thi"}
                   </Button>
                   <Button
-                    variant={selectedAnswer?.id === exam.id ? "default" : "outline"}
-                    onClick={() => setSelectedAnswer(selectedAnswer?.id === exam.id ? null : exam)}
+                    variant={
+                      selectedAnswer?.id === exam.id ? "default" : "outline"
+                    }
+                    onClick={() =>
+                      setSelectedAnswer(
+                        selectedAnswer?.id === exam.id ? null : exam
+                      )
+                    }
                   >
                     {selectedAnswer?.id === exam.id ? "Đóng đáp án" : "Đáp án"}
                   </Button>
@@ -211,7 +255,10 @@ const ExamList = ({ exams }) => {
       {/* Modal xem đề thi */}
       <Exam exam={selectedExam} onClose={() => setSelectedExam(null)} />
       {/* Modal xem đáp án */}
-      <ExamAnswer exam={selectedAnswer} onClose={() => setSelectedAnswer(null)} />
+      <ExamAnswer
+        exam={selectedAnswer}
+        onClose={() => setSelectedAnswer(null)}
+      />
 
       {/* Dieu huong phan trang*/}
       <div className="flex justify-end items-center mt-4 gap-2">
@@ -222,13 +269,17 @@ const ExamList = ({ exams }) => {
         >
           Trang trước
         </Button>
-       <span>
-  {totalPages === 0 ? "Trang 0 / 0" : `Trang ${currentPage} / ${totalPages}`}
-</span>
+        <span>
+          {totalPages === 0
+            ? "Trang 0 / 0"
+            : `Trang ${currentPage} / ${totalPages}`}
+        </span>
 
         <Button
           variant="outline"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Trang sau

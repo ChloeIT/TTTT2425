@@ -11,8 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { getFile } from "@/actions/sign-action";
 
-export default function ExamAnswer({ exam, onClose, onApprove }) {
-  const [signedAnswerFile, setSignedAnswerFile] = useState(null);
+export default function ExamQuestion({ exam, onClose, onApprove }) {
+  const [signedQuestionFile, setSignedQuestionFile] = useState(null);
 
   useEffect(() => {
     const fetchSignedFile = async () => {
@@ -22,7 +22,7 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
           console.error("Lỗi khi lấy file:", res.message);
         } else {
           console.log("Đã lấy signed file:", res.data);
-          setSignedAnswerFile(res.data.questionFile);
+          setSignedQuestionFile(res.data.questionFile);
         }
       }
     };
@@ -40,8 +40,8 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
         </DialogHeader>
 
         <iframe
-          src={signedAnswerFile || exam?.questionFile}
-          title="Đề thi"
+          src={signedQuestionFile || exam?.questionFile}
+          title="Đề Thi"
           className="flex-grow border-0"
         />
 

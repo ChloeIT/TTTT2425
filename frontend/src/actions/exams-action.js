@@ -71,7 +71,6 @@ export const getSignedExamFiles = async (examId) => {
   }
 };
 
-
 export const statusChanged = async (examId, changeStatus) => {
   try {
     const res = await instanceAPI.patch(

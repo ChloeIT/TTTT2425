@@ -24,6 +24,7 @@ export const userRole = {
   TRUONG_KHOA: "Trưởng khoa",
   GIANG_VIEN_RA_DE: "Giảng viên ra đề",
   THU_KY: "Thư ký",
+  VAN_THU: "Văn thư",
   USER: "Giảng viên",
 };
 export const userSchema = {

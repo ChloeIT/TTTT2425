@@ -1,39 +1,44 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getExams } from "@/actions/sign-action";
+import { getExams } from "@/actions/archive-action";
 import ExamList from "./_components/exam-table";
 import { parseToNumber } from "@/lib/utils";
+import { cookies } from "next/headers";
 
 export async function generateMetadata() {
   return {
-    title: "Quản lý đề thi",
+    title: "Văn thư",
   };
 }
 
-const ExamPage = async ({ searchParams }) => {
+const ArchivePage = async ({ searchParams }) => {
   const { page, query } = await searchParams;
   const currentPage = parseToNumber(page, 1);
 
   const { data, totalPage } = await getExams({ page: currentPage, query });
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value || "";
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Danh sách Đề thi và Đáp án
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+          Trang văn thư
         </h1>
       </div>
       <Card>
         <CardHeader>
-          {/* <CardTitle> <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-        Danh sách đề thi
-      </h1></CardTitle> */}
-          {/* <CardDescription>Quản lý các đề thi trong hệ thống</CardDescription> */}
+          <CardTitle>
+            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              Danh sách đề đã thi
+            </h1>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ExamList
             exams={data}
             totalPage={totalPage}
             currentPage={currentPage}
+            token={token}
           />
         </CardContent>
       </Card>
@@ -41,4 +46,4 @@ const ExamPage = async ({ searchParams }) => {
   );
 };
 
-export default ExamPage;
+export default ArchivePage;

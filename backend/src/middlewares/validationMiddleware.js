@@ -1,5 +1,8 @@
 const { ZodError } = require("zod");
-const { createExamSchema } = require("../schemas/exam.schema");
+const {
+  createExamSchema,
+  updateExamDocumentSchema,
+} = require("../schemas/exam.schema");
 
 function validateData(schema) {
   return (req, res, next) => {

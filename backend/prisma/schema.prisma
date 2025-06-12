@@ -73,6 +73,7 @@ enum Role {
   TRUONG_KHOA
   GIANG_VIEN_RA_DE
   THU_KY
+  VAN_THU
   USER
 }
 

@@ -1,5 +1,6 @@
 const examService = require("../services/exam.service");
 const { cloudinary } = require("../libs/cloudinary");
+const { cloudinary: cloudinaryArchive } = require("../libs/cloudinary_archive");
 
 const examController = {
   createExam: async (req, res, next) => {
@@ -50,7 +51,8 @@ const examController = {
 
   getAllExams: async (req, res, next) => {
     try {
-      const exams = await examService.getAllExams();
+      const { status } = req.query;
+      const exams = await examService.getAllExams({ status });
       res.status(200).json({ data: exams });
     } catch (error) {
       next(error);
@@ -248,6 +250,38 @@ const examController = {
     } catch (error) {
       console.error("Lỗi xác thực mật khẩu:", error);
       return res.status(500).json({ error: "Lỗi hệ thống" });
+    }
+  },
+
+  updateExamDocument: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const exam = await examService.getExamById(id);
+      if (!exam) return res.status(404).json({ error: "Exam not found" });
+
+      if (!req.files.questionFile || !req.files.answerFile) {
+        return res
+          .status(400)
+          .json({ error: "Missing question or answer file" });
+      }
+
+      const questionFile = req.files.questionFile[0].path;
+      const answerFile = req.files.answerFile[0].path;
+
+      const updatedExam = await examService.updateExamDocument(id, {
+        questionFile,
+        answerFile,
+      });
+
+      return res.status(200).json({ ok: true, data: updatedExam });
+    } catch (error) {
+      console.error("Error in updateExamDocument:", error);
+      if (error.message === "Chỉ chấp nhận file PDF") {
+        return res.status(400).json({ ok: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ ok: false, error: "Lỗi hệ thống, vui lòng thử lại sau" });
     }
   },
 

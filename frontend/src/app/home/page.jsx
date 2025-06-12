@@ -8,6 +8,7 @@ const DashboardPage = () => {
     { title: "Soạn đề ", icon: "📘", link: "/home/examsUpload" },
     { title: "Duyệt đề ", icon: "📊", link: "/home/sign/sign_exam" },
     { title: "Đề thi", icon: "📄", link: "/home/exam" },
+    { title: "Văn thư", icon: "🗃️", link: "/home/archive" },
     { title: "Đáp án", icon: "📝", link: "/home/answer" },
   ];
 
@@ -19,7 +20,7 @@ const DashboardPage = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow flex items-center">
-        <div className="grid grid-cols-4 gap-6 p-8 max-w-6xl mx-auto w-full">
+        <div className="grid grid-cols-5 gap-6 p-8 max-w-6xl mx-auto w-full">
           {cards.map((card, index) => (
             <div
               key={index}

@@ -41,7 +41,7 @@ export default function ExamQuestion({ exam, onClose, onApprove }) {
 
         <iframe
           src={signedQuestionFile || exam?.questionFile}
-          title="Đáp án"
+          title="Đề Thi"
           className="flex-grow border-0"
         />
 

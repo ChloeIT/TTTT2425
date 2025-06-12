@@ -37,6 +37,26 @@ const examService = {
     const baseQuestionFile = extractBaseUrl(questionFile);
     const baseAnswerFile = extractBaseUrl(answerFile);
 
+    // Gửi thông báo 
+    const bghUsers = await prisma.user.findMany({
+      where: {
+        role: "BAN_GIAM_HIEU",
+      },
+    });
+
+    const titleNotify = `Thông báo đề thi ${title} đã được soạn`;
+    const messageNotify = `Đề thi "${title}" đã được gửi .`;
+
+    await Promise.all(
+      bghUsers.map((user) =>
+        notificationService.createNotificationAndSendMail({
+          userId: user.id,
+          title: titleNotify,
+          message: messageNotify,
+        })
+      )
+    );
+
     return await prisma.exam.create({
       data: {
         title,
@@ -126,17 +146,17 @@ const examService = {
     const existingExam = await prisma.exam.findUnique({
       where: { id },
     });
-  
+
     if (!existingExam) {
       throw new Error("Không tìm thấy đề thi");
     }
-  
+
     if (existingExam.status !== "DANG_CHO") {
       throw new Error("Đề thi không hợp lệ");
     }
-  
+
     const encryptedPassword = encrypt(rawPassword);
-  
+
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
@@ -145,14 +165,16 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-  
-    notificationService.notifyApproveExam(updatedExam.createdById, updatedExam.title);
-  
+
+    notificationService.notifyApproveExam(
+      updatedExam.createdById,
+      updatedExam.title
+    );
+
     const { password, ...examWithoutPassword } = updatedExam;
 
     return examWithoutPassword;
-  }
-,  
+  },
   rejectExam: async (id, message, userId) => {
     const existingExam = await prisma.exam.findUnique({
       where: { id },
@@ -178,9 +200,7 @@ const examService = {
     const { password, ...examWithoutPassword } = updatedExam;
 
     return examWithoutPassword;
-  }
-  ,
-
+  },
   verifyPassword: async (examId, inputPassword) => {
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
@@ -192,8 +212,8 @@ const examService = {
   },
 
   changeStatus: async (id, changeStatus) => {
-    console.log(id)
-    console.log(changeStatus)
+    console.log(id);
+    console.log(changeStatus);
     // Cập nhật trạng thái sang DA_THI
     const updatedExam = await prisma.exam.update({
       where: { id },
@@ -202,7 +222,10 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    notificationService.notifyOpenExam(updatedExam.createdById, updatedExam.title)
+    notificationService.notifyOpenExam(
+      updatedExam.createdById,
+      updatedExam.title
+    );
 
     // Tạo thông báo mở đề
     // notificationService.notifyOpenExam(userId, exam.title);

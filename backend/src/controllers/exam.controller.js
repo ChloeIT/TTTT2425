@@ -14,15 +14,24 @@ const examController = {
           .json({ error: "Thiếu file đề thi hoặc file đáp án" });
       }
 
-      const questionFile = req.files.questionFile[0].path;
-      const answerFile = req.files.answerFile[0].path;
+      const questionFile = req.files.questionFile[0];
+      const answerFile = req.files.answerFile[0];
+
+      // Kiểm tra đuôi file
+      const isPdf = (file) =>
+        file.mimetype === "application/pdf" ||
+        file.originalname.endsWith(".pdf");
+
+      if (!isPdf(questionFile) || !isPdf(answerFile)) {
+        throw new Error("Chỉ chấp nhận file PDF");
+      }
 
       const exam = await examService.createExam({
         title,
         status: "DANG_CHO",
         createdById,
-        questionFile,
-        answerFile,
+        questionFile: questionFile.path,
+        answerFile: answerFile.path,
       });
 
       // Log exam vừa tạo

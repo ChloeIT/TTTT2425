@@ -226,6 +226,31 @@ const examService = {
       updatedExam.title
     );
 
+    // Tạo thông báo mở đề
+    // notificationService.notifyOpenExam(userId, exam.title);
+
+    return {
+      id: updatedExam.id,
+      title: updatedExam.title,
+      questionFile: exam.questionFile,
+    };
+  },
+    openExam: async (id, userId) => {
+    // Kiểm tra trạng thái phải là DA_DUYET
+    const exam = await prisma.exam.findUnique({ where: { id } });
+    if (!exam || exam.status !== "DA_DUYET") {
+      throw new Error("Exam not approved or already opened");
+    }
+
+    // Cập nhật trạng thái sang DA_THI
+    const updatedExam = await prisma.exam.update({
+      where: { id },
+      data: {
+        status: "DA_THI",
+        updatedAt: new Date(),
+      },
+    });
+
     // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
     /*
     await prisma.document.create({
@@ -239,7 +264,7 @@ const examService = {
     */
 
     // Tạo thông báo mở đề
-    // notificationService.notifyOpenExam(userId, exam.title);
+    notificationService.notifyOpenExam(userId, exam.title);
 
     return {
       id: updatedExam.id,

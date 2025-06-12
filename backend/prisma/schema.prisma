@@ -87,7 +87,7 @@ model Exam {
   answerFile   String
   note         String?
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime?   
 
   document Document?
 }

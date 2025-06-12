@@ -22,6 +22,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
+import { Card, CardContent } from "@/components/ui/card";
 const ExamViewList = ({ page, query }) => {
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -96,14 +97,15 @@ const ExamViewList = ({ page, query }) => {
 
 
   return (
-    <div className="p-6">
+    <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           Trang đề thi đã duyệt
         </h1>
       </div>
 
-      <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <Card><CardContent>
+        <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <TableHeader>
           <TableRow>
             <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Tên đề thi</TableHead>
@@ -155,7 +157,8 @@ const ExamViewList = ({ page, query }) => {
             ))
           )}
         </TableBody>
-      </Table>
+      </Table></CardContent> </Card>
+      
 
       {/* Dialog nhập mật khẩu */}
       <Dialog open={open} onOpenChange={setOpen}>

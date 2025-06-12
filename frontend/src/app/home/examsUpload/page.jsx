@@ -10,6 +10,7 @@ import ExamTable from "./_components/exam-table";
 
 // import action getExams
 import { getExams } from "@/actions/exams-action";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function ExamsUploadPage() {
   const router = useRouter();
@@ -53,14 +54,15 @@ export default function ExamsUploadPage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-          Trang soạn & quản lý đề thi
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Soạn Đề và Đáp án
         </h1>
       </div>
 
-      <div className="px-6 py-6">
+      <Card><CardContent>
+        <div className="px-6 py-6">
         {/* Nút “Đăng tải đề thi” ở đầu */}
         <ExamUploadModal onUploadSuccess={loadExams} />
       </div>
@@ -87,7 +89,8 @@ export default function ExamsUploadPage() {
             Đang tải dữ liệu…
           </div>
         )}
-      </div>
+      </div></CardContent></Card>
+      
     </div>
   );
 }

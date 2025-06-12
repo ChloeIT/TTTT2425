@@ -23,11 +23,16 @@ const ExamPage = async ({ searchParams }) => {
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
+      <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Danh sách Đề thi và Đáp án
+        </h1>
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle> <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+          {/* <CardTitle> <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
         Danh sách đề thi
-      </h1></CardTitle>
+      </h1></CardTitle> */}
           {/* <CardDescription>Quản lý các đề thi trong hệ thống</CardDescription> */}
         </CardHeader>
         <CardContent>

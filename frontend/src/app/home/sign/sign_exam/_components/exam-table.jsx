@@ -7,7 +7,7 @@ import ApproveButton from "./approve-button";
 import RejectButton from "./reject-button";
 import SearchBar from "../../../_components/search-bar";
 import FilterPanel from "../../../_components/filter-department";
-
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -33,17 +33,6 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
 
   if (!exams || exams.length === 0) return <p>Không có đề thi nào.</p>;
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const d = new Date(dateString);
-    return d.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const statusMap = {
     DANG_CHO: "Đang chờ",
@@ -172,10 +161,11 @@ const ExamList = ({ exams, totalPage, currentPage }) => {
                   "Không rõ"}
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {formatDate(exam.createdAt)}
+              {exam.createdAt ? format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm") : ""}
+
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {formatDate(exam.updatedAt)}
+              {exam.updatedAt ? format(new Date(exam.updatedAt), "dd/MM/yyyy HH:mm") : ""}
               </TableCell>
 
               <TableCell className="text-center text-gray-600 dark:text-gray-400">

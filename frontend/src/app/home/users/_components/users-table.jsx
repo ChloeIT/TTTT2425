@@ -14,8 +14,10 @@ import {
 import { UserEditButton } from "./user-edit";
 import { UserActiveButton } from "./user-active-buton";
 import { userDepartment, userRole } from "@/schemas/user.schema";
+import { useProfile } from "@/hooks/use-profile";
 
 export const UsersTable = ({ data = [], totalPage }) => {
+  const { user } = useProfile();
   return (
     <>
       <div className="py-4 flex gap-2 lg:flex-row flex-col items-start lg:items-center">
@@ -40,15 +42,20 @@ export const UsersTable = ({ data = [], totalPage }) => {
           {data.map((item) => {
             return (
               <TableRow key={item.id}>
-                <TableCell>{item.fullName}</TableCell>
+                <TableCell>
+                  {item.fullName} {user?.id === item.id && "(Bạn)"}
+                </TableCell>
                 <TableCell>{item.email}</TableCell>
                 <TableCell>{userRole[item.role]}</TableCell>
                 <TableCell>{userDepartment[item.department]}</TableCell>
                 <TableCell>
-                  <UserEditButton data={item} />
+                  <UserEditButton data={item} disabled={user?.id === item.id} />
                 </TableCell>
                 <TableCell>
-                  <UserActiveButton data={item} />
+                  <UserActiveButton
+                    data={item}
+                    disabled={user?.id === item.id}
+                  />
                 </TableCell>
               </TableRow>
             );

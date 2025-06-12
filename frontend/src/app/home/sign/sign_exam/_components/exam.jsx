@@ -22,7 +22,7 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
           console.error("Lỗi khi lấy file:", res.message);
         } else {
           console.log("Đã lấy signed file:", res.data);
-          setSignedAnswerFile(res.data.answerFile);
+          setSignedAnswerFile(res.data.questionFile);
         }
       }
     };
@@ -35,13 +35,13 @@ export default function ExamAnswer({ exam, onClose, onApprove }) {
       <DialogContent className="w-[95vw] max-w-7xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-4 border-b">
           <DialogTitle className="text-xl font-semibold">
-            {exam?.title} - Đáp án
+            {exam?.title} - Đề thi
           </DialogTitle>
         </DialogHeader>
 
         <iframe
           src={signedAnswerFile || exam?.questionFile}
-          title="Đáp án"
+          title="Đề thi"
           className="flex-grow border-0"
         />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import Notify from "./notify";
 
 import SearchBar from "../../_components/search-bar";
 import FilterPanel from "../../_components/filter-department";
+import { format } from "date-fns";
 
 const PasswordList = ({ passwords }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -25,21 +26,16 @@ const PasswordList = ({ passwords }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedMonth, selectedYear, selectedDepartment]);
+
   if (!passwords || passwords.length === 0) {
     return <p>Không có mật khẩu đề thi nào.</p>;
   }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const d = new Date(dateString);
-    return d.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const statusMap = {
     DA_DUYET: "Đã duyệt",
@@ -91,15 +87,25 @@ const PasswordList = ({ passwords }) => {
     })
     .filter(
       (exam) =>
-        !selectedDepartment || exam.createdBy?.department === selectedDepartment
+        !selectedDepartment ||
+        exam.createdBy?.department === selectedDepartment
     );
+
+  const totalPages = Math.ceil(filteredPassword.length / itemsPerPage);
+  const paginatedData = filteredPassword.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
       {/* Thanh tìm kiếm + Bộ lọc tháng, năm, phòng ban */}
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1 min-w-[250px]">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel
@@ -112,6 +118,8 @@ const PasswordList = ({ passwords }) => {
           />
         </div>
       </div>
+
+      {/* Bảng hiển thị mật khẩu */}
       <Table>
         <TableHeader>
           <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-20">
@@ -119,7 +127,6 @@ const PasswordList = ({ passwords }) => {
             <TableHead>Mật khẩu</TableHead>
             <TableHead>Trạng thái</TableHead>
             <TableHead className="min-w-[150px]">Họ tên người tạo đề</TableHead>
-            <TableHead>Email người tạo đề</TableHead>
             <TableHead>Phòng ban</TableHead>
             <TableHead>Ngày gửi</TableHead>
             <TableHead>Ngày duyệt</TableHead>
@@ -127,9 +134,9 @@ const PasswordList = ({ passwords }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredPassword.map((item) => (
+          {paginatedData.map((item) => (
             <TableRow key={item.id}>
-              <TableCell>{item.title}</TableCell>
+              <TableCell className="text-left">{item.title}</TableCell>
               <TableCell className="flex items-center gap-2">
                 {item.decryptedPassword ? (
                   <>
@@ -163,12 +170,19 @@ const PasswordList = ({ passwords }) => {
                 )}
               </TableCell>
               <TableCell>{item.createdBy?.fullName || "Không rõ"}</TableCell>
-              <TableCell>{item.createdBy?.email || "Không rõ"}</TableCell>
               <TableCell>
                 {departmentMap[item.createdBy?.department] || "Không rõ"}
               </TableCell>
-              <TableCell>{formatDate(item.createdAt)}</TableCell>
-              <TableCell>{formatDate(item.updatedAt)}</TableCell>
+              <TableCell>
+                {item.createdAt
+                  ? format(new Date(item.createdAt), "dd/MM/yyyy HH:mm")
+                  : ""}
+              </TableCell>
+              <TableCell>
+                {item.updatedAt
+                  ? format(new Date(item.updatedAt), "dd/MM/yyyy HH:mm")
+                  : ""}
+              </TableCell>
               <TableCell>
                 <button
                   onClick={() => handleOpenNotify(item)}
@@ -182,6 +196,34 @@ const PasswordList = ({ passwords }) => {
         </TableBody>
       </Table>
 
+      {/* Điều hướng phân trang */}
+      {totalPages > 1 && (
+        <div className="flex justify-end items-center mt-4 gap-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Trang trước
+          </button>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                prev < totalPages ? prev + 1 : prev
+              )
+            }
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Trang sau
+          </button>
+        </div>
+      )}
+
+      {/* Modal gửi thông báo */}
       <Notify
         isOpen={notifyOpen}
         onClose={handleCloseNotify}

@@ -90,7 +90,7 @@ examRouter.patch(
 examRouter.patch(
   "/:id/document",
   requireLogin,
-  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
+  permitRoles("VAN_THU"),
   archiveParser.fields([
     { name: "questionFile", maxCount: 1 },
     { name: "answerFile", maxCount: 1 },

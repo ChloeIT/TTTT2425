@@ -6,6 +6,7 @@ export const userRoleEnum = [
   "GIANG_VIEN_RA_DE",
   "THU_KY",
   "USER",
+  "VAN_THU",
 ];
 export const departmentEnum = [
   "LY_LUAN_CO_SO",

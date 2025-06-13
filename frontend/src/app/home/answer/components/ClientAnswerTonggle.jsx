@@ -46,7 +46,7 @@ const ClientAnswerTonggle = ({ data }) => {
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl">
         <div className="bg-white rounded-lg shadow p-6 mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-800">Trang Đề thi</h1>
+          <h1 className="text-xl font-semibold text-gray-800">Danh sách Đáp án</h1>
         </div>
 
         <div className="overflow-x-auto">

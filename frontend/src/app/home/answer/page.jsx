@@ -3,7 +3,7 @@ import { getAllDocumentsWithExam } from "@/actions/document-action";
 
 
 export async function generateMetadata() {
-  return { title: "Danh sách Đáp án" };
+  return { title: "Đáp án" };
 }
 
 const ViewExams = async () => {

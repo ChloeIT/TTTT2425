@@ -233,14 +233,14 @@ const examService = {
     return {
       id: updatedExam.id,
       title: updatedExam.title,
-      questionFile: exam.questionFile,
+      questionFile: updatedExam.questionFile,
     };
   },
   openExam: async (id, userId) => {
     // Kiểm tra trạng thái phải là DA_DUYET
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || exam.status !== "DA_DUYET") {
-      throw new Error("Exam not approved or already opened");
+      throw new Error("Đề thi chưa duyệt hoặc đã mở");
     }
 
     // Cập nhật trạng thái sang DA_THI

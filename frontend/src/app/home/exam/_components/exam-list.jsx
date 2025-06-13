@@ -118,14 +118,14 @@ const ExamViewList = ({ page, query }) => {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-4 text-gray-500 dark:text-gray-400">
-                Không có đề thi nào được duyệt
+              <TableCell colSpan={5} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                Không có dữ liệu
               </TableCell>
             </TableRow>
           ) : (
             data.map((exam) => (
               <TableRow key={exam.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <TableCell className="text-center">{exam.title}</TableCell>
+                <TableCell className="text-center font-bold text-blue-800">{exam.title}</TableCell>
                 <TableCell className="text-center">{exam.createdBy?.fullName || "Không rõ"}</TableCell> 
                 <TableCell className="text-center">{departmentMap[exam.createdBy?.department] || "Không rõ"}</TableCell>
 

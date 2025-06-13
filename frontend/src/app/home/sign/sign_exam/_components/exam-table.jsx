@@ -159,7 +159,7 @@ const ExamList = ({ exams }) => {
         <TableBody className="dark:border-gray-700">
           {currentExams.map((exam) => (
             <TableRow key={exam.id} className="min-h-[100px]">
-              <TableCell className="text-left py-4 text-gray-500 dark:text-gray-400">
+              <TableCell className=" py-4 text-gray-500 dark:text-gray-400">
                 {exam.title}
               </TableCell>
               <TableCell className="text-center text-gray-600 dark:text-gray-400">

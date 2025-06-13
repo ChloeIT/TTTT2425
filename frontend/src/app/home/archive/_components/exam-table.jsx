@@ -178,21 +178,21 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
 
             return (
               <TableRow key={exam.id} className="min-h-[100px]">
-                <TableCell className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <TableCell className="text-center py-4 font-bold text-blue-800 dark:text-gray-400">
                   {exam.title}
                 </TableCell>
-                <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                <TableCell className="text-center text-black dark:text-gray-400">
                   {exam.createdBy?.fullName || "Không rõ"}
                 </TableCell>
-                <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                <TableCell className="text-center text-black dark:text-gray-400">
                   {departmentMap[exam.createdBy?.department] ||
                     exam.createdBy?.department ||
                     "Không rõ"}
                 </TableCell>
-                <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                <TableCell className="text-center text-black dark:text-gray-400">
                   {formatDate(exam.updatedAt)}
                 </TableCell>
-                <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                <TableCell className="text-center text-black dark:text-gray-400">
                   <div className="flex flex-col justify-center items-center gap-2">
                     <Button
                       variant="outline"

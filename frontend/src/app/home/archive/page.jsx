@@ -3,6 +3,8 @@ import { getExams } from "@/actions/archive-action";
 import ExamList from "./_components/exam-table";
 import { parseToNumber } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { requireRole } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
   return {
@@ -18,6 +20,12 @@ const ArchivePage = async ({ searchParams }) => {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value || "";
 
+  const isPermitted = await requireRole("VAN_THU");
+
+  if (!isPermitted) {
+    redirect("/home");
+  }
+
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
@@ -26,9 +34,7 @@ const ArchivePage = async ({ searchParams }) => {
         </h1>
       </div>
       <Card>
-        <CardHeader>
-          
-        </CardHeader>
+        <CardHeader></CardHeader>
         <CardContent>
           <ExamList
             exams={data}

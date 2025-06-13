@@ -61,36 +61,38 @@ export default function ExamsUploadPage() {
         </h1>
       </div>
 
-      <Card><CardContent>
-        <div className="px-6 py-6">
-        {/* Nút “Đăng tải đề thi” ở đầu */}
-        <ExamUploadModal onUploadSuccess={loadExams} />
-      </div>
-
-      <div className="px-6 pb-10">
-        {/* Bảng đang chờ duyệt */}
-        {!loading && (
-          <>
-            <ExamTable
-              exams={examsDangCho}
-              title="Danh sách đề thi đang chờ duyệt"
-              className="dark:border-gray-700"
-            />
-            <ExamTable
-              exams={examsTuChoi}
-              title="Danh sách đề thi bị từ chối"
-              className="dark:border-gray-700"
-            />
-          </>
-        )}
-
-        {loading && (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-            Đang tải dữ liệu…
+      <Card>
+        <CardContent>
+          <div className="px-6 py-6">
+            {/* Nút “Đăng tải đề thi” ở đầu */}
+            <ExamUploadModal onUploadSuccess={loadExams} />
           </div>
-        )}
-      </div></CardContent></Card>
-      
+
+          <div className="px-6 pb-10">
+            {/* Bảng đang chờ duyệt */}
+            {!loading && (
+              <>
+                <ExamTable
+                  exams={examsDangCho}
+                  title="Danh sách đề thi đang chờ duyệt"
+                  className="dark:border-gray-700"
+                />
+                <ExamTable
+                  exams={examsTuChoi}
+                  title="Danh sách đề thi bị từ chối"
+                  className="dark:border-gray-700"
+                />
+              </>
+            )}
+
+            {loading && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-10">
+                Đang tải dữ liệu…
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

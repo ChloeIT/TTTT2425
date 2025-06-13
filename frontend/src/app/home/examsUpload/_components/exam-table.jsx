@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getSignedExamFiles } from "@/actions/exams-action";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ExamTable({ exams, title }) {
   const [fileUrls, setFileUrls] = useState({});
@@ -49,16 +49,17 @@ export default function ExamTable({ exams, title }) {
 
   return (
     <div className="mb-10">
+      <Toaster position="top-right" />
       <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
         {title}
       </h2>
       <Table className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
         <TableHeader>
           <TableRow>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 min-w-[150px]">
               Tên đề thi
             </TableHead>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray- dark:text-gray-200">
+            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray- dark:text-gray-200 w-[150px]">
               Nội dung
             </TableHead>
             <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
@@ -67,11 +68,13 @@ export default function ExamTable({ exams, title }) {
             <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               Ngày tạo
             </TableHead>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-              Ngày cập nhật
-            </TableHead>
             {title === "Danh sách đề thi bị từ chối" && (
               <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                Ngày cập nhật
+              </TableHead>
+            )}
+            {title === "Danh sách đề thi bị từ chối" && (
+              <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 min-w-[100px]">
                 Ghi chú
               </TableHead>
             )}
@@ -90,7 +93,7 @@ export default function ExamTable({ exams, title }) {
           )}
           {exams.map((exam) => (
             <TableRow key={exam.id} className="dark:border-gray-700">
-              <TableCell>
+              <TableCell className="text-left">
                 <span className="px-3 text-lg font-bold dark:text-gray-100">
                   {exam.title}
                 </span>
@@ -144,9 +147,11 @@ export default function ExamTable({ exams, title }) {
               <TableCell className="dark:text-gray-300">
                 {new Date(exam.createdAt).toLocaleString()}
               </TableCell>
-              <TableCell className="dark:text-gray-300">
-                {new Date(exam.updatedAt).toLocaleString()}
-              </TableCell>
+              {title === "Danh sách đề thi bị từ chối" && (
+                <TableCell className="dark:text-gray-300">
+                  {new Date(exam.updatedAt).toLocaleString()}
+                </TableCell>
+              )}
               {title === "Danh sách đề thi bị từ chối" && (
                 <TableCell className="dark:text-gray-300">
                   {exam.note || "-"}

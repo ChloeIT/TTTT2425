@@ -7,8 +7,7 @@ export async function generateMetadata() {
 }
 
 const ViewExamsPage = async ({ searchParams }) => {
-  const page = (await searchParams?.page) || "1";
-  const query = (await searchParams?.query) || "";
+  const { page = 1, query } = await searchParams;
 
   return <ExamList page={page} query={query} />;
 };

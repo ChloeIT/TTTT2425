@@ -118,8 +118,8 @@ const ExamViewList = ({ page, query }) => {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-4 text-gray-500 dark:text-gray-400">
-                Không có đề thi nào được duyệt
+              <TableCell colSpan={5} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                Không có dữ liệu
               </TableCell>
             </TableRow>
           ) : (

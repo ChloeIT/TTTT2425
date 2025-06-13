@@ -2,7 +2,7 @@ import ExamList from "./_components/exam-list";
 
 export async function generateMetadata() {
   return {
-    title: "Danh sách Đề thi",
+    title: "Đề thi",
   };
 }
 

@@ -5,7 +5,7 @@ import { parseToNumber } from "@/lib/utils";
 
 export async function generateMetadata() {
   return {
-    title: "Quản lý đề thi",
+    title: "Duyệt đề và đáp án",
   };
 }
 

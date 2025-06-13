@@ -100,7 +100,7 @@ const ExamViewList = ({ page, query }) => {
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Trang đề thi đã duyệt
+          Danh sách Đề Thi
         </h1>
       </div>
 

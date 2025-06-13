@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { InitDeviceId } from "./_components/init-device-id";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
         >
           {children}
           <Sonner />
+          <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>

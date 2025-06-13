@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import ExamList from "./_components/exam-list";
 
 export async function generateMetadata() {
@@ -7,9 +8,11 @@ export async function generateMetadata() {
 }
 
 const ViewExamsPage = async ({ searchParams }) => {
+  const cookie = await cookies();
+  const token = cookie.get("token")?.value;
   const { page = 1, query } = await searchParams;
 
-  return <ExamList page={page} query={query} />;
+  return <ExamList page={page} query={query} token={token} />;
 };
 
 export default ViewExamsPage;

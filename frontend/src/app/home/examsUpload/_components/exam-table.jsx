@@ -56,18 +56,10 @@ export default function ExamTable({ exams, title }) {
       <Table className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
         <TableHeader>
           <TableRow>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 min-w-[150px]">
-              Tên đề thi
-            </TableHead>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray- dark:text-gray-200 w-[150px]">
-              Nội dung
-            </TableHead>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-              Trạng thái
-            </TableHead>
-            <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-              Ngày tạo
-            </TableHead>
+            <TableHead>Tên đề thi</TableHead>
+            <TableHead>Nội dung</TableHead>
+            <TableHead>Trạng thái</TableHead>
+            <TableHead>Ngày tạo</TableHead>
             {title === "Danh sách đề thi bị từ chối" && (
               <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                 Ngày cập nhật

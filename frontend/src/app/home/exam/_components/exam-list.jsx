@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import { ApprovedExamsList, statusChanged } from "@/actions/exams-action";
+import { ApprovedExamsList, approvedFull, getAllExams, statusChanged } from "@/actions/exams-action";
 import { parseToNumber } from "@/lib/utils";
 import {
   Dialog,
@@ -23,8 +23,10 @@ import {
 } from "@/components/ui/table";
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
 import { Card, CardContent } from "@/components/ui/card";
+import { currentUser } from "@/actions/auth-action";
 
 const ExamViewList = ({ page, query, token }) => {
+  const [user, setUser] = useState(null)
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [inputPassword, setInputPassword] = useState("");
@@ -35,13 +37,24 @@ const ExamViewList = ({ page, query, token }) => {
 
   const currentPage = parseToNumber(page, 1);
 
+  useEffect(()=> {
+    const getCurrentUser = async()=> {
+      const res = await currentUser();
+      if(res.data){
+        setUser(res.data)
+      }
+    }
+    getCurrentUser()
+  },[])
+
   useEffect(() => {
+
     const fetchExams = async () => {
-      const res = await ApprovedExamsList({ page: currentPage, query });
+      const res = await approvedFull({ page: currentPage, query });
       setData(res.data || []);
     };
     fetchExams();
-  }, [currentPage, query]);
+  }, [currentPage, query, user]);
 
   const handleOpen = async (exam) => {
     setSelectedExam(exam);
@@ -108,19 +121,19 @@ const ExamViewList = ({ page, query, token }) => {
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow>
-                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                <TableHead >
                   Tên đề thi
                 </TableHead>
-                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                <TableHead >
                   Người tạo
                 </TableHead>
-                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                <TableHead >
                   Khoa
                 </TableHead>
-                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                <TableHead >
                   Trạng thái
                 </TableHead>
-                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                <TableHead >
                   Thao tác
                 </TableHead>
               </TableRow>

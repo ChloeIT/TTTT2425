@@ -67,7 +67,7 @@ const examService = {
       },
     });
   },
-
+//ds bai thi theo user
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: { createdById: userId },

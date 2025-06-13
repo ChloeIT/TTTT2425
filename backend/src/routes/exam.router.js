@@ -37,7 +37,7 @@ examRouter.post(
 examRouter.get(
   "/all",
   requireLogin,
-  permitRoles("BAN_GIAM_HIEU"),
+  // permitRoles("BAN_GIAM_HIEU"),
   examController.getAllExams
 );
 //user
@@ -49,10 +49,7 @@ examRouter.get(
 
 
 //lấy danh sách đề thi theo người soạn ( user hiện tại đang đăng nhập)
-examRouter.get(
-  "/", 
-  requireLogin, 
-  examController.getExams);
+examRouter.get("/", requireLogin, examController.getExams);
 
 examRouter.get("/:id", requireLogin, examController.getExamById);
 
@@ -63,7 +60,11 @@ examRouter.get(
   examController.getSignedExamFiles
 );
 
-examRouter.post("/verify-password",requireLogin, examController.verifyExamPassword);
+examRouter.post(
+  "/verify-password",
+  requireLogin,
+  examController.verifyExamPassword
+);
 
 examRouter.patch(
   "/:id/approve",
@@ -87,8 +88,6 @@ examRouter.patch(
   validateData(openExamSchema),
   examController.openExam
 );
-
-
 
 examRouter.patch(
   "/:id/document",

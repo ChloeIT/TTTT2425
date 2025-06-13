@@ -194,18 +194,27 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
                 </TableCell>
                 <TableCell className="text-center text-black dark:text-gray-400">
                   <div className="flex flex-col justify-center items-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleDownload(exam.id, "question")}
-                    >
-                      📄Tải đề thi
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleDownload(exam.id, "answer")}
-                    >
-                      📝Tải đáp án
-                    </Button>
+                    {isWithin24Hours && (
+                      <Button variant="outline" disabled className="w-[90px]">
+                        Chưa đủ 24h
+                      </Button>
+                    )}
+                    {!isWithin24Hours && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDownload(exam.id, "question")}
+                      >
+                        📄Tải đề thi
+                      </Button>
+                    )}
+                    {!isWithin24Hours && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDownload(exam.id, "answer")}
+                      >
+                        📝Tải đáp án
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-center text-gray-600 dark:text-gray-400">

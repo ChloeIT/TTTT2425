@@ -12,10 +12,14 @@ import ExamTable from "./_components/exam-table";
 import { getExams } from "@/actions/exams-action";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { useRole } from "@/hooks/use-role";
+
 export default function ExamsUploadPage() {
   const router = useRouter();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const isAuthorized = useRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
 
   // Hàm fetch data bằng action
   const loadExams = async () => {
@@ -37,7 +41,7 @@ export default function ExamsUploadPage() {
   useEffect(() => {
     loadExams();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthorized]);
 
   // Lọc và sắp xếp:
   const examsDangCho = exams
@@ -53,6 +57,9 @@ export default function ExamsUploadPage() {
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
+  if (!isAuthorized)
+    return <div>Bạn không có quyền truy cập vào trang này</div>;
+
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
@@ -61,36 +68,38 @@ export default function ExamsUploadPage() {
         </h1>
       </div>
 
-      <Card><CardContent>
-        <div className="px-6 py-6">
-        {/* Nút “Đăng tải đề thi” ở đầu */}
-        <ExamUploadModal onUploadSuccess={loadExams} />
-      </div>
-
-      <div className="px-6 pb-10">
-        {/* Bảng đang chờ duyệt */}
-        {!loading && (
-          <>
-            <ExamTable
-              exams={examsDangCho}
-              title="Danh sách đề thi đang chờ duyệt"
-              className="dark:border-gray-700"
-            />
-            <ExamTable
-              exams={examsTuChoi}
-              title="Danh sách đề thi bị từ chối"
-              className="dark:border-gray-700"
-            />
-          </>
-        )}
-
-        {loading && (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-            Đang tải dữ liệu…
+      <Card>
+        <CardContent>
+          <div className="px-6 py-6">
+            {/* Nút “Đăng tải đề thi” ở đầu */}
+            <ExamUploadModal onUploadSuccess={loadExams} />
           </div>
-        )}
-      </div></CardContent></Card>
-      
+
+          <div className="px-6 pb-10">
+            {/* Bảng đang chờ duyệt */}
+            {!loading && (
+              <>
+                <ExamTable
+                  exams={examsDangCho}
+                  title="Danh sách đề thi đang chờ duyệt"
+                  className="dark:border-gray-700"
+                />
+                <ExamTable
+                  exams={examsTuChoi}
+                  title="Danh sách đề thi bị từ chối"
+                  className="dark:border-gray-700"
+                />
+              </>
+            )}
+
+            {loading && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-10">
+                Đang tải dữ liệu…
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

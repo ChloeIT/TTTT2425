@@ -60,7 +60,6 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
 
   return (
     <>
-      <Toaster position="top-right" />
       <Button
         className="bg-blue-100 text-blue-700 hover:bg-blue-200"
         onClick={() => setPendingApproveExam(exam)}

@@ -22,7 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { getUserEmail, notifyUserByEmail } from "@/actions/secretary-password-action";
+import {
+  getUserEmail,
+  notifyUserByEmail,
+} from "@/actions/secretary-password-action";
 
 const Notify = ({ isOpen, onClose, exam }) => {
   const [groupedEmails, setGroupedEmails] = useState({});
@@ -33,10 +36,10 @@ const Notify = ({ isOpen, onClose, exam }) => {
 
   useEffect(() => {
     if (isOpen) {
-      getUserEmail() 
+      getUserEmail()
         .then((data) => {
-          setGroupedEmails(data); 
-          const departments = Object.keys(data); 
+          setGroupedEmails(data);
+          const departments = Object.keys(data);
           if (departments.length > 0) {
             const firstDepartment = departments[0];
             setSelectedDepartment(firstDepartment);
@@ -63,11 +66,11 @@ const Notify = ({ isOpen, onClose, exam }) => {
   useEffect(() => {
     if (selectedDepartment && groupedEmails[selectedDepartment]) {
       const emailsForSelectedDepartment = groupedEmails[selectedDepartment];
-      setDisplayEmails(emailsForSelectedDepartment); 
+      setDisplayEmails(emailsForSelectedDepartment);
       if (emailsForSelectedDepartment.length > 0) {
         setSelectedEmail(emailsForSelectedDepartment[0]);
       } else {
-        setSelectedEmail(""); 
+        setSelectedEmail("");
       }
     } else {
       setDisplayEmails([]);
@@ -85,7 +88,11 @@ const Notify = ({ isOpen, onClose, exam }) => {
 
     setSending(true);
     try {
-      await notifyUserByEmail(selectedEmail, exam.decryptedPassword, exam.title);
+      await notifyUserByEmail(
+        selectedEmail,
+        exam.decryptedPassword,
+        exam.title
+      );
       toast.success("Gửi thông báo thành công!");
       setTimeout(() => {
         onClose();
@@ -100,7 +107,6 @@ const Notify = ({ isOpen, onClose, exam }) => {
 
   return (
     <>
-      <Toaster position="top-right" />
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-lg sm:w-full">
           <DialogHeader>
@@ -128,7 +134,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="no-department" disabled> 
+                    <SelectItem value="no-department" disabled>
                       Không có phòng ban nào
                     </SelectItem>
                   )}
@@ -156,7 +162,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="no-email" disabled> 
+                    <SelectItem value="no-email" disabled>
                       Không có email nào cho phòng ban này
                     </SelectItem>
                   )}
@@ -177,7 +183,12 @@ const Notify = ({ isOpen, onClose, exam }) => {
           </div>
 
           <DialogFooter>
-            <Button variant="secondary" onClick={onClose} className="mr-2" disabled={sending}>
+            <Button
+              variant="secondary"
+              onClick={onClose}
+              className="mr-2"
+              disabled={sending}
+            >
               Đóng
             </Button>
             <Button

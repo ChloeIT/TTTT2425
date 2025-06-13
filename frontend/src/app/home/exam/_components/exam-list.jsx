@@ -1,5 +1,5 @@
 "use client";
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { ApprovedExamsList, statusChanged } from "@/actions/exams-action";
 import { parseToNumber } from "@/lib/utils";
@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/table";
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
 import { Card, CardContent } from "@/components/ui/card";
-const ExamViewList = ({ page, query }) => {
+
+const ExamViewList = ({ page, query, token }) => {
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [inputPassword, setInputPassword] = useState("");
@@ -31,7 +32,6 @@ const ExamViewList = ({ page, query }) => {
   const [open, setOpen] = useState(false);
   const [examToOpen, setExamToOpen] = useState(null);
   const [openedExamIds, setOpenedExamIds] = useState([]);
-
 
   const currentPage = parseToNumber(page, 1);
 
@@ -43,13 +43,11 @@ const ExamViewList = ({ page, query }) => {
     fetchExams();
   }, [currentPage, query]);
 
-  const handleOpen = async(exam) => {
-    
+  const handleOpen = async (exam) => {
     setSelectedExam(exam);
     setInputPassword("");
     setError("");
     setOpen(true);
-    
   };
 
   const handleCheckPassword = async () => {
@@ -61,6 +59,7 @@ const ExamViewList = ({ page, query }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({
@@ -72,29 +71,29 @@ const ExamViewList = ({ page, query }) => {
       const result = await res.json();
       if (res.ok) {
         const status = "DA_THI";
-        const changeStatusResult = await statusChanged(selectedExam.id.toString(), status);
+        const changeStatusResult = await statusChanged(
+          selectedExam.id.toString(),
+          status
+        );
 
         // console.log(changeStatusResult)
         setOpen(false);
         setExamToOpen(selectedExam);
         setOpenedExamIds((prev) => [...prev, selectedExam.id]);
       } else {
-      setError(result.error || "Đã xảy ra lỗi");
+        setError(result.error || "Đã xảy ra lỗi");
       }
-
     } catch (err) {
       setError("Lỗi kết nối tới server");
     }
-    
   };
 
   const departmentMap = {
-  MAC_DINH: "Mặc định",
-  LY_LUAN_CO_SO: "Lý luận cơ sở",
-  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
-  XAY_DUNG_DANG: "Xây dựng Đảng",
-};
-
+    MAC_DINH: "Mặc định",
+    LY_LUAN_CO_SO: "Lý luận cơ sở",
+    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+    XAY_DUNG_DANG: "Xây dựng Đảng",
+  };
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
@@ -104,61 +103,86 @@ const ExamViewList = ({ page, query }) => {
         </h1>
       </div>
 
-      <Card><CardContent>
-        <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Tên đề thi</TableHead>
-            <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Người tạo</TableHead>
-            <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Khoa</TableHead>
-            <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Trạng thái</TableHead>
-            <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">Thao tác</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center py-4 text-gray-500 dark:text-gray-400">
-                Không có dữ liệu
-              </TableCell>
-            </TableRow>
-          ) : (
-            data.map((exam) => (
-              <TableRow key={exam.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <TableCell className="text-center font-bold text-blue-800">{exam.title}</TableCell>
-                <TableCell className="text-center">{exam.createdBy?.fullName || "Không rõ"}</TableCell> 
-                <TableCell className="text-center">{departmentMap[exam.createdBy?.department] || "Không rõ"}</TableCell>
-
-                <TableCell className="text-center">
-                  <Badge
-                    variant="default"
-                    className={
-                      {
-                        DA_DUYET: "bg-green-500 text-white dark:bg-green-600",
-                        DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
-                      }[exam.status] || "bg-gray-400 text-white dark:bg-gray-600"
-                    }
-                  >
-                    {exam.status === "DA_DUYET" ? "Đã duyệt" : "Đã thi"}
-                  </Badge>
-                </TableCell>
-
-                <TableCell className="text-center">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleOpen(exam)} 
-                    disabled={openedExamIds.includes(exam.id)}
-                  >
-                    Mở đề
-                  </Button>
-                </TableCell>
-
+      <Card>
+        <CardContent>
+          <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                  Tên đề thi
+                </TableHead>
+                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                  Người tạo
+                </TableHead>
+                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                  Khoa
+                </TableHead>
+                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                  Trạng thái
+                </TableHead>
+                <TableHead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-center">
+                  Thao tác
+                </TableHead>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table></CardContent> </Card>
-      
+            </TableHeader>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-4 text-gray-500 dark:text-gray-400"
+                  >
+                    Không có dữ liệu
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((exam) => (
+                  <TableRow
+                    key={exam.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <TableCell className="text-center font-bold text-blue-800">
+                      {exam.title}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {exam.createdBy?.fullName || "Không rõ"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {departmentMap[exam.createdBy?.department] || "Không rõ"}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="default"
+                        className={
+                          {
+                            DA_DUYET:
+                              "bg-green-500 text-white dark:bg-green-600",
+                            DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
+                          }[exam.status] ||
+                          "bg-gray-400 text-white dark:bg-gray-600"
+                        }
+                      >
+                        {exam.status === "DA_DUYET" ? "Đã duyệt" : "Đã thi"}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleOpen(exam)}
+                        disabled={openedExamIds.includes(exam.id)}
+                      >
+                        Mở đề
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>{" "}
+      </Card>
 
       {/* Dialog nhập mật khẩu */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -177,7 +201,9 @@ const ExamViewList = ({ page, query }) => {
           />
           {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
           <DialogFooter className="mt-4">
-            <Button variant="secondary" onClick={() => setOpen(false)}>Hủy</Button>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Hủy
+            </Button>
             <Button onClick={handleCheckPassword}>Xác nhận</Button>
           </DialogFooter>
         </DialogContent>

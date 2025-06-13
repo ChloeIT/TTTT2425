@@ -125,7 +125,7 @@ const ExamViewList = ({ page, query }) => {
           ) : (
             data.map((exam) => (
               <TableRow key={exam.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <TableCell className="text-center">{exam.title}</TableCell>
+                <TableCell className="text-center font-bold text-blue-800">{exam.title}</TableCell>
                 <TableCell className="text-center">{exam.createdBy?.fullName || "Không rõ"}</TableCell> 
                 <TableCell className="text-center">{departmentMap[exam.createdBy?.department] || "Không rõ"}</TableCell>
 

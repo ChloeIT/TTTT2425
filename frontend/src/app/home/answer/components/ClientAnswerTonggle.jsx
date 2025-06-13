@@ -54,7 +54,7 @@ const ClientAnswerTonggle = ({ data }) => {
             <thead className="bg-gray-100 text-sm font-semibold text-gray-700">
               <tr>
                 <th className="px-4 py-3">Tên đề thi</th>
-                <th className="px-4 py-3">Ngày tạo</th>
+                <th className="px-4 py-3">Ngày ký</th>
                 <th className="px-4 py-3">Xem Đề thi</th>
                 <th className="px-4 py-3">Xem Đáp án</th>
               </tr>

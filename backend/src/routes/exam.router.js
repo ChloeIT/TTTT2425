@@ -35,11 +35,15 @@ examRouter.post(
 examRouter.get(
   "/all",
   requireLogin,
-  // permitRoles("BAN_GIAM_HIEU"),
+  permitRoles("BAN_GIAM_HIEU"),
   examController.getAllExams
 );
 
-examRouter.get("/", requireLogin, examController.getExams);
+//lấy danh sách đề thi theo người soạn ( user hiện tại đang đăng nhập)
+examRouter.get(
+  "/", 
+  requireLogin, 
+  examController.getExams);
 
 examRouter.get("/:id", requireLogin, examController.getExamById);
 
@@ -50,7 +54,7 @@ examRouter.get(
   examController.getSignedExamFiles
 );
 
-examRouter.post("/verify-password", examController.verifyExamPassword);
+examRouter.post("/verify-password",requireLogin, examController.verifyExamPassword);
 
 examRouter.patch(
   "/:id/approve",
@@ -75,17 +79,7 @@ examRouter.patch(
   examController.openExam
 );
 
-examRouter.patch(
-  "/:id/document",
-  requireLogin,
-  permitRoles("BAN_GIAM_HIEU", "TRUONG_KHOA"),
-  archiveParser.fields([
-    { name: "questionFile", maxCount: 1 },
-    { name: "answerFile", maxCount: 1 },
-  ]),
-  // validateUploadExamDocument,
-  examController.updateExamDocument
-);
+
 
 examRouter.patch(
   "/:id/document",

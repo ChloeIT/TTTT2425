@@ -15,7 +15,6 @@ export const getExams = async ({ page = 1, query }) => {
       totalPage: res.data.totalPage || 1,
     };
   } catch (error) {
-   
     return {
       data: [],
       totalPage: 0,
@@ -23,8 +22,30 @@ export const getExams = async ({ page = 1, query }) => {
   }
 };
 
+export const ApprovedExamsList = async ({ page = 1, query }) => {
+  try {
+    const res = await instanceAPI.get("/exams", {
+      params: { page, query },
+    });
 
+    const allExams = res.data.data || [];
+    const approvedExams = allExams.filter((exam) => exam.status === "DA_DUYET");
 
+    return {
+      data: approvedExams,
+      totalPage: res.data.totalPage || 1,
+    };
+  } catch (error) {
+    console.error(
+      "Lỗi khi gọi API lấy đề thi:",
+      error?.response?.data || error
+    );
+    return {
+      data: [],
+      totalPage: 0,
+    };
+  }
+};
 
 // export const uploadSignature = async (file, password) => {
 //   try {
@@ -112,7 +133,6 @@ export const approveExam = async (examId, password) => {
   }
 };
 
-
 export const rejectExam = async (examId, message) => {
   try {
     const res = await instanceAPI.patch(
@@ -166,7 +186,3 @@ export const getFile = async (examId) => {
     };
   }
 };
-
-
-
-

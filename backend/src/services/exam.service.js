@@ -37,7 +37,7 @@ const examService = {
     const baseQuestionFile = extractBaseUrl(questionFile);
     const baseAnswerFile = extractBaseUrl(answerFile);
 
-    // Gửi thông báo 
+    // Gửi thông báo
     const bghUsers = await prisma.user.findMany({
       where: {
         role: "BAN_GIAM_HIEU",
@@ -236,7 +236,7 @@ const examService = {
       questionFile: exam.questionFile,
     };
   },
-    openExam: async (id, userId) => {
+  openExam: async (id, userId) => {
     // Kiểm tra trạng thái phải là DA_DUYET
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || exam.status !== "DA_DUYET") {

@@ -12,10 +12,14 @@ import ExamTable from "./_components/exam-table";
 import { getExams } from "@/actions/exams-action";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { useRole } from "@/hooks/use-role";
+
 export default function ExamsUploadPage() {
   const router = useRouter();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const isAuthorized = useRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
 
   // Hàm fetch data bằng action
   const loadExams = async () => {
@@ -37,7 +41,7 @@ export default function ExamsUploadPage() {
   useEffect(() => {
     loadExams();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthorized]);
 
   // Lọc và sắp xếp:
   const examsDangCho = exams
@@ -52,6 +56,9 @@ export default function ExamsUploadPage() {
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
+
+  if (!isAuthorized)
+    return <div>Bạn không có quyền truy cập vào trang này</div>;
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">

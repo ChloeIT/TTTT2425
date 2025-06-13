@@ -94,21 +94,6 @@ const examService = {
       },
     });
   },
-  // getAllExams: async () => {
-  //   return await prisma.exam.findMany({
-  //     include: {
-  //       createdBy: {
-  //         select: {
-  //           id: true,
-  //           fullName: true,
-  //           email: true,
-  //           department: true,
-  //
-  //         },
-  //       },
-  //     },
-  //   });
-  // },
 
   getExamById: async (id) => {
     return await prisma.exam.findUnique({

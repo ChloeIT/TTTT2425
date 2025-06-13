@@ -35,7 +35,6 @@ export const useExamDocumentUpload = (examId) => {
       setLoading(false);
 
       if (result.ok) {
-        toast.success("Tải file thành công");
         return true;
       } else {
         toast.error(result.message || "Tải file thất bại");

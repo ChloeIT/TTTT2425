@@ -301,6 +301,12 @@ const examController = {
       // validate department, status, month, year is valid
       const { department, month, page, query, year } =
         examService.validateQueryGetExamsByStatus(req);
+
+      // truyền department=MAC_DINH...
+      //truyền month >=1 và <=12
+      //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
+      //status= DANG_CHO...
+      //để query
       const status = ExamStatus.DANG_CHO;
       const { data, totalPage } = await examService.getExamsByStatus({
         page,

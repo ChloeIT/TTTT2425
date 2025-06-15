@@ -294,6 +294,15 @@ const examController = {
       next(error);
     }
   },
+
+  getExamsForArchive: async (req, res, next) => {
+    try {
+      const exams = await examService.getAllExams({ status: "DA_THI" });
+      res.status(200).json({ data: exams });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 module.exports = examController;

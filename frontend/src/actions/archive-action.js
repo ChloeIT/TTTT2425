@@ -8,8 +8,8 @@ const {
 
 export const getExams = async ({ page = 1, query }) => {
   try {
-    const res = await instanceAPI.get("/exams/all", {
-      params: { page, query, status: "DA_THI" },
+    const res = await instanceAPI.get("/exams/archive", {
+      params: { page, query },
     });
     // console.log("API Response:", res.data);
     return {

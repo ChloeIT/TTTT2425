@@ -17,6 +17,7 @@ const {
   openExamSchema,
   updateExamDocumentSchema,
 } = require("../schemas/exam.schema");
+const { Role } = require("../generated/prisma");
 
 const examRouter = Router();
 
@@ -32,7 +33,6 @@ examRouter.post(
   examController.createExam
 );
 
-
 //BGH
 examRouter.get(
   "/all",
@@ -41,12 +41,7 @@ examRouter.get(
   examController.getAllExams
 );
 //user
-examRouter.get(
-  "/approved",
-  requireLogin,
-  examController.getAllExams
-);
-
+examRouter.get("/approved", requireLogin, examController.getAllExams);
 
 //lấy danh sách đề thi theo người soạn ( user hiện tại đang đăng nhập)
 examRouter.get("/", requireLogin, examController.getExams);
@@ -109,5 +104,12 @@ examRouter.patch(
 );
 
 // examRouter.delete("/:id", requireLogin, examController.deleteExam);
+
+examRouter.get(
+  "/waiting/ban-giam-hieu",
+  requireLogin,
+  permitRoles(Role.BAN_GIAM_HIEU),
+  examController.getWaitingExamByBanGiamHieu
+);
 
 module.exports = examRouter;

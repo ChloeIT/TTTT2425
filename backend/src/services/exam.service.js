@@ -1,6 +1,14 @@
 const prisma = require("../libs/prisma");
 const { encrypt, decrypt } = require("../libs/encrypt");
 const notificationService = require("./notification.service");
+const {
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} = require("date-fns");
+const { Department, ExamStatus } = require("../generated/prisma");
+const LIMIT = 10;
 
 const examService = {
   createExam: async ({
@@ -67,7 +75,7 @@ const examService = {
       },
     });
   },
-//ds bai thi theo user
+  //ds bai thi theo user
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: { createdById: userId },
@@ -320,6 +328,122 @@ const examService = {
     });
 
     return updatedExam;
+  },
+
+  getExamsByStatus: async ({
+    page = 1,
+    status,
+    query,
+    department,
+    month,
+    year,
+  }) => {
+    const where = {
+      ...(query && {
+        title: {
+          contains: query,
+        },
+      }),
+      ...(status && {
+        status,
+      }),
+      ...(department && {
+        createdBy: {
+          department,
+        },
+      }),
+    };
+
+    if (month && year) {
+      const from = startOfMonth(new Date(year, month - 1)); // month - 1 vì JS month bắt đầu từ 0
+      const to = endOfMonth(new Date(year, month - 1));
+      where.createdAt = {
+        gte: from,
+        lte: to,
+      };
+    } else if (year) {
+      const from = startOfYear(new Date(year, 0));
+      const to = endOfYear(new Date(year, 0));
+      where.createdAt = {
+        gte: from,
+        lte: to,
+      };
+    }
+
+    const [data, count] = await prisma.$transaction([
+      prisma.exam.findMany({
+        take: LIMIT,
+        skip: (page - 1) * LIMIT,
+        where,
+        select: {
+          id: true,
+          title: true,
+          questionFile: true,
+          answerFile: true,
+          createdAt: true,
+          updatedAt: true,
+          note: true,
+          status: true,
+          createdById: true,
+          createdBy: {
+            select: {
+              username: true,
+              fullName: true,
+              email: true,
+              department: true,
+            },
+          },
+        },
+      }),
+      prisma.exam.count({
+        where,
+      }),
+    ]);
+    const totalPage = Math.ceil(count / LIMIT);
+
+    return {
+      data,
+      totalPage,
+    };
+  },
+  validateQueryGetExamsByStatus: (req) => {
+    let { query, department, month, year, status } = req.query;
+    const page = Number(req.query.page) || 1;
+
+    // Validate department
+    if (!Object.values(Department).includes(department)) {
+      department = undefined;
+    }
+
+    // Validate month
+    const parsedMonth = parseInt(month);
+    if (isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+      month = undefined;
+    } else {
+      month = parsedMonth;
+    }
+
+    // Validate year (trong vòng 10 năm từ hiện tại)
+    const currentYear = new Date().getFullYear();
+    const parsedYear = parseInt(year);
+    if (
+      isNaN(parsedYear) ||
+      parsedYear < currentYear - 10 ||
+      parsedYear > currentYear
+    ) {
+      year = undefined;
+    } else {
+      year = parsedYear;
+    }
+
+    return {
+      query,
+      department,
+      month,
+      year,
+      status,
+      page,
+    };
   },
 };
 

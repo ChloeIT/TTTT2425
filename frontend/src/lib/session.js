@@ -22,7 +22,6 @@ export const auth = async () => {
     const res = await instanceAPI.get("/currentUser");
     return res.data?.data?.user;
   } catch (error) {
-    deleteSession();
     return null;
   }
 };

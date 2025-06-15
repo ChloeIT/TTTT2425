@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import ExamAnswer from "./exam-answer";
-import Exam from "./exam";
-import ApproveButton from "./approve-button";
-import RejectButton from "./reject-button";
-import SearchBar from "../../../_components/search-bar";
-import FilterPanel from "../../../_components/filter-department";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { getExams } from "@/actions/sign-action";
+
 import {
   Table,
   TableBody,
@@ -19,272 +15,219 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { NavPagination } from "@/components/nav-pagination";
 
-const ExamList = ({ exams }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+import SearchBar from "../../../_components/search-bar";
+import FilterPanel from "../../../_components/filter-department";
+import FilterStatus from "../../../_components/filter-status";
+import Exam from "./exam";
+import ExamAnswer from "./exam-answer";
+import ApproveButton from "./approve-button";
+import RejectButton from "./reject-button";
+
+const statusMap = {
+  DANG_CHO: "Đang chờ",
+  DA_DUYET: "Đã duyệt",
+  TU_CHOI: "Đã từ chối",
+  DA_THI: "Đã thi",
+};
+
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
+
+const ExamList = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const page = Number(searchParams.get("page")) || 1;
+  const query = searchParams.get("query") || "";
+  const status = searchParams.get("status");
+  const department = searchParams.get("department") || "";
+  const month = searchParams.get("month") || "";
+  const year = searchParams.get("year") || "";
+
+  const [selectedMonth, setSelectedMonth] = useState(month);
+  const [selectedYear, setSelectedYear] = useState(year);
+  const [exams, setExams] = useState([]);
+  const [totalPage, setTotalPage] = useState(1);
+
   const [selectedExam, setSelectedExam] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("DANG_CHO");
   const [pendingApproveExam, setPendingApproveExam] = useState(null);
   const [pendingRejectExam, setPendingRejectExam] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-
-  const itemsPerPage = 10;
-
-  if (!exams || exams.length === 0) return <p>Không có đề thi nào.</p>;
-
-  const statusMap = {
-    DANG_CHO: "Đang chờ",
-    DA_DUYET: "Đã duyệt",
-    TU_CHOI: "Đã từ chối",
-    DA_THI: "Đã thi",
+  
+  const refetchExams = async () => {
+    const { data, totalPage } = await getExams({
+      page,
+      query,
+      status: status || undefined,
+      department,
+      month,
+      year,
+    });
+    setExams(data);
+    setTotalPage(totalPage);
   };
-
-  const departmentMap = {
-    MAC_DINH: "Mặc định",
-    LY_LUAN_CO_SO: "Lý luận cơ sở",
-    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
-    XAY_DUNG_DANG: "Xây dựng Đảng",
-  };
-
-  // === Lọc dữ liệu trước ===
-  const filteredExams = exams
-    .filter((exam) =>
-      filterStatus === "ALL" ? true : exam.status === filterStatus
-    )
-    .filter((exam) =>
-      exam.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter((exam) => {
-      const date = new Date(exam.createdAt);
-      const monthMatches =
-        !selectedMonth ||
-        (date.getMonth() + 1).toString().padStart(2, "0") === selectedMonth;
-      const yearMatches =
-        !selectedYear || date.getFullYear().toString() === selectedYear;
-      return monthMatches && yearMatches;
-    })
-    .filter(
-      (exam) =>
-        !selectedDepartment || exam.createdBy?.department === selectedDepartment
-    );
   useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchQuery,
-    filterStatus,
-    selectedMonth,
-    selectedYear,
-    selectedDepartment,
-  ]);
-  // === Phân trang trên dữ liệu đã lọc ===
-  const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentExams = filteredExams.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+    const fetchData = async () => {
+      const { data, totalPage } = await getExams({
+        page,
+        query,
+        status: status || undefined,
+        department,
+        month,
+        year,
+      });
+      setExams(data);
+      setTotalPage(totalPage);
+    };
+    fetchData();
+    refetchExams();
+  }, [page, query, status, department, month, year]);
 
   return (
     <>
-      {/* Thanh tìm kiếm + Bộ lọc */}
-      <div className="flex flex-wrap justify-between gap-4 mb-4">
-        <div className="flex-1 min-w-[250px]">
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
+      {/* Bộ lọc */}
+      <div className="flex flex-col gap-2 mb-4">
+        <div className="flex justify-between gap-4">
+          <div className="flex-1 min-w-[250px]">
+            <SearchBar
+              searchQuery={query}
+              setSearchQuery={(val) => {
+                const params = new URLSearchParams(window.location.search);
+                params.set("query", val);
+                params.set("page", "1");
+                router.push(`?${params.toString()}`);
+              }}
+            />
+          </div>
+
           <FilterPanel
+            selectedDepartment={department}
+            setSelectedDepartment={(val) => {
+              const params = new URLSearchParams(window.location.search);
+              val ? params.set("department", val) : params.delete("department");
+              params.set("page", "1");
+              router.push(`?${params.toString()}`);
+            }}
             selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
+            setSelectedMonth={(val) => {
+              setSelectedMonth(val);
+              const params = new URLSearchParams(window.location.search);
+              val ? params.set("month", val) : params.delete("month");
+              params.set("page", "1");
+              router.push(`?${params.toString()}`);
+            }}
             selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            selectedDepartment={selectedDepartment}
-            setSelectedDepartment={setSelectedDepartment}
+            setSelectedYear={(val) => {
+              setSelectedYear(val);
+              const params = new URLSearchParams(window.location.search);
+              val ? params.set("year", val) : params.delete("year");
+              params.set("page", "1");
+              router.push(`?${params.toString()}`);
+            }}
           />
+        </div>
+
+        <div className="mt-1">
+          <FilterStatus />
         </div>
       </div>
 
-      {/* Bộ lọc trạng thái */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {[
-          { key: "ALL", label: "Tất cả" },
-          { key: "DANG_CHO", label: "Đang chờ" },
-          { key: "DA_DUYET", label: "Đã duyệt" },
-          { key: "TU_CHOI", label: "Đã từ chối" },
-        ].map(({ key, label }) => (
-          <Button
-            key={key}
-            variant={filterStatus === key ? "default" : "outline"}
-            onClick={() => {
-              setFilterStatus(key);
-              setCurrentPage(1); // Reset về trang 1 khi thay đổi lọc
-            }}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
-
+      {/* Bảng đề thi */}
       <Table>
         <TableHeader>
-          <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-            <TableHead className="min-w-[100px] text-center">
-              Tên đề thi
-            </TableHead>
-            <TableHead className="min-w-[80px] text-center">
-              Trạng thái
-            </TableHead>
-            <TableHead className="min-w-[130px] text-center">
-              Người soạn đề
-            </TableHead>
-            {/* <TableHead className="text-center">Email người tạo</TableHead> */}
-            <TableHead className="min-w-[130px] text-center">
-              Phòng ban
-            </TableHead>
+          <TableRow className="bg-gray-100 dark:bg-gray-800">
+            <TableHead className="text-center">Tên đề thi</TableHead>
+            <TableHead className="text-center">Trạng thái</TableHead>
+            <TableHead className="text-center">Người soạn đề</TableHead>
+            <TableHead className="text-center">Phòng ban</TableHead>
             <TableHead className="text-center">Ngày gửi</TableHead>
-            <TableHead className="min-w-[120px] text-center">
-              Ngày xác nhận
-            </TableHead>
+            <TableHead className="text-center">Ngày xác nhận</TableHead>
             <TableHead className="text-center">Nội dung</TableHead>
             <TableHead className="text-center">Xác nhận</TableHead>
           </TableRow>
         </TableHeader>
 
-        <TableBody className="dark:border-gray-700">
-          {currentExams.map((exam) => (
-            <TableRow key={exam.id} className="min-h-[100px]">
-              <TableCell className=" py-4 text-gray-500 dark:text-gray-400">
-                {exam.title}
-              </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
+        <TableBody>
+          {exams.map((exam) => (
+            <TableRow key={exam.id}>
+              <TableCell>{exam.title}</TableCell>
+              <TableCell>
                 <Badge
-                  className={
-                    {
-                      DANG_CHO: "bg-yellow-500 text-white",
-                      DA_DUYET: "bg-green-500 text-white",
-                      TU_CHOI: "bg-red-500 text-white",
-                    }[exam.status] || "bg-gray-400 text-white"
-                  }
+                  className={{
+                    DANG_CHO: "bg-yellow-500 text-white",
+                    DA_DUYET: "bg-green-500 text-white",
+                    TU_CHOI: "bg-red-500 text-white",
+                  }[exam.status] || "bg-gray-400 text-white"}
                 >
                   {statusMap[exam.status] || exam.status}
                 </Badge>
               </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.createdBy?.fullName || "Không rõ"}
+              <TableCell>{exam.createdBy?.fullName || "Không rõ"}</TableCell>
+              <TableCell>
+                {departmentMap[exam.createdBy?.department] || "Không rõ"}
               </TableCell>
-              {/* <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.createdBy?.email || "Không rõ"}
-              </TableCell> */}
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {departmentMap[exam.createdBy?.department] ||
-                  exam.createdBy?.department ||
-                  "Không rõ"}
+              <TableCell>
+                {exam.createdAt ? format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm") : ""}
               </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.createdAt
-                  ? format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm")
-                  : ""}
+              <TableCell>
+                {exam.updatedAt ? format(new Date(exam.updatedAt), "dd/MM/yyyy HH:mm") : ""}
               </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                {exam.updatedAt
-                  ? format(new Date(exam.updatedAt), "dd/MM/yyyy HH:mm")
-                  : ""}
-              </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                <div className="flex flex-wrap justify-center items-center gap-2">
+              <TableCell>
+                <div className="flex gap-2 justify-center">
                   <Button
-                    variant={
-                      selectedExam?.id === exam.id ? "default" : "outline"
-                    }
-                    onClick={() =>
-                      setSelectedExam(
-                        selectedExam?.id === exam.id ? null : exam
-                      )
-                    }
+                    variant={selectedExam?.id === exam.id ? "default" : "outline"}
+                    onClick={() => setSelectedExam(selectedExam?.id === exam.id ? null : exam)}
                   >
                     {selectedExam?.id === exam.id ? "Đóng đề thi" : "Đề thi"}
                   </Button>
                   <Button
-                    variant={
-                      selectedAnswer?.id === exam.id ? "default" : "outline"
-                    }
-                    onClick={() =>
-                      setSelectedAnswer(
-                        selectedAnswer?.id === exam.id ? null : exam
-                      )
-                    }
+                    variant={selectedAnswer?.id === exam.id ? "default" : "outline"}
+                    onClick={() => setSelectedAnswer(selectedAnswer?.id === exam.id ? null : exam)}
                   >
                     {selectedAnswer?.id === exam.id ? "Đóng đáp án" : "Đáp án"}
                   </Button>
                 </div>
               </TableCell>
-              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                <div className="flex flex-wrap justify-center items-center gap-2">
-                  {exam.status === "DANG_CHO" ? (
-                    <>
-                      <ApproveButton
-                        exam={exam}
-                        pendingApproveExam={pendingApproveExam}
-                        setPendingApproveExam={setPendingApproveExam}
-                      />
-                      <RejectButton
-                        exam={exam}
-                        pendingRejectExam={pendingRejectExam}
-                        setPendingRejectExam={setPendingRejectExam}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-[90px] h-10" />
-                      <div className="w-[90px] h-10" />
-                    </>
-                  )}
-                </div>
+              <TableCell>
+                {exam.status === "DANG_CHO" ? (
+                  <div className="flex gap-2 justify-center">
+                    <ApproveButton
+                      exam={exam}
+                      pendingApproveExam={pendingApproveExam}
+                      setPendingApproveExam={setPendingApproveExam}
+                      onSuccess={refetchExams}
+                    />
+                    <RejectButton
+                      exam={exam}
+                      pendingRejectExam={pendingRejectExam}
+                      setPendingRejectExam={setPendingRejectExam}
+                      onSuccess={refetchExams}
+                    />
+                  </div>
+                ) : (
+                  <div className="h-10" />
+                )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
-      {/* Modal xem đề thi */}
       <Exam exam={selectedExam} onClose={() => setSelectedExam(null)} />
-      {/* Modal xem đáp án */}
-      <ExamAnswer
-        exam={selectedAnswer}
-        onClose={() => setSelectedAnswer(null)}
-      />
+      <ExamAnswer exam={selectedAnswer} onClose={() => setSelectedAnswer(null)} />
 
-      {/* Dieu huong phan trang*/}
-      <div className="flex justify-end items-center mt-4 gap-2">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Trang trước
-        </Button>
-        <span>
-          {totalPages === 0
-            ? "Trang 0 / 0"
-            : `Trang ${currentPage} / ${totalPages}`}
-        </span>
+      {/* Phân trang */}
 
-        <Button
-          variant="outline"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Trang sau
-        </Button>
-      </div>
+<div className="py-4">
+  <NavPagination totalPage={totalPage} />
+</div>
+
     </>
   );
 };

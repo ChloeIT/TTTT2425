@@ -1,10 +1,24 @@
 const secretaryService = require("../services/secretary.service");
 
 const secretaryController = {
-  getExamsForSecretary: async (req, res, next) => {
+  getSignedExams: async (req, res, next) => {
     try {
-      const exams = await secretaryService.getExamsWithDecryptedPasswords();
-      res.status(200).json({ data: exams });
+      const { department, month, page, query, year } =
+        secretaryService.validateQuerySignedExam(req);
+
+      const { data, totalPage } =
+        await secretaryService.getExamsWithDecryptedPasswords({
+          page,
+          query,
+          department,
+          month,
+          year,
+        });
+
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
     } catch (error) {
       next(error);
     }
@@ -21,9 +35,9 @@ const secretaryController = {
 
   sendNotification: async (req, res) => {
     try {
-      const { email, password ,titleExam } = req.body;
+      const { email, password, titleExam } = req.body;
 
-      await secretaryService.notifyUserByEmail(email, password,titleExam);
+      await secretaryService.notifyUserByEmail(email, password, titleExam);
       return res.status(200).json({ message: `Đã gửi thông báo tới ${email}` });
     } catch (error) {
       console.error("sendNotification error:", error);

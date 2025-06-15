@@ -2,41 +2,131 @@ const prisma = require("../libs/prisma");
 const { decrypt } = require("../libs/encrypt");
 const notificationService = require("./notification.service");
 const userService = require("./user.service");
+const {
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} = require("date-fns");
+const { Department, ExamStatus } = require("../generated/prisma");
+const LIMIT = 10;
+
 const secretaryService = {
-  getExamsWithDecryptedPasswords: async () => {
-    const exams = await prisma.exam.findMany({
-      where: {
-        status: "DA_DUYET",
-        password: {
-          not: null,
-        },
+  getExamsWithDecryptedPasswords: async ({
+    page = 1,
+    query,
+    month,
+    year,
+    department,
+  }) => {
+    const where = {
+      status: "DA_DUYET",
+      password: {
+        not: null,
       },
-      include: {
+      ...(query && {
+        title: {
+          contains: query,
+        },
+      }),
+      ...(department && {
         createdBy: {
-          select: {
-            fullName: true,
-            email: true,
-            department: true,
-            username: true,
+          department,
+        },
+      }),
+    };
+
+    if (month && year) {
+      const from = startOfMonth(new Date(year, month - 1));
+      const to = endOfMonth(new Date(year, month - 1));
+      where.createdAt = {
+        gte: from,
+        lte: to,
+      };
+    } else if (year) {
+      const from = startOfYear(new Date(year, 0));
+      const to = endOfYear(new Date(year, 0));
+      where.createdAt = {
+        gte: from,
+        lte: to,
+      };
+    }
+
+    const [exams, count] = await prisma.$transaction([
+      prisma.exam.findMany({
+        where,
+        include: {
+          createdBy: {
+            select: {
+              fullName: true,
+              email: true,
+              department: true,
+              username: true,
+            },
           },
         },
-
-      },
-      orderBy: {
-        createdAt: "desc",
-
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: (page - 1) * LIMIT,
+        take: LIMIT,
+      }),
+      prisma.exam.count({ where }),
+    ]);
 
     const examsWithDecryptedPasswords = exams.map((exam) => {
-      const { password, ...rest } = exam; // loại bỏ password mã hóa
+      const { password, ...rest } = exam;
       return {
         ...rest,
         decryptedPassword: password ? decrypt(password) : null,
       };
     });
 
-    return examsWithDecryptedPasswords;
+    const totalPage = Math.ceil(count / LIMIT);
+
+    return {
+      data: examsWithDecryptedPasswords,
+      totalPage,
+    };
+  },
+
+  validateQuerySignedExam: (req) => {
+    let { query, department, month, year, status } = req.query;
+    const page = Number(req.query.page) || 1;
+
+    // Validate department
+    if (!Object.values(Department).includes(department)) {
+      department = undefined;
+    }
+
+    // Validate month
+    const parsedMonth = parseInt(month);
+    if (isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+      month = undefined;
+    } else {
+      month = parsedMonth;
+    }
+
+    // Validate year (trong vòng 10 năm từ hiện tại)
+    const currentYear = new Date().getFullYear();
+    const parsedYear = parseInt(year);
+    if (
+      isNaN(parsedYear) ||
+      parsedYear < currentYear - 10 ||
+      parsedYear > currentYear
+    ) {
+      year = undefined;
+    } else {
+      year = parsedYear;
+    }
+
+    return {
+      query,
+      department,
+      month,
+      year,
+      page,
+    };
   },
   // getExamsWithEncryptedPasswords: async () => {
   //   const exams = await prisma.exam.findMany({
@@ -77,7 +167,7 @@ const secretaryService = {
       },
     });
 
-    const groupedEmails = {}; 
+    const groupedEmails = {};
 
     users.forEach((user) => {
       if (user.email && user.department) {

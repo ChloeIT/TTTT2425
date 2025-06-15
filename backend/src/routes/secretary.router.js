@@ -2,24 +2,19 @@ const { Router } = require("express");
 const secretaryController = require("../controllers/secretary.controller");
 const requireLogin = require("../middlewares/authMiddleware");
 const permitRoles = require("../middlewares/roleMiddleware");
-const {
-  validateData,
+const { validateData } = require("../middlewares/validationMiddleware");
 
-} = require("../middlewares/validationMiddleware");
-
-const {
-  createNotificationSchema,
-} = require("../schemas/secretary.schema");
-
+const { createNotificationSchema } = require("../schemas/secretary.schema");
 
 const examRouter = Router();
 
 examRouter.get(
-  "/allExams",
+  "/signed-exam",
   requireLogin,
   permitRoles("THU_KY"),
-  secretaryController.getExamsForSecretary
+  secretaryController.getSignedExams
 );
+
 examRouter.get(
   "/getEmailUsers",
   requireLogin,
@@ -33,6 +28,5 @@ examRouter.post(
   validateData(createNotificationSchema),
   secretaryController.sendNotification
 );
-
 
 module.exports = examRouter;

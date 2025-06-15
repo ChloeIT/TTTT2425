@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,7 +16,7 @@ import { rejectExam } from "@/actions/sign-action";
 import { rejectExamSchema } from "@/schemas/sign.schema";
 import { useRouter } from "next/navigation";
 
-const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
+const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam, onSuccess }) => {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,14 +33,18 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
         setLoading(false);
         return;
       }
-
+  
       const result = await rejectExam(exam.id.toString(), message.trim());
-      console.log("Kết quả từ chối:", result);
-
+  
       if (result?.success) {
         toast.success(result.message || "Đã từ chối đề thi thành công!");
+
         setTimeout(() => {
-          router.refresh();
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.refresh();
+          }
         }, 1500);
       } else {
         toast.error("Từ chối thất bại: " + (result?.message || "Không rõ lỗi"));
@@ -54,6 +58,7 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
       setLoading(false);
     }
   };
+  
 
   return (
     <>
@@ -91,7 +96,7 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam }) => {
 
           <DialogFooter className="flex justify-end gap-2">
             <Button
-              className="bg-red-100 text-red-700 hover:bg-red-20"
+              className="bg-red-100 text-red-700 hover:bg-red-200"
               onClick={handleReject}
               disabled={loading}
             >

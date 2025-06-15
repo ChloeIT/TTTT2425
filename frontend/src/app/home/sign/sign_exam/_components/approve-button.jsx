@@ -16,7 +16,7 @@ import { approveExam } from "@/actions/sign-action";
 import { approveExamSchema } from "@/schemas/sign.schema";
 import { useRouter } from "next/navigation";
 
-const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
+const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam, onSuccess }) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
   const handleApprove = async () => {
     setLoading(true);
     try {
-      // Validate password trước khi approve
+      // Validate password
       const approveValidation = approveExamSchema.safeParse({ password });
       if (!approveValidation.success) {
         const errors = approveValidation.error.format();
@@ -34,14 +34,18 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
         setLoading(false);
         return;
       }
-
+  
       const approveResult = await approveExam(exam.id.toString(), password);
-      console.log("Kết quả duyệt:", approveResult);
-
+  
       if (approveResult?.success) {
         toast.success("Đã duyệt đề thi thành công!");
+
         setTimeout(() => {
-          router.refresh();
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.refresh();
+          }
         }, 1500);
       } else {
         toast.error(
@@ -57,7 +61,7 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam }) => {
       setLoading(false);
     }
   };
-
+  
   return (
     <>
       <Button

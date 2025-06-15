@@ -51,7 +51,7 @@ const ClientAnswerTonggle = ({ data }) => {
       <div className="w-full max-w-6xl">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Trang Đề thi
+            Danh sách Đề thi và Đáp án đã kí
           </h1>
         </div>
 

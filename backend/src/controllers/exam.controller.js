@@ -1,6 +1,7 @@
 const examService = require("../services/exam.service");
 const { cloudinary } = require("../libs/cloudinary");
 const { cloudinary: cloudinaryArchive } = require("../libs/cloudinary_archive");
+const { Department, ExamStatus } = require("../generated/prisma");
 
 const examController = {
   createExam: async (req, res, next) => {
@@ -290,6 +291,35 @@ const examController = {
       const id = Number(req.params.id);
       await examService.deleteExam(id);
       res.status(200).json({ message: "Đã xóa đề thi thành công" });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getWaitingExamByBanGiamHieu: async (req, res, next) => {
+    try {
+      // validate department, status, month, year is valid
+      const { department, month, page, query, year } =
+        examService.validateQueryGetExamsByStatus(req);
+
+      // truyền department=MAC_DINH...
+      //truyền month >=1 và <=12
+      //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
+      //status= DANG_CHO...
+      //để query
+      const status = ExamStatus.DANG_CHO;
+      const { data, totalPage } = await examService.getExamsByStatus({
+        page,
+        query,
+        status,
+        department,
+        month,
+        year,
+      });
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
     } catch (error) {
       next(error);
     }

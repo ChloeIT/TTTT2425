@@ -17,6 +17,7 @@ const {
   openExamSchema,
   updateExamDocumentSchema,
 } = require("../schemas/exam.schema");
+const { Role } = require("../generated/prisma");
 
 const examRouter = Router();
 
@@ -112,5 +113,12 @@ examRouter.patch(
 );
 
 // examRouter.delete("/:id", requireLogin, examController.deleteExam);
+
+examRouter.get(
+  "/waiting/ban-giam-hieu",
+  requireLogin,
+  permitRoles(Role.BAN_GIAM_HIEU),
+  examController.getWaitingExamByBanGiamHieu
+);
 
 module.exports = examRouter;

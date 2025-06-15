@@ -36,7 +36,7 @@ export const getExams = async () => {
     };
   }
 };
-
+//UI đè thi BGH
 export const ApprovedExamsList = async ({ page = 1, query }) => {
   try {
     const res = await instanceAPI.get("/exams/all", {
@@ -62,7 +62,7 @@ export const ApprovedExamsList = async ({ page = 1, query }) => {
   }
 };
 
-
+//UI đề thi người gác
 export const approvedFull = async ({ page = 1, query }) => {
   try {
     const res = await instanceAPI.get("/exams/approved", {

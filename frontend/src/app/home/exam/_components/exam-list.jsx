@@ -120,7 +120,7 @@ const ExamViewList = ({ page, query, token }) => {
         <CardContent>
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
-              <TableRow>
+              <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
                 <TableHead >
                   Tên đề thi
                 </TableHead>

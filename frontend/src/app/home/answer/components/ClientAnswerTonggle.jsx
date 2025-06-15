@@ -14,9 +14,18 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
 
 const ClientAnswerTonggle = ({ data }) => {
   const [loadingId, setLoadingId] = useState(null);
+
   const examWithFile = data.filter((exam) => exam.questionFile);
 
   const handleGetSignedFile = async (documentId, type) => {
@@ -53,12 +62,12 @@ const ClientAnswerTonggle = ({ data }) => {
       setLoadingId(null);
     }
   };
-
-  return (
+ console.log("examWithFile", examWithFile) ;
+  return ( 
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Danh sách Đề Thi
+          Danh sách Đề Thi và Đáp Án
         </h1>
       </div>
 
@@ -66,8 +75,10 @@ const ClientAnswerTonggle = ({ data }) => {
         <CardContent>
           <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
                 <TableHead className="text-center">Tên đề thi</TableHead>
+                <TableHead className="text-center">Người tạo</TableHead>
+                <TableHead className="text-center">Khoa</TableHead>
                 <TableHead className="text-center">Ngày ký</TableHead>
                 <TableHead className="text-center">Xem Đề thi</TableHead>
                 <TableHead className="text-center">Xem Đáp án</TableHead>
@@ -77,39 +88,38 @@ const ClientAnswerTonggle = ({ data }) => {
               {examWithFile.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={4}
+                    colSpan={6}
                     className="text-center py-4 text-gray-500 dark:text-gray-400"
                   >
                     Không có dữ liệu
                   </TableCell>
                 </TableRow>
               ) : (
-                examWithFile.map((exam) => (
+                examWithFile.map((document) => (
                   <TableRow
-                    key={exam.id}
+                    key={document?.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <TableCell className="text-center font-bold text-blue-800 dark:text-blue-300">
-                      {exam.exam?.title || "Không có tên đề thi"}
+                      {document?.exam?.title || "Không có tên đề thi"}
                     </TableCell>
                     <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
-                      {new Intl.DateTimeFormat("vi-VN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: "Asia/Ho_Chi_Minh",
-                      }).format(new Date(exam.createdAt))}
+                      {document?.exam?.createdBy?.fullName || "Không rõ"}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
+                      {departmentMap[document?.exam?.createdBy?.department] || "Không rõ"}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
+                      {format(document?.createdAt, "dd-MM-yyyy hh:mm")}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
                         className="w-full"
                         variant="default"
-                        onClick={() => handleGetSignedFile(exam.id, "question")}
-                        disabled={loadingId === `${exam.id}-question`}
+                        onClick={() => handleGetSignedFile(document?.id, "question")}
+                        disabled={loadingId === `${document?.id}-question`}
                       >
-                        {loadingId === `${exam.id}-question`
+                        {loadingId === `${document.id}-question`
                           ? "Đang tải..."
                           : "Xem Đề thi"}
                       </Button>
@@ -118,10 +128,10 @@ const ClientAnswerTonggle = ({ data }) => {
                       <Button
                         className="w-full"
                         variant="secondary"
-                        onClick={() => handleGetSignedFile(exam.id, "answer")}
-                        disabled={loadingId === `${exam.id}-answer`}
+                        onClick={() => handleGetSignedFile(document?.id, "answer")}
+                        disabled={loadingId === `${document.id}-answer`}
                       >
-                        {loadingId === `${exam.id}-answer`
+                        {loadingId === `${document.id}-answer`
                           ? "Đang tải..."
                           : "Xem Đáp án"}
                       </Button>

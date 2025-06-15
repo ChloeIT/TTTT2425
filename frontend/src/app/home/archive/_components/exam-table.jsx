@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 const ExamList = ({ exams, totalPage, currentPage, token }) => {
   const [pendingUploadExam, setPendingUploadExam] = useState(null);
@@ -190,7 +191,7 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
                     "Không rõ"}
                 </TableCell>
                 <TableCell className="text-center text-black dark:text-gray-400">
-                  {formatDate(exam.updatedAt)}
+                  {format(exam?.updatedAt, "dd-MM-yyyy hh:mm")}
                 </TableCell>
                 <TableCell className="text-center text-black dark:text-gray-400">
                   <div className="flex flex-col justify-center items-center gap-2">

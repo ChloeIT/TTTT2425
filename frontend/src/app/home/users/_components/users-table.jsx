@@ -29,13 +29,13 @@ export const UsersTable = ({ data = [], totalPage }) => {
       <Table>
         <TableHeader>
           <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-            <TableHead>Họ và tên</TableHead>
-            <TableHead>Địa chỉ email</TableHead>
-            <TableHead>Vai trò</TableHead>
-            <TableHead>Khoa công tác</TableHead>
+            <TableHead className="min-w-[100px]">Họ và tên</TableHead>
+            <TableHead className="min-w-[200px]">Địa chỉ email</TableHead>
+            <TableHead className="min-w-[100px]">Vai trò</TableHead>
+            <TableHead className="min-w-[200px]">Khoa công tác</TableHead>
 
-            <TableHead>Hành động</TableHead>
-            <TableHead>Trạng thái</TableHead>
+            <TableHead className="min-w-[100px]">Hành động</TableHead>
+            <TableHead className="min-w-[100px]">Trạng thái</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,4 +72,4 @@ export const UsersTable = ({ data = [], totalPage }) => {
       </div>
     </>
   );
-};  
+};

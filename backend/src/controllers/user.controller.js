@@ -39,7 +39,11 @@ const userController = {
       }
       // Ban giám hiệu có thể cập nhật vai trò của ban giám hiệu khác
       // mà không thể cập nhật vai trò của chính mình
-      if (req.user.id == user.id && user.role === Role.BAN_GIAM_HIEU) {
+      if (
+        req.user.id == user.id &&
+        user.role === Role.BAN_GIAM_HIEU &&
+        role !== Role.BAN_GIAM_HIEU
+      ) {
         throw new Error("Không thể cập nhật vai trò cho chính mình");
       }
       await userService.updateUser(userId, {

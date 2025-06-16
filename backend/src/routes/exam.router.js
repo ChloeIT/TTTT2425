@@ -40,8 +40,17 @@ examRouter.get(
   // permitRoles("BAN_GIAM_HIEU"),
   examController.getAllExams
 );
+
 //user
 examRouter.get("/approved", requireLogin, examController.getAllExams);
+
+//Van thu
+examRouter.get(
+  "/archive",
+  requireLogin,
+  permitRoles("VAN_THU"),
+  examController.getExamsForArchive
+);
 
 //lấy danh sách đề thi theo người soạn ( user hiện tại đang đăng nhập)
 examRouter.get("/", requireLogin, examController.getExams);

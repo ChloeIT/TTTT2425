@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -26,6 +28,8 @@ export default function ExamTable({ exams, title }) {
           expiresAt: result.data.expiresAt,
         },
       }));
+    } else {
+      toast.error(result.message || "Không thể tải file");
     }
   };
 
@@ -35,6 +39,16 @@ export default function ExamTable({ exams, title }) {
       fetchSignedUrls(examId);
     }
   };
+
+  // Refetch exams when a new upload succeeds
+  useEffect(() => {
+    const handleRefresh = () => {
+      // Refetch logic could be implemented here if needed, but for now, rely on parent re-render
+      console.log("Exam uploaded, consider refetching if needed");
+    };
+    window.addEventListener("examUploadSuccess", handleRefresh);
+    return () => window.removeEventListener("examUploadSuccess", handleRefresh);
+  }, []);
 
   const getStatusText = (status) => {
     switch (status) {
@@ -61,12 +75,12 @@ export default function ExamTable({ exams, title }) {
             <TableHead>Trạng thái</TableHead>
             <TableHead>Ngày tạo</TableHead>
             {title === "Danh sách đề thi bị từ chối" && (
-              <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+              <TableHead className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
                 Ngày cập nhật
               </TableHead>
             )}
             {title === "Danh sách đề thi bị từ chối" && (
-              <TableHead className="text-center dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 min-w-[100px]">
+              <TableHead className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
                 Ghi chú
               </TableHead>
             )}
@@ -85,7 +99,7 @@ export default function ExamTable({ exams, title }) {
           )}
           {exams.map((exam) => (
             <TableRow key={exam.id} className="dark:border-gray-700">
-              <TableCell >
+              <TableCell>
                 <span className="px-3 text-lg font-bold dark:text-gray-100">
                   {exam.title}
                 </span>

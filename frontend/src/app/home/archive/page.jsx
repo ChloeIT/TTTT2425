@@ -13,10 +13,17 @@ export async function generateMetadata() {
 }
 
 const ArchivePage = async ({ searchParams }) => {
-  const { page, query } = await searchParams;
+  const { page, query, department, month, year } = await searchParams;
   const currentPage = parseToNumber(page, 1);
 
-  const { data, totalPage } = await getExams({ page: currentPage, query });
+  const { data, totalPage } = await getExams({
+    page: currentPage,
+    query: query || "",
+    department: department || "",
+    month: month || "",
+    year: year || "",
+  });
+
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value || "";
 
@@ -41,6 +48,10 @@ const ArchivePage = async ({ searchParams }) => {
             totalPage={totalPage}
             currentPage={currentPage}
             token={token}
+            searchQuery={query || ""}
+            selectedDepartment={department || ""}
+            selectedMonth={month || ""}
+            selectedYear={year || ""}
           />
         </CardContent>
       </Card>

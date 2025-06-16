@@ -14,6 +14,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { NavPagination } from "@/components/nav-pagination";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -28,28 +29,43 @@ const departmentMap = {
 const ITEMS_PER_PAGE = 5;
 
 const ClientAnswerTonggle = ({ data }) => {
-  const [loadingId, setLoadingId] = useState(null);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const pageParam = Number(searchParams.get("page")) || 1;
-  const [currentPage, setCurrentPage] = useState(pageParam);
+  const keywordParam = searchParams.get("search") || "";
 
+  const [currentPage, setCurrentPage] = useState(pageParam);
+  const [searchKeyword, setSearchKeyword] = useState(keywordParam);
+  const [loadingId, setLoadingId] = useState(null);
+
+  // Đồng bộ page khi đổi URL
   useEffect(() => {
     setCurrentPage(pageParam);
   }, [pageParam]);
 
-  const examWithFile = useMemo(() => data.filter((exam) => exam.questionFile), [data]);
+  // Cập nhật URL khi searchKeyword thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("search", searchKeyword);
+    params.set("page", "1"); // Reset về trang 1 khi tìm kiếm mới
+    router.push(`?${params.toString()}`);
+  }, [searchKeyword]);
 
+  // Lọc theo đề thi có file
+  const examWithFile = useMemo(() => {
+    return data.filter((exam) => exam.questionFile);
+  }, [data]);
+
+  // Lọc theo từ khóa
   const filteredData = useMemo(() => {
-    return examWithFile.filter((doc) =>
-      doc?.exam?.title?.toLowerCase().includes(searchKeyword.toLowerCase())
+    return examWithFile.filter((document) =>
+      document?.exam?.title?.toLowerCase().includes(searchKeyword.toLowerCase())
     );
   }, [examWithFile, searchKeyword]);
 
+  // Phân trang
   const totalPage = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
@@ -89,39 +105,43 @@ const ClientAnswerTonggle = ({ data }) => {
   };
 
   const handlePageChange = (page) => {
-    router.push(`?page=${page}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`?${params.toString()}`);
   };
 
   return (
-    <div className="flex flex-col gap-y-4 py-4 h-full">
-      <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Danh sách Đề Thi và Đáp Án
-        </h1>
-      </div>
+   <div className="flex flex-col gap-y-4 py-4 h-full">
+  {/* Tiêu đề */}
+  <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
+    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+      Danh sách Đề Thi và Đáp Án
+    </h1>
+  </div>
+
+  {/* Ô tìm kiếm */}
+  <div className="px-6">
+    <Input
+      type="text"
+      placeholder="Tìm kiếm tên đề thi..."
+      className="w-64"
+      value={searchKeyword}
+      onChange={(e) => setSearchKeyword(e.target.value)}
+    />
+  </div>
+
 
       <Card>
         <CardContent>
-          {/* Search input */}
-          <div className="flex items-center justify-between mb-4">
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên đề thi..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md w-1/3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-            />
-          </div>
-
           <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
-                <TableHead className="text-center min-w-[90px]">Tên đề thi</TableHead>
-                <TableHead className="text-center min-w-[90px]">Người tạo</TableHead>
-                <TableHead className="text-center min-w-[90px]">Khoa</TableHead>
-                <TableHead className="text-center min-w-[90px]">Ngày ký</TableHead>
-                <TableHead className="text-center min-w-[90px]">Xem Đề thi</TableHead>
-                <TableHead className="text-center min-w-[90px]">Xem Đáp án</TableHead>
+                <TableHead className="text-center">Tên đề thi</TableHead>
+                <TableHead className="text-center">Người tạo</TableHead>
+                <TableHead className="text-center">Khoa</TableHead>
+                <TableHead className="text-center">Ngày ký</TableHead>
+                <TableHead className="text-center">Xem Đề thi</TableHead>
+                <TableHead className="text-center">Xem Đáp án</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import UploadExamButton from "./upload-exam-button";
-import SearchBar from "../../_components/search-bar";
+import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../_components/filter-department";
 import { getFile } from "@/actions/archive-action";
 import {
@@ -46,7 +46,7 @@ const ExamList = ({
   const searchParams = useSearchParams();
 
   const [fileUrls, setFileUrls] = useState({});
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || "");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedMonth, setSelectedMonth] = useState(initialMonth || "");
   const [selectedYear, setSelectedYear] = useState(initialYear || "");
   const [selectedDepartment, setSelectedDepartment] = useState(
@@ -54,7 +54,8 @@ const ExamList = ({
   );
 
   useEffect(() => {
-    setSearchQuery(initialSearchQuery || "");
+    const queryParam = searchParams.get("query") || "";
+    setSearchQuery(queryParam);
     setSelectedMonth(initialMonth || "");
     setSelectedYear(initialYear || "");
     setSelectedDepartment(initialDepartment || "");
@@ -163,8 +164,8 @@ const ExamList = ({
         <div className="flex justify-between gap-4">
           <div className="flex-1 min-w-[250px]">
             <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={handleSearch}
+              placeholder="Tìm kiếm đề thi theo tên..."
+              isPagination={true}
             />
           </div>
           <FilterPanel

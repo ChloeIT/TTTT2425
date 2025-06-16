@@ -4,18 +4,18 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
 const SearchBar = ({ searchQuery, setSearchQuery }) => {
-  const [tempQuery, setTempQuery] = useState(searchQuery); 
+  const [tempQuery, setTempQuery] = useState(searchQuery);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       setSearchQuery(tempQuery); // Chỉ cập nhật sau 500ms không gõ nữa
-    }, 500); 
+    }, 500);
 
-    return () => clearTimeout(delayDebounce); 
+    return () => clearTimeout(delayDebounce);
   }, [tempQuery]);
 
   useEffect(() => {
-    setTempQuery(searchQuery); 
+    setTempQuery(searchQuery);
   }, [searchQuery]);
 
   return (

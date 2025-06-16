@@ -161,23 +161,25 @@ const ExamList = ({
   return (
     <>
       <div className="flex flex-col gap-2 mb-4">
-        <div className="flex justify-between gap-4">
-          <div className="flex-1 min-w-[250px]">
+        <div className="flex flex-col lg:flex-row justify-between gap-4">
+          <div className="w-full lg:w-auto lg:min-w-[250px]">
             <SearchBar
               placeholder="Tìm kiếm đề thi theo tên..."
               isPagination={true}
             />
           </div>
-          <FilterPanel
-            selectedDepartment={selectedDepartment}
-            setSelectedDepartment={(val) =>
-              handleFilterChange("department", val)
-            }
-            selectedMonth={selectedMonth}
-            setSelectedMonth={(val) => handleFilterChange("month", val)}
-            selectedYear={selectedYear}
-            setSelectedYear={(val) => handleFilterChange("year", val)}
-          />
+          <div className="w-full lg:w-auto">
+            <FilterPanel
+              selectedDepartment={selectedDepartment}
+              setSelectedDepartment={(val) =>
+                handleFilterChange("department", val)
+              }
+              selectedMonth={selectedMonth}
+              setSelectedMonth={(val) => handleFilterChange("month", val)}
+              selectedYear={selectedYear}
+              setSelectedYear={(val) => handleFilterChange("year", val)}
+            />
+          </div>
         </div>
       </div>
 

@@ -105,13 +105,20 @@ const Notify = ({ isOpen, onClose, exam }) => {
     }
   };
 
+    const departmentMap = {
+    MAC_DINH: "Mặc định",
+    LY_LUAN_CO_SO: "Lý luận cơ sở",
+    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+    XAY_DUNG_DANG: "Xây dựng Đảng",
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-lg sm:w-full">
           <DialogHeader>
-            <DialogTitle>Gửi thông báo cho: {exam?.title}</DialogTitle>
-            <DialogDescription>Thông báo</DialogDescription>
+            <DialogTitle>Gửi mật khẩu bài thi : {exam?.title}</DialogTitle>
+            <DialogDescription>Vui lòng chọn email phù hợp</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
@@ -130,7 +137,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
                   {Object.keys(groupedEmails).length > 0 ? (
                     Object.keys(groupedEmails).map((department) => (
                       <SelectItem key={department} value={department}>
-                        {department}
+                        {departmentMap[department]}
                       </SelectItem>
                     ))
                   ) : (

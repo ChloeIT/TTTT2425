@@ -96,7 +96,7 @@ const ClientAnswerTonggle = ({ data }) => {
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Đề Thi và Đáp Án
+          Danh sách Đề Thi và Đáp Án
         </h1>
       </div>
 
@@ -116,12 +116,12 @@ const ClientAnswerTonggle = ({ data }) => {
           <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
-                <TableHead className="text-center">Tên đề thi</TableHead>
-                <TableHead className="text-center">Người tạo</TableHead>
-                <TableHead className="text-center">Khoa</TableHead>
-                <TableHead className="text-center">Ngày ký</TableHead>
-                <TableHead className="text-center">Xem Đề thi</TableHead>
-                <TableHead className="text-center">Xem Đáp án</TableHead>
+                <TableHead className="text-center min-w-[90px]">Tên đề thi</TableHead>
+                <TableHead className="text-center min-w-[90px]">Người tạo</TableHead>
+                <TableHead className="text-center min-w-[90px]">Khoa</TableHead>
+                <TableHead className="text-center min-w-[90px]">Ngày ký</TableHead>
+                <TableHead className="text-center min-w-[90px]">Xem Đề thi</TableHead>
+                <TableHead className="text-center min-w-[90px]">Xem Đáp án</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

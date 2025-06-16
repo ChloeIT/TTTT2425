@@ -31,11 +31,11 @@ const FilterPanel = ({
   ];
 
   return (
-    <div className="flex flex-wrap gap-4 mb-4">
+    <div className="flex flex-wrap md:flex-nowrap gap-4 mb-4">
       <select
         value={selectedMonth}
         onChange={(e) => setSelectedMonth(e.target.value)}
-        className="border rounded px-2 py-1"
+        className="border rounded px-2 py-1 w-full md:w-auto min-w-[120px]"
       >
         {months.map((m) => (
           <option key={m.value} value={m.value}>
@@ -47,7 +47,7 @@ const FilterPanel = ({
       <select
         value={selectedYear}
         onChange={(e) => setSelectedYear(e.target.value)}
-        className="border rounded px-2 py-1"
+        className="border rounded px-2 py-1 w-full md:w-auto min-w-[120px]"
       >
         {years.map((y) => (
           <option key={y.value} value={y.value}>
@@ -59,7 +59,7 @@ const FilterPanel = ({
       <select
         value={selectedDepartment}
         onChange={(e) => setSelectedDepartment(e.target.value)}
-        className="border rounded px-2 py-1"
+        className="border rounded px-2 py-1 w-full md:w-auto min-w-[150px]"
       >
         {departments.map((d) => (
           <option key={d.value} value={d.value}>
@@ -68,6 +68,7 @@ const FilterPanel = ({
         ))}
       </select>
     </div>
+
   );
 };
 

@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, EyeOff } from "lucide-react";
 import Notify from "./notify";
 
-import SearchBar from "../../_components/search-bar";
+// import SearchBar from "../../_components/search-bar";
+import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../_components/filter-department";
 import { NavPagination } from "@/components/nav-pagination";
 import { format } from "date-fns";
@@ -73,7 +74,7 @@ const PasswordList = ({ passwords, totalPage }) => {
       {/* Bộ lọc */}
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1 min-w-[250px]">
-          <SearchBar
+          {/* <SearchBar
             searchQuery={query}
             setSearchQuery={(val) => {
               const params = new URLSearchParams(window.location.search);
@@ -81,7 +82,11 @@ const PasswordList = ({ passwords, totalPage }) => {
               params.set("page", "1");
               router.push(`?${params.toString()}`);
             }}
-          />
+          /> */}
+           <SearchBar
+                  placeholder="Tìm kiếm đề thi..."
+                  isPagination
+            />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel

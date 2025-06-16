@@ -161,131 +161,134 @@ const ExamList = ({
   return (
     <>
       <div className="flex flex-col gap-2 mb-4">
-        <div className="flex justify-between gap-4">
-          <div className="flex-1 min-w-[250px]">
+        <div className="flex flex-col lg:flex-row justify-between gap-4">
+          <div className="w-full lg:w-auto lg:min-w-[250px]">
             <SearchBar
               placeholder="Tìm kiếm đề thi theo tên..."
               isPagination={true}
             />
           </div>
-          <FilterPanel
-            selectedDepartment={selectedDepartment}
-            setSelectedDepartment={(val) =>
-              handleFilterChange("department", val)
-            }
-            selectedMonth={selectedMonth}
-            setSelectedMonth={(val) => handleFilterChange("month", val)}
-            selectedYear={selectedYear}
-            setSelectedYear={(val) => handleFilterChange("year", val)}
-          />
+          <div className="w-full lg:w-auto">
+            <FilterPanel
+              selectedDepartment={selectedDepartment}
+              setSelectedDepartment={(val) =>
+                handleFilterChange("department", val)
+              }
+              selectedMonth={selectedMonth}
+              setSelectedMonth={(val) => handleFilterChange("month", val)}
+              selectedYear={selectedYear}
+              setSelectedYear={(val) => handleFilterChange("year", val)}
+            />
+          </div>
         </div>
       </div>
+      <div className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
+              <TableHead className="min-w-[150px] text-center">
+                Tên đề thi
+              </TableHead>
+              <TableHead className="min-w-[130px] text-center">
+                Họ tên người tạo
+              </TableHead>
+              <TableHead className="min-w-[130px] text-center">
+                Phòng ban
+              </TableHead>
+              <TableHead className="min-w-[120px] text-center">
+                Ngày thi
+              </TableHead>
+              <TableHead className="text-center">Tải về</TableHead>
+              <TableHead className="text-center">Đăng tải</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="dark:border-gray-700">
+            {filteredExams.map((exam) => {
+              const updatedAt = new Date(exam.updatedAt);
+              const timeDiffMs = currentTime - updatedAt;
+              const isWithin24Hours = timeDiffMs < 24 * 60 * 60 * 1000;
+              const hasDocument = !!exam.document;
 
-      <Table>
-        <TableHeader>
-          <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-            <TableHead className="min-w-[150px] text-center">
-              Tên đề thi
-            </TableHead>
-            <TableHead className="min-w-[130px] text-center">
-              Họ tên người tạo
-            </TableHead>
-            <TableHead className="min-w-[130px] text-center">
-              Phòng ban
-            </TableHead>
-            <TableHead className="min-w-[120px] text-center">
-              Ngày thi
-            </TableHead>
-            <TableHead className="text-center">Tải về</TableHead>
-            <TableHead className="text-center">Đăng tải</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="dark:border-gray-700">
-          {filteredExams.map((exam) => {
-            const updatedAt = new Date(exam.updatedAt);
-            const timeDiffMs = currentTime - updatedAt;
-            const isWithin24Hours = timeDiffMs < 24 * 60 * 60 * 1000;
-            const hasDocument = !!exam.document;
-
-            return (
-              <TableRow key={exam.id} className="min-h-[100px]">
-                <TableCell className="text-center py-4 font-bold text-blue-800 dark:text-gray-400">
-                  {exam.title}
-                </TableCell>
-                <TableCell className="text-center text-black dark:text-gray-400">
-                  {exam.createdBy?.fullName || "Không rõ"}
-                </TableCell>
-                <TableCell className="text-center text-black dark:text-gray-400">
-                  {departmentMap[exam.createdBy?.department] ||
-                    exam.createdBy?.department ||
-                    "Không rõ"}
-                </TableCell>
-                <TableCell className="text-center text-black dark:text-gray-400">
-                  {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
-                </TableCell>
-                <TableCell className="text-center text-black dark:text-gray-400">
-                  <div className="flex flex-col justify-center items-center gap-2">
-                    {isWithin24Hours && (
-                      <Button variant="outline" disabled className="w-[90px]">
-                        Chưa đủ 24h
-                      </Button>
-                    )}
-                    {!isWithin24Hours && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDownload(exam.id, "question")}
-                      >
-                        📄Tải đề thi
-                      </Button>
-                    )}
-                    {!isWithin24Hours && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDownload(exam.id, "answer")}
-                      >
-                        📝Tải đáp án
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                  <div className="flex flex-wrap justify-center items-center gap-2">
-                    {exam.status === "DA_THI" ? (
-                      <>
-                        {isWithin24Hours ? (
-                          <Button
-                            variant="outline"
-                            disabled
-                            className="w-[90px]"
-                          >
-                            Chưa đủ 24h
-                          </Button>
-                        ) : hasDocument ? (
-                          <Button
-                            variant="outline"
-                            disabled
-                            className="w-[120px]"
-                          >
-                            Đã được đăng tải
-                          </Button>
-                        ) : (
-                          <UploadExamButton
-                            exam={exam}
-                            pendingUploadExam={null} // Adjust as needed
-                            setPendingUploadExam={() => {}} // Adjust as needed
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-[90px] h-10" />
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+              return (
+                <TableRow key={exam.id} className="min-h-[100px]">
+                  <TableCell className="text-center py-4 font-bold text-blue-800 dark:text-gray-400">
+                    {exam.title}
+                  </TableCell>
+                  <TableCell className="text-center text-black dark:text-gray-400">
+                    {exam.createdBy?.fullName || "Không rõ"}
+                  </TableCell>
+                  <TableCell className="text-center text-black dark:text-gray-400">
+                    {departmentMap[exam.createdBy?.department] ||
+                      exam.createdBy?.department ||
+                      "Không rõ"}
+                  </TableCell>
+                  <TableCell className="text-center text-black dark:text-gray-400">
+                    {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
+                  </TableCell>
+                  <TableCell className="text-center text-black dark:text-gray-400">
+                    <div className="flex flex-col justify-center items-center gap-2">
+                      {isWithin24Hours && (
+                        <Button variant="outline" disabled className="w-[90px]">
+                          Chưa đủ 24h
+                        </Button>
+                      )}
+                      {!isWithin24Hours && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDownload(exam.id, "question")}
+                        >
+                          📄Tải đề thi
+                        </Button>
+                      )}
+                      {!isWithin24Hours && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDownload(exam.id, "answer")}
+                        >
+                          📝Tải đáp án
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-wrap justify-center items-center gap-2">
+                      {exam.status === "DA_THI" ? (
+                        <>
+                          {isWithin24Hours ? (
+                            <Button
+                              variant="outline"
+                              disabled
+                              className="w-[90px]"
+                            >
+                              Chưa đủ 24h
+                            </Button>
+                          ) : hasDocument ? (
+                            <Button
+                              variant="outline"
+                              disabled
+                              className="w-[120px]"
+                            >
+                              Đã được đăng tải
+                            </Button>
+                          ) : (
+                            <UploadExamButton
+                              exam={exam}
+                              pendingUploadExam={null} // Adjust as needed
+                              setPendingUploadExam={() => {}} // Adjust as needed
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-[90px] h-10" />
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="py-4">
         <NavPagination

@@ -45,25 +45,25 @@ const examService = {
     const baseQuestionFile = extractBaseUrl(questionFile);
     const baseAnswerFile = extractBaseUrl(answerFile);
 
-    // Gửi thông báo
-    const bghUsers = await prisma.user.findMany({
-      where: {
-        role: "BAN_GIAM_HIEU",
-      },
-    });
+    // // Gửi thông báo
+    // const bghUsers = await prisma.user.findMany({
+    //   where: {
+    //     role: "BAN_GIAM_HIEU",
+    //   },
+    // });
 
-    const titleNotify = `Thông báo đề thi ${title} đã được soạn`;
-    const messageNotify = `Đề thi "${title}" đã được gửi .`;
-
-    await Promise.all(
-      bghUsers.map((user) =>
-        notificationService.createNotificationAndSendMail({
-          userId: user.id,
-          title: titleNotify,
-          message: messageNotify,
-        })
-      )
-    );
+    // const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
+    // const messageNotify = `Đề thi "${title}" đã được gửi bởi .`;
+ 
+    // await Promise.all(
+    //   bghUsers.map((user) =>
+    //     notificationService.createNotificationAndSendMail({
+    //       userId: user.id,
+    //       title: titleNotify,
+    //       message: messageNotify,
+    //     })
+    //   )
+    // );
 
     return await prisma.exam.create({
       data: {
@@ -216,18 +216,18 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    notificationService.notifyOpenExam(
-      updatedExam.createdById,
-      updatedExam.title
-    );
+    
+    // notificationService.notifyOpenExam(
+    //   updatedExam.createdById,
+    //   updatedExam.title
+    // );
 
-    // Tạo thông báo mở đề
-    // notificationService.notifyOpenExam(userId, exam.title);
 
     return {
       id: updatedExam.id,
       title: updatedExam.title,
       questionFile: updatedExam.questionFile,
+      createdById: updatedExam.createdById
     };
   },
   openExam: async (id, userId) => {

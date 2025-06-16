@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+
 const {
   default: instanceAPI,
   successResponse,
@@ -11,6 +13,7 @@ export const createExam = async (formData) => {
     const res = await instanceAPI.post("/exams", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    revalidatePath("/home/examsUpload")
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);

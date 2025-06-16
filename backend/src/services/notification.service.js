@@ -4,6 +4,13 @@ const moment = require("moment");
 const userService = require("./user.service");
 const LIMIT = 10;
 
+  const departmentMap = {
+    MAC_DINH: "Mặc định",
+    LY_LUAN_CO_SO: "Lý luận cơ sở",
+    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+    XAY_DUNG_DANG: "Xây dựng Đảng",
+  };
+
 const notificationService = {
   getToday: () => {
     return moment().format("DD-MM-YYYY hh:mm");
@@ -93,9 +100,9 @@ const notificationService = {
     await this.sendNotificationMail(userId, title, message);
   },
 
-  notifyOpenExam: async function (userId, examTitle) {
+  notifyOpenExam: async function (userId, examTitle, fullName, department) {
     const title = `Đề thi ${examTitle} đã được mở`;
-    const message = `Đề thi ${examTitle} đã được mở vào lúc ${this.getToday()}`;
+    const message = `Đề thi ${examTitle} đã được mở vào lúc ${this.getToday()} bởi GV  ${fullName} - ${departmentMap[department]}`;
 
     // Thông báo cho người mở đề
     await this.createNotification({ userId, title, message });

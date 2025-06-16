@@ -129,19 +129,19 @@ const ExamViewList = ({ query, token }) => {
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Tên đề thi
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] " >
                   Người tạo
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Khoa
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Trạng thái
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Thao tác
                 </TableHead>
               </TableRow>

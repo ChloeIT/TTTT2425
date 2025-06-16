@@ -119,13 +119,13 @@ const PasswordList = ({ passwords, totalPage }) => {
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-            <TableHead>Tên đề thi</TableHead>
-            <TableHead>Mật khẩu</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead>Người tạo</TableHead>
-            <TableHead>Phòng ban</TableHead>
-            <TableHead>Ngày gửi</TableHead>
-            <TableHead>Ngày duyệt</TableHead>
+            <TableHead className="min-w-[90px]">Tên đề thi</TableHead>
+            <TableHead className="min-w-[80px]">Mật khẩu</TableHead>
+            <TableHead className="min-w-[90px]">Trạng thái</TableHead>
+            <TableHead className="min-w-[90px]">Người tạo</TableHead>
+            <TableHead className="min-w-[90px]">Phòng ban</TableHead>
+            <TableHead className="min-w-[90px]">Ngày gửi</TableHead>
+            <TableHead className="min-w-[100px]">Ngày duyệt</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>

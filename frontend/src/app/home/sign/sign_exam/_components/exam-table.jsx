@@ -74,19 +74,6 @@ const ExamList = () => {
     setTotalPage(totalPage);
   };
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, totalPage } = await getExams({
-        page,
-        query,
-        status: status || undefined,
-        department,
-        month,
-        year,
-      });
-      setExams(data);
-      setTotalPage(totalPage);
-    };
-    fetchData();
     refetchExams();
   }, [page, query, status, department, month, year]);
 
@@ -144,17 +131,18 @@ const ExamList = () => {
       </div>
 
       {/* Bảng đề thi */}
+      <div className="w-full overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-            <TableHead className="text-center">Tên đề thi</TableHead>
-            <TableHead className="text-center">Trạng thái</TableHead>
-            <TableHead className="text-center">Người soạn đề</TableHead>
-            <TableHead className="text-center">Phòng ban</TableHead>
-            <TableHead className="text-center">Ngày gửi</TableHead>
-            <TableHead className="text-center">Ngày xác nhận</TableHead>
-            <TableHead className="text-center">Nội dung</TableHead>
-            <TableHead className="text-center">Xác nhận</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Tên đề thi</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Trạng thái</TableHead>
+            <TableHead className="text-center min-w-[115px] ">Người soạn đề</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Phòng ban</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Ngày gửi</TableHead>
+            <TableHead className="text-center min-w-[115px] ">Ngày xác nhận</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Nội dung</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Xác nhận</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -226,7 +214,7 @@ const ExamList = () => {
 
       <Exam exam={selectedExam} onClose={() => setSelectedExam(null)} />
       <ExamAnswer exam={selectedAnswer} onClose={() => setSelectedAnswer(null)} />
-
+      </div>
       {/* Phân trang */}
 
 <div className="py-4">

@@ -1,20 +1,33 @@
 "use server";
 
+import { cookies } from "next/headers";
 const {
   default: instanceAPI,
   successResponse,
   errorResponse,
 } = require("@/lib/axios");
 
-export const getExams = async ({ page = 1, query }) => {
+export const getExams = async ({
+  page = 1,
+  query = "",
+  department = "",
+  month = "",
+  year = "",
+}) => {
   try {
     const res = await instanceAPI.get("/exams/archive", {
-      params: { page, query },
+      params: {
+        page,
+        query,
+        department,
+        month,
+        year,
+      },
     });
-    // console.log("API Response:", res.data);
+
     return {
-      data: res.data.data || [],
-      totalPage: res.data.totalPage || 1,
+      data: res.data.data,
+      totalPage: res.data.totalPage,
     };
   } catch (error) {
     console.error("Error in getExams:", error?.response?.data || error.message);

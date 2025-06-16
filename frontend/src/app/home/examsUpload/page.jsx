@@ -1,49 +1,36 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-
-// import modal upload và bảng hiển thị (nếu bạn đã tạo)
 import ExamUploadModal from "./_components/exam-upload-modal";
 import ExamTable from "./_components/exam-table";
-
-// import action getExams
-import { getExams } from "@/actions/exams-action";
 import { Card, CardContent } from "@/components/ui/card";
+import { getExams } from "@/actions/exams-action";
+import { requireRole } from "@/lib/session";
+import { redirect } from "next/navigation";
 
-import { useRole } from "@/hooks/use-role";
-
-export default function ExamsUploadPage() {
-  const router = useRouter();
-  const [exams, setExams] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const isAuthorized = useRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
-
-  // Hàm fetch data bằng action
-  const loadExams = async () => {
-    setLoading(true);
-    const result = await getExams();
-    setLoading(false);
-
-    if (result.ok) {
-      setExams(result.data);
-    } else if (result.unauthenticated) {
-      // Nếu chưa đăng nhập (status 401), chuyển hướng về /login
-      toast.error("Vui lòng đăng nhập để thực hiện");
-      router.replace("/login");
-    } else {
-      toast.error(result.message);
-    }
+export async function generateMetadata() {
+  return {
+    title: "Soạn Đề và Đáp án",
   };
+}
 
-  useEffect(() => {
-    loadExams();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthorized]);
+const ExamsUploadPage = async () => {
+  // Fetch exams server-side
+  const result = await getExams();
+  if (!result.ok) {
+    if (result.unauthenticated) {
+      redirect("/login");
+    }
+    // For other errors, we could throw an error or handle it differently
+    throw new Error(result.message || "Failed to load exams");
+  }
 
-  // Lọc và sắp xếp:
+  const exams = result.data;
+
+  // Server-side role check
+  const isAuthorized = await requireRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
+  if (!isAuthorized) {
+    redirect("/home");
+  }
+
+  // Filter and sort exams server-side
   const examsDangCho = exams
     .filter((e) => e.status === "DANG_CHO")
     .sort(
@@ -57,9 +44,6 @@ export default function ExamsUploadPage() {
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
-  if (!isAuthorized)
-    return <div>Bạn không có quyền truy cập vào trang này</div>;
-
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
@@ -71,35 +55,27 @@ export default function ExamsUploadPage() {
       <Card>
         <CardContent>
           <div className="px-6 py-6">
-            {/* Nút “Đăng tải đề thi” ở đầu */}
-            <ExamUploadModal onUploadSuccess={loadExams} />
+            {/* Modal for uploading exams, handled client-side */}
+            <ExamUploadModal />
           </div>
 
           <div className="px-6 pb-10">
-            {/* Bảng đang chờ duyệt */}
-            {!loading && (
-              <>
-                <ExamTable
-                  exams={examsDangCho}
-                  title="Danh sách đề thi đang chờ duyệt"
-                  className="dark:border-gray-700"
-                />
-                <ExamTable
-                  exams={examsTuChoi}
-                  title="Danh sách đề thi bị từ chối"
-                  className="dark:border-gray-700"
-                />
-              </>
-            )}
-
-            {loading && (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-                Đang tải dữ liệu…
-              </div>
-            )}
+            {/* Tables for displaying exams, handled client-side */}
+            <ExamTable
+              exams={examsDangCho}
+              title="Danh sách đề thi đang chờ duyệt"
+              className="dark:border-gray-700"
+            />
+            <ExamTable
+              exams={examsTuChoi}
+              title="Danh sách đề thi bị từ chối"
+              className="dark:border-gray-700"
+            />
           </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default ExamsUploadPage;

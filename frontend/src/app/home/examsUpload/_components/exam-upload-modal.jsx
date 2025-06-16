@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useExamUpload } from "@/hooks/use-exam-upload";
 import toast from "react-hot-toast";
 
-export default function ExamUploadModal({ onUploadSuccess }) {
+export default function ExamUploadModal() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [questionFile, setQuestionFile] = useState(null);
@@ -35,9 +37,8 @@ export default function ExamUploadModal({ onUploadSuccess }) {
       setOpen(false);
       document.getElementById("questionFile").value = "";
       document.getElementById("answerFile").value = "";
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
+      // Dispatch custom event to trigger refresh
+      window.dispatchEvent(new Event("examUploadSuccess"));
     }
   };
 

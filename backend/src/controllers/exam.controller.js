@@ -253,25 +253,42 @@ const examController = {
       return res.status(500).json({ error: "Lỗi hệ thống" });
     }
   },
-
+  //dang tai document (trang van thu)
   updateExamDocument: async (req, res, next) => {
     try {
       const id = Number(req.params.id);
       const exam = await examService.getExamById(id);
-      if (!exam) return res.status(404).json({ error: "Exam not found" });
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
+
+      if (exam.document) {
+        return res.status(400).json({
+          ok: false,
+          error: "Đã có tài liệu, không thể cập nhật thêm",
+        });
+      }
 
       if (!req.files.questionFile || !req.files.answerFile) {
         return res
           .status(400)
-          .json({ error: "Missing question or answer file" });
+          .json({ error: "Thiếu file đề thi hoặc file đáp án" });
       }
 
-      const questionFile = req.files.questionFile[0].path;
-      const answerFile = req.files.answerFile[0].path;
+      const questionFile = req.files.questionFile[0];
+      const answerFile = req.files.answerFile[0];
+
+      // Kiểm tra đuôi file
+      const isPdf = (file) =>
+        file.mimetype === "application/pdf" ||
+        file.originalname.endsWith(".pdf");
+
+      if (!isPdf(questionFile) || !isPdf(answerFile)) {
+        throw new Error("Chỉ chấp nhận file PDF");
+      }
 
       const updatedExam = await examService.updateExamDocument(id, {
-        questionFile,
-        answerFile,
+        questionFile: questionFile.path,
+        answerFile: answerFile.path,
       });
 
       return res.status(200).json({ ok: true, data: updatedExam });
@@ -326,8 +343,22 @@ const examController = {
 
   getExamsForArchive: async (req, res, next) => {
     try {
-      const exams = await examService.getAllExams({ status: "DA_THI" });
-      res.status(200).json({ data: exams });
+      const { page, query, department, month, year } =
+        examService.validateQueryGetExamsByStatus(req);
+      const status = "DA_THI"; // Fixed status for archive
+
+      const { data, totalPage } = await examService.getExamsByStatus({
+        page,
+        query,
+        status,
+        department,
+        month,
+        year,
+      });
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
     } catch (error) {
       next(error);
     }

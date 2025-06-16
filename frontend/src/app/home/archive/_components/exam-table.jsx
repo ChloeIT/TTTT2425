@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import UploadExamButton from "./upload-exam-button";
 import SearchBar from "../../_components/search-bar";
 import FilterPanel from "../../_components/filter-department";
 import { getFile } from "@/actions/archive-action";
-
 import {
   Table,
   TableBody,
@@ -17,41 +17,113 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { NavPagination } from "@/components/nav-pagination";
 
-const ExamList = ({ exams, totalPage, currentPage, token }) => {
-  const [pendingUploadExam, setPendingUploadExam] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+const statusMap = {
+  DANG_CHO: "Đang chờ",
+  DA_DUYET: "Đã duyệt",
+  TU_CHOI: "Đã từ chối",
+  DA_THI: "Đã thi",
+};
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
 
-  if (!exams || exams.length === 0) return <p>Không có đề thi nào.</p>;
+const ExamList = ({
+  exams,
+  totalPage,
+  currentPage,
+  token,
+  searchQuery: initialSearchQuery,
+  selectedDepartment: initialDepartment,
+  selectedMonth: initialMonth,
+  selectedYear: initialYear,
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const d = new Date(dateString);
-    return d.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const [fileUrls, setFileUrls] = useState({});
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || "");
+  const [selectedMonth, setSelectedMonth] = useState(initialMonth || "");
+  const [selectedYear, setSelectedYear] = useState(initialYear || "");
+  const [selectedDepartment, setSelectedDepartment] = useState(
+    initialDepartment || ""
+  );
+
+  useEffect(() => {
+    setSearchQuery(initialSearchQuery || "");
+    setSelectedMonth(initialMonth || "");
+    setSelectedYear(initialYear || "");
+    setSelectedDepartment(initialDepartment || "");
+  }, [initialSearchQuery, initialMonth, initialYear, initialDepartment]);
+
+  const fetchSignedUrls = async (examId) => {
+    const result = await getFile(examId);
+    if (result.ok) {
+      setFileUrls((prev) => ({
+        ...prev,
+        [examId]: {
+          questionFile: result.data.questionFile,
+          answerFile: result.data.answerFile,
+          expiresAt: result.data.expiresAt,
+        },
+      }));
+    }
   };
 
-  const statusMap = {
-    DANG_CHO: "Đang chờ",
-    DA_DUYET: "Đã duyệt",
-    TU_CHOI: "Đã từ chối",
-    DA_THI: "Đã thi",
-  };
-  const departmentMap = {
-    MAC_DINH: "Mặc định",
-    LY_LUAN_CO_SO: "Lý luận cơ sở",
-    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
-    XAY_DUNG_DANG: "Xây dựng Đảng",
+  const handleFetchFile = (examId) => {
+    if (!fileUrls[examId] || Date.now() > fileUrls[examId].expiresAt) {
+      fetchSignedUrls(examId);
+    }
   };
 
+  const handleDownload = async (examId, fileType) => {
+    const result = await getFile(examId);
+    if (result.ok) {
+      const { questionFile, answerFile, expiresAt } = result.data;
+      const url = fileType === "question" ? questionFile : answerFile;
+      if (url) {
+        try {
+          const currentTime = Date.now();
+          if (expiresAt && currentTime > expiresAt) {
+            alert("Liên kết đã hết hạn. Vui lòng thử lại.");
+            return;
+          }
+          const response = await fetch(url, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok)
+            throw new Error(`HTTP error! status: ${response.status}`);
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = `${examId}_${
+            fileType === "question" ? "question" : "answer"
+          }.pdf`;
+          link.rel = "noopener noreferrer";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+          alert("Không thể tải file. Vui lòng thử lại hoặc kiểm tra kết nối.");
+        }
+      } else {
+        alert("Không tìm thấy file để tải.");
+      }
+    } else {
+      alert(`Lỗi: ${result.message}`);
+    }
+  };
+
+  const currentTime = new Date();
   const filteredExams = exams
     .filter((exam) =>
       exam.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -70,79 +142,40 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
         !selectedDepartment || exam.createdBy?.department === selectedDepartment
     );
 
-  const handleDownload = async (examId, fileType) => {
-    const result = await getFile(examId);
-    console.log("getFile result:", result); // Log full result for debugging
-    if (result.ok) {
-      const { questionFile, answerFile, expiresAt } = result.data;
-      const url = fileType === "question" ? questionFile : answerFile;
-      console.log("Download URL:", url); // Confirm URL
-      if (url) {
-        try {
-          const currentTime = Date.now();
-          if (expiresAt && currentTime > expiresAt) {
-            console.log("URL has expired");
-            alert("Liên kết đã hết hạn. Vui lòng thử lại.");
-            return;
-          }
-
-          // Use fetch to download as blob
-          const response = await fetch(url, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`, // Use prop token
-            },
-          });
-          if (!response.ok)
-            throw new Error(`HTTP error! status: ${response.status}`);
-          const blob = await response.blob();
-          const blobUrl = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = blobUrl;
-          link.download = `${examId}_${
-            fileType === "question" ? "question" : "answer"
-          }.pdf`;
-          link.rel = "noopener noreferrer";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(blobUrl);
-          console.log("Download successful for:", url);
-        } catch (error) {
-          console.error("Download failed:", error);
-          alert("Không thể tải file. Vui lòng thử lại hoặc kiểm tra kết nối.");
-        }
-      } else {
-        console.log("No URL available for download");
-        alert("Không tìm thấy file để tải.");
-      }
-    } else {
-      console.log("Download failed:", result.message);
-      alert(`Lỗi: ${result.message}`);
-    }
+  const handleSearch = (val) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("query", val);
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
   };
 
-  // Current time for 24-hour check
-  const currentTime = new Date();
+  const handleFilterChange = (type, val) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (val) params.set(type, val);
+    else params.delete(type);
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <>
-      {/* Thanh tìm kiếm + Bộ lọc tháng, năm, phòng ban */}
-      <div className="flex flex-wrap justify-between gap-4 mb-4">
-        <div className="flex-1 min-w-[250px]">
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-col gap-2 mb-4">
+        <div className="flex justify-between gap-4">
+          <div className="flex-1 min-w-[250px]">
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={handleSearch}
+            />
+          </div>
           <FilterPanel
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
             selectedDepartment={selectedDepartment}
-            setSelectedDepartment={setSelectedDepartment}
+            setSelectedDepartment={(val) =>
+              handleFilterChange("department", val)
+            }
+            selectedMonth={selectedMonth}
+            setSelectedMonth={(val) => handleFilterChange("month", val)}
+            selectedYear={selectedYear}
+            setSelectedYear={(val) => handleFilterChange("year", val)}
           />
         </div>
       </div>
@@ -166,15 +199,11 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
             <TableHead className="text-center">Đăng tải</TableHead>
           </TableRow>
         </TableHeader>
-
         <TableBody className="dark:border-gray-700">
           {filteredExams.map((exam) => {
-            // Check if less than 24 hours have passed since updatedAt
             const updatedAt = new Date(exam.updatedAt);
             const timeDiffMs = currentTime - updatedAt;
-            const isWithin24Hours = timeDiffMs < 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-            // Check if a document is already uploaded
+            const isWithin24Hours = timeDiffMs < 24 * 60 * 60 * 1000;
             const hasDocument = !!exam.document;
 
             return (
@@ -191,7 +220,7 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
                     "Không rõ"}
                 </TableCell>
                 <TableCell className="text-center text-black dark:text-gray-400">
-                  {format(exam?.updatedAt, "dd-MM-yyyy hh:mm")}
+                  {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
                 </TableCell>
                 <TableCell className="text-center text-black dark:text-gray-400">
                   <div className="flex flex-col justify-center items-center gap-2">
@@ -241,16 +270,10 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
                         ) : (
                           <UploadExamButton
                             exam={exam}
-                            pendingUploadExam={pendingUploadExam}
-                            setPendingUploadExam={setPendingUploadExam}
+                            pendingUploadExam={null} // Adjust as needed
+                            setPendingUploadExam={() => {}} // Adjust as needed
                           />
                         )}
-                        {/* Uncomment if needed */}
-                        {/* <UploadAnswerButton
-                          exam={exam}
-                          pendingUploadAnswer={pendingUploadAnswer}
-                          setPendingUploadAnswer={setPendingUploadAnswer}
-                        /> */}
                       </>
                     ) : (
                       <div className="w-[90px] h-10" />
@@ -262,6 +285,18 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
           })}
         </TableBody>
       </Table>
+
+      <div className="py-4">
+        <NavPagination
+          totalPage={totalPage}
+          currentPage={currentPage}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", newPage);
+            router.push(`?${params.toString()}`);
+          }}
+        />
+      </div>
     </>
   );
 };

@@ -15,7 +15,7 @@ export async function generateMetadata() {
 }
 
 const PasswordManagementPage = async ({ searchParams }) => {
-  const { page, query, month, year, department } = searchParams;
+  const { page, query, month, year, department } = await searchParams;
   const currentPage = parseToNumber(page, 1);
   const { data, totalPage } = await getSignedExams({
     page: currentPage,

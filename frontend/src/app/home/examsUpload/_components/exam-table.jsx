@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getSignedExamFiles } from "@/actions/exams-action";
 import toast, { Toaster } from "react-hot-toast";
+import { format } from "date-fns";
 
 export default function ExamTable({ exams, title }) {
   const [fileUrls, setFileUrls] = useState({});
@@ -151,11 +152,11 @@ export default function ExamTable({ exams, title }) {
                 </Badge>
               </TableCell>
               <TableCell className="dark:text-gray-300">
-                {new Date(exam.createdAt).toLocaleString()}
+                {format(exam.createdAt, "dd-MM-yyyy hh:mm")}
               </TableCell>
               {title === "Danh sách đề thi bị từ chối" && (
                 <TableCell className="dark:text-gray-300">
-                  {new Date(exam.updatedAt).toLocaleString()}
+                  {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
                 </TableCell>
               )}
               {title === "Danh sách đề thi bị từ chối" && (

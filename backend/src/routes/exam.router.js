@@ -126,5 +126,11 @@ examRouter.get("/openedExam",
   requireLogin,
   examController.getOpenedExams
 );
-
+// ds đề theo trưởng khoa
+examRouter.get(
+  "/truongkhoa/ds",
+  requireLogin,
+  permitRoles("TRUONG_KHOA"),
+  examController.getExamsforDean
+);
 module.exports = examRouter;

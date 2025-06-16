@@ -38,7 +38,7 @@ export default function ExamUploadModal() {
       document.getElementById("questionFile").value = "";
       document.getElementById("answerFile").value = "";
       // Dispatch custom event to trigger refresh
-      window.dispatchEvent(new Event("examUploadSuccess"));
+      // window.dispatchEvent(new Event("examUploadSuccess"));
     }
   };
 

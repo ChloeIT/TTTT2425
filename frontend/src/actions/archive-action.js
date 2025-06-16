@@ -30,7 +30,7 @@ export const getExams = async ({
       totalPage: res.data.totalPage,
     };
   } catch (error) {
-    console.error("Error in getExams:", error?.response?.data || error.message);
+    
     return {
       data: [],
       totalPage: 0,

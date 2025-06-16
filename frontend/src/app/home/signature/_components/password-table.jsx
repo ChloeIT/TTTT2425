@@ -178,7 +178,7 @@ const PasswordList = ({ passwords, totalPage }) => {
               <TableCell>
                 <button
                   onClick={() => handleOpenNotify(item)}
-                  className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                  className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition min-w-[110px]"
                 >
                   Gửi thông báo
                 </button>

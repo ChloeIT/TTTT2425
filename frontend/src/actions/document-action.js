@@ -37,3 +37,25 @@ export const getAllDocumentsWithExam = async () => {
     };
   }
 };
+export const getExamsWithDocuments = async ({ page, query }) => {
+   
+  const res = await instanceAPI.get("/documents", {
+    params: {
+      page,
+      query,
+    },
+    
+  });
+    
+
+  const result = res.data;
+  if (!result || !result.data) {
+    return { data: [], totalPage: 1 };
+  }
+
+  return {
+    data: result.data,
+    totalPage: result.totalPage ?? 1, // fallback nếu server không trả totalPage
+  };
+};
+

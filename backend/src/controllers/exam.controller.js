@@ -2,6 +2,16 @@ const examService = require("../services/exam.service");
 const { cloudinary } = require("../libs/cloudinary");
 const { cloudinary: cloudinaryArchive } = require("../libs/cloudinary_archive");
 const { Department, ExamStatus } = require("../generated/prisma");
+const notificationService = require("../services/notification.service");
+const prisma = require("../libs/prisma");
+
+
+  const departmentMap = {
+    MAC_DINH: "Mặc định",
+    LY_LUAN_CO_SO: "Lý luận cơ sở",
+    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+    XAY_DUNG_DANG: "Xây dựng Đảng",
+  };
 
 const examController = {
   createExam: async (req, res, next) => {
@@ -37,6 +47,25 @@ const examController = {
 
       // Log exam vừa tạo
       console.log("Created exam:", exam);
+       // Gửi thông báo
+    const bghUsers = await prisma.user.findMany({
+      where: {
+        role: "BAN_GIAM_HIEU",
+      },
+    });
+
+    const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
+    const messageNotify = `Đề thi "${title}" đã được soạn bởi ${req.user.fullName} - ${departmentMap[req.user.department]}.`;
+ 
+    await Promise.all(
+      bghUsers.map((user) =>
+        notificationService.createNotificationAndSendMail({
+          userId: user.id,
+          title: titleNotify,
+          message: messageNotify,
+        })
+      )
+    );
 
       // Gửi response thành công
       return res.status(201).json({ ok: true, data: exam });
@@ -211,18 +240,16 @@ const examController = {
       const examId = Number(req.params.examId);
       const { changeStatus } = req.body;
 
-      // if (!password) {
-      //   return res
-      //     .status(400)
-      //     .json({ error: "Password is required to open exam" });
-      // }
-
-      // const isPasswordValid = await examService.verifyPassword(id, password);
-      // if (!isPasswordValid) {
-      //   return res.status(401).json({ error: "Invalid password" });
-      // }
 
       const updatedExam = await examService.changeStatus(examId, changeStatus);
+      
+      notificationService.notifyOpenExam(
+        updatedExam.createdById,
+        updatedExam.title,
+        req.user.fullName,
+        req.user.department
+      );
+      
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -382,6 +409,30 @@ const examController = {
         month,
         year,
       });
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getExamsforDean: async (req, res, next) => {
+    try {
+      const {
+        page = 1,
+        query = "",
+        department,
+      } = examService.validateQueryGetExamsByStatus(req);
+        console.log(req.query)
+      const { data, totalPage } = await examService.getExamsByStatus({
+        page: Number(page),
+        query,
+        status: "DANG_CHO",
+        department,
+      });
+
       return res.status(200).json({
         data,
         totalPage,

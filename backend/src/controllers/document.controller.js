@@ -63,7 +63,19 @@ const getSignedDocumentFiles = async (req, res, next) => {
     console.error("Error in getSignedDocumentFiles:", err);
     next(err);
   }
+  
 };
+const getDocuments = async (req, res) => {
+  try {
+    const documents = await documentService.getDocuments();
+    res.status(200).json({ data: documents });
+  } catch (err) {
+    console.error("Error fetching documents:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   getSignedDocumentFiles,
+  getDocuments,
 };

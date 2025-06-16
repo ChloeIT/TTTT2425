@@ -2,10 +2,22 @@
 
 import instanceAPI from "@/lib/axios";
 
-export async function getPasswords({ page = 1, query } = {}) {
+export async function getSignedExams({
+  page = 1,
+  query = "",
+  department,
+  month,
+  year,
+} = {}) {
   try {
-    const res = await instanceAPI.get("/secretary/allExams", {
-      params: { page, query },
+    const res = await instanceAPI.get("/secretary/signed-exam", {
+      params: {
+        page,
+        query,
+        department,
+        month,
+        year,
+      },
     });
 
     return {

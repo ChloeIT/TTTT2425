@@ -117,7 +117,7 @@ examRouter.patch(
 examRouter.get(
   "/waiting/ban-giam-hieu",
   requireLogin,
-  permitRoles(Role.BAN_GIAM_HIEU),
+  permitRoles("BAN_GIAM_HIEU"),
   examController.getWaitingExamByBanGiamHieu
 );
 

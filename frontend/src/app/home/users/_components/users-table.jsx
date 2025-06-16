@@ -28,7 +28,7 @@ export const UsersTable = ({ data = [], totalPage }) => {
       </div>
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
             <TableHead>Họ và tên</TableHead>
             <TableHead>Địa chỉ email</TableHead>
             <TableHead>Vai trò</TableHead>

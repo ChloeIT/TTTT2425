@@ -85,7 +85,7 @@ export default function ExamTable({ exams, title }) {
           )}
           {exams.map((exam) => (
             <TableRow key={exam.id} className="dark:border-gray-700">
-              <TableCell className="text-left">
+              <TableCell >
                 <span className="px-3 text-lg font-bold dark:text-gray-100">
                   {exam.title}
                 </span>

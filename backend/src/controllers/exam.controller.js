@@ -298,8 +298,7 @@ const examController = {
 
   getWaitingExamByBanGiamHieu: async (req, res, next) => {
     try {
-      // validate department, status, month, year is valid
-      const { department, month, page, query, year } =
+      const { department, month, status, page, query, year } =
         examService.validateQueryGetExamsByStatus(req);
 
       // truyền department=MAC_DINH...
@@ -307,7 +306,7 @@ const examController = {
       //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
       //status= DANG_CHO...
       //để query
-      const status = ExamStatus.DANG_CHO;
+      // const status = ExamStatus.DANG_CHO;
       const { data, totalPage } = await examService.getExamsByStatus({
         page,
         query,

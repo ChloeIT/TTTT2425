@@ -1,6 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Card,
+  CardContent
+} from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
 
 const ClientAnswerTonggle = ({ data }) => {
   const [loadingId, setLoadingId] = useState(null);
@@ -9,7 +30,6 @@ const ClientAnswerTonggle = ({ data }) => {
 
   const handleGetSignedFile = async (documentId, type) => {
     setLoadingId(`${documentId}-${type}`);
-
     try {
       const res = await fetch(
         `http://localhost:5000/documents/${documentId}/signed-files`,
@@ -21,7 +41,6 @@ const ClientAnswerTonggle = ({ data }) => {
           },
         }
       );
-
       const result = await res.json();
       if (res.ok && result.data) {
         const fileUrl =
@@ -31,9 +50,7 @@ const ClientAnswerTonggle = ({ data }) => {
         if (fileUrl) {
           window.open(fileUrl, "_blank");
         } else {
-          alert(
-            `Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`
-          );
+          alert(`Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`);
         }
       } else {
         alert(result.message || "Không lấy được file.");
@@ -45,81 +62,87 @@ const ClientAnswerTonggle = ({ data }) => {
       setLoadingId(null);
     }
   };
-
-  return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen flex justify-center">
-      <div className="w-full max-w-6xl">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Danh sách Đề thi và Đáp án đã kí
-          </h1>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-center">
-            <thead className="bg-gray-100 dark:bg-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-100">
-              <tr>
-                <th className="px-4 py-3">Tên đề thi</th>
-                <th className="px-4 py-3">Ngày ký</th>
-                <th className="px-4 py-3">Xem Đề thi</th>
-                <th className="px-4 py-3">Xem Đáp án</th>
-              </tr>
-            </thead>
-            <tbody>
-              {examWithFile.map((exam, id) => (
-                <tr
-                  key={id}
-                  className="border-t border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <td className="px-4 py-4 align-middle font-bold text-blue-800 dark:text-blue-300">
-                    {exam.exam?.title || "Không có tên đề thi"}
-                  </td>
-                  <td className="px-4 py-4 align-middle text-sm text-gray-700 dark:text-gray-300">
-                    {new Intl.DateTimeFormat("vi-VN", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "Asia/Ho_Chi_Minh",
-                    }).format(new Date(exam.createdAt))}
-                  </td>
-                  <td className="px-4 py-4 align-middle">
-                    <button
-                      onClick={() => handleGetSignedFile(exam.id, "question")}
-                      disabled={loadingId === `${exam.id}-question`}
-                      className={`${
-                        loadingId === `${exam.id}-question`
-                          ? "bg-blue-300 dark:bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                      } text-white px-3 py-1 rounded text-sm w-full`}
-                    >
-                      {loadingId === `${exam.id}-question`
-                        ? "Đang tải..."
-                        : "Xem Đề thi"}
-                    </button>
-                  </td>
-                  <td className="px-4 py-4 align-middle">
-                    <button
-                      onClick={() => handleGetSignedFile(exam.id, "answer")}
-                      disabled={loadingId === `${exam.id}-answer`}
-                      className={`${
-                        loadingId === `${exam.id}-answer`
-                          ? "bg-green-300 dark:bg-green-400 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
-                      } text-white px-3 py-1 rounded text-sm w-full`}
-                    >
-                      {loadingId === `${exam.id}-answer`
-                        ? "Đang tải..."
-                        : "Xem Đáp án"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+ console.log("examWithFile", examWithFile) ;
+  return ( 
+    <div className="flex flex-col gap-y-4 py-4 h-full">
+      <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Danh sách Đề Thi và Đáp Án
+        </h1>
       </div>
+
+      <Card>
+        <CardContent>
+          <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <TableHeader>
+              <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
+                <TableHead className="text-center">Tên đề thi</TableHead>
+                <TableHead className="text-center">Người tạo</TableHead>
+                <TableHead className="text-center">Khoa</TableHead>
+                <TableHead className="text-center">Ngày ký</TableHead>
+                <TableHead className="text-center">Xem Đề thi</TableHead>
+                <TableHead className="text-center">Xem Đáp án</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {examWithFile.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-4 text-gray-500 dark:text-gray-400"
+                  >
+                    Không có dữ liệu
+                  </TableCell>
+                </TableRow>
+              ) : (
+                examWithFile.map((document) => (
+                  <TableRow
+                    key={document?.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <TableCell className="text-center font-bold text-blue-800 dark:text-blue-300">
+                      {document?.exam?.title || "Không có tên đề thi"}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
+                      {document?.exam?.createdBy?.fullName || "Không rõ"}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
+                      {departmentMap[document?.exam?.createdBy?.department] || "Không rõ"}
+                    </TableCell>
+                    <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
+                      {format(document?.createdAt, "dd-MM-yyyy hh:mm")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        className="w-full"
+                        variant="default"
+                        onClick={() => handleGetSignedFile(document?.id, "question")}
+                        disabled={loadingId === `${document?.id}-question`}
+                      >
+                        {loadingId === `${document.id}-question`
+                          ? "Đang tải..."
+                          : "Xem Đề thi"}
+                      </Button>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        className="w-full"
+                        variant="secondary"
+                        onClick={() => handleGetSignedFile(document?.id, "answer")}
+                        disabled={loadingId === `${document.id}-answer`}
+                      >
+                        {loadingId === `${document.id}-answer`
+                          ? "Đang tải..."
+                          : "Xem Đáp án"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

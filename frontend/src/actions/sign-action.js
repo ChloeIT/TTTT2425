@@ -3,16 +3,29 @@
 import { cookies } from "next/headers";
 import instanceAPI from "@/lib/axios";
 
-export const getExams = async ({ page = 1, query }) => {
+export const getExams = async ({
+  page = 1,
+  query = "",
+  status = "",
+  department = "",
+  month = "",
+  year = "",
+}) => {
   try {
-    // không cần thêm bearer đã config sẵn rồi
-    const res = await instanceAPI.get("/exams/all", {
-      params: { page, query },
+    const res = await instanceAPI.get("/exams/waiting/ban-giam-hieu", {
+      params: {
+        page,
+        query,
+        month,
+        year,
+        status,
+        department,
+      },
     });
 
     return {
-      data: res.data.data || [],
-      totalPage: res.data.totalPage || 1,
+      data: res.data.data,
+      totalPage: res.data.totalPage,
     };
   } catch (error) {
     return {

@@ -233,7 +233,7 @@ const ExamList = ({ exams, totalPage, currentPage, token }) => {
                           <Button
                             variant="outline"
                             disabled
-                            className="w-[90px]"
+                            className="w-[120px]"
                           >
                             Đã được đăng tải
                           </Button>

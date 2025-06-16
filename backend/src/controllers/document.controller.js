@@ -1,5 +1,7 @@
 const cloudinary = require("cloudinary").v2;
+const { ExamStatus } = require("../generated/prisma");
 const documentService = require("../services/document.service");
+const examService = require("../services/exam.service");
 
 const getSignedDocumentFiles = async (req, res, next) => {
   try {
@@ -65,14 +67,31 @@ const getSignedDocumentFiles = async (req, res, next) => {
   }
   
 };
-const getDocuments = async (req, res) => {
-  try {
-    const documents = await documentService.getDocuments();
-    res.status(200).json({ data: documents });
-  } catch (err) {
-    console.error("Error fetching documents:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+const getDocuments = async (req, res, next) => {
+   try {
+      const { department, month, page, query, year } =
+        examService.validateQueryGetExamsByStatus(req);
+
+      // truyền department=MAC_DINH...
+      //truyền month >=1 và <=12
+      //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
+      //status= DANG_CHO...
+      //để query
+     
+      const { data, totalPage } = await documentService.getExamsByStatusWithDocuments({
+        page,
+        query,
+        department,
+        month,
+        year,
+      });
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
+    } catch (error) {
+      next(error);
+    }
 };
 
 module.exports = {

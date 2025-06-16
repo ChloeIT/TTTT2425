@@ -39,6 +39,33 @@ export const getExams = async () => {
     };
   }
 };
+//lấy ds đề trưởng khoa
+export async function getExamsWithDeanRole({
+  page = 1,
+  query = "",
+  department,
+} = {}) {
+
+  try {
+    const res = await instanceAPI.get("/exams/truongkhoa/ds", {
+      params: {
+        page,
+        query,
+        department,
+      },
+    });
+
+    return {
+      data: res.data.data || [],
+      totalPage: res.data.totalPage || 1,
+    };
+  } catch (error) {
+    return {
+      data: [],
+      totalPage: 0,
+    };
+  }
+}
 //UI đè thi BGH
 export const ApprovedExamsList = async ({ page = 1, query }) => {
   try {
@@ -74,7 +101,7 @@ export const approvedFull = async ({ page = 1, query, status }) => {
 
     return {
       data: res.data.data,
-      totalPage: res.data.totalPage ,
+      totalPage: res.data.totalPage,
     };
   } catch (error) {
     console.error(

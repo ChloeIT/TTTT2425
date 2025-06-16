@@ -417,6 +417,30 @@ const examController = {
       next(error);
     }
   },
+
+  getExamsforDean: async (req, res, next) => {
+    try {
+      const {
+        page = 1,
+        query = "",
+        department,
+      } = examService.validateQueryGetExamsByStatus(req);
+        console.log(req.query)
+      const { data, totalPage } = await examService.getExamsByStatus({
+        page: Number(page),
+        query,
+        status: "DANG_CHO",
+        department,
+      });
+
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 module.exports = examController;

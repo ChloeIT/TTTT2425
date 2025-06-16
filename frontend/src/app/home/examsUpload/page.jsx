@@ -1,8 +1,10 @@
 import ExamUploadModal from "./_components/exam-upload-modal";
 import ExamTable from "./_components/exam-table";
+import ExamView from "./_components/exam-view-list";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { getExams } from "@/actions/exams-action";
-import { requireRole } from "@/lib/session";
+import { requireRole, auth } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
@@ -12,37 +14,38 @@ export async function generateMetadata() {
 }
 
 const ExamsUploadPage = async () => {
-  // Fetch exams server-side
-  const result = await getExams();
-  if (!result.ok) {
-    if (result.unauthenticated) {
-      redirect("/login");
-    }
-    // For other errors, we could throw an error or handle it differently
-    throw new Error(result.message || "Failed to load exams");
-  }
+  const user = await auth();
+  const role = user?.role;
+  const department = user?.department;
 
-  const exams = result.data;
-
-  // Server-side role check
   const isAuthorized = await requireRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
   if (!isAuthorized) {
     redirect("/home");
   }
 
-  // Filter and sort exams server-side
-  const examsDangCho = exams
-    .filter((e) => e.status === "DANG_CHO")
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  const examsTuChoi = exams
-    .filter((e) => e.status === "TU_CHOI")
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+  let exams = [];
+
+  if (role === "GIANG_VIEN_RA_DE") {
+    const result = await getExams();
+    if (!result.ok) {
+      throw new Error(result.message || "Failed to load exams");
+    }
+    exams = result.data;
+  }
+
+  const examsDangCho =
+    role === "GIANG_VIEN_RA_DE"
+      ? exams
+          .filter((e) => e.status === "DANG_CHO")
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      : [];
+
+  const examsTuChoi =
+    role === "GIANG_VIEN_RA_DE"
+      ? exams
+          .filter((e) => e.status === "TU_CHOI")
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      : [];
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
@@ -54,24 +57,30 @@ const ExamsUploadPage = async () => {
 
       <Card>
         <CardContent>
-          <div className="px-6 py-6">
-            {/* Modal for uploading exams, handled client-side */}
-            <ExamUploadModal />
-          </div>
+          {role === "GIANG_VIEN_RA_DE" && (
+            <>
+              <div className="px-6 py-6">
+                <ExamUploadModal />
+              </div>
+              <div className="px-6 pb-10">
+                <ExamTable
+                  exams={examsDangCho}
+                  title="Danh sách đề thi đang chờ duyệt"
+                />
+                <ExamTable
+                  exams={examsTuChoi}
+                  title="Danh sách đề thi bị từ chối"
+                />
+              </div>
+            </>
+          )}
 
-          <div className="px-6 pb-10">
-            {/* Tables for displaying exams, handled client-side */}
-            <ExamTable
-              exams={examsDangCho}
-              title="Danh sách đề thi đang chờ duyệt"
-              className="dark:border-gray-700"
-            />
-            <ExamTable
-              exams={examsTuChoi}
-              title="Danh sách đề thi bị từ chối"
-              className="dark:border-gray-700"
-            />
-          </div>
+          {role === "TRUONG_KHOA" && (
+            <div className="px-6 py-6">
+              <ExamUploadModal />
+              <ExamView department={department} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

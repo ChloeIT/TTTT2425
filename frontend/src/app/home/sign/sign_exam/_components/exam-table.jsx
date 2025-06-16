@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NavPagination } from "@/components/nav-pagination";
 
-import SearchBar from "../../../_components/search-bar";
+// import SearchBar from "../../../_components/search-bar";
+import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../../_components/filter-department";
 import FilterStatus from "../../../_components/filter-status";
 import Exam from "./exam";
@@ -95,7 +96,7 @@ const ExamList = () => {
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex justify-between gap-4">
           <div className="flex-1 min-w-[250px]">
-            <SearchBar
+            {/* <SearchBar
               searchQuery={query}
               setSearchQuery={(val) => {
                 const params = new URLSearchParams(window.location.search);
@@ -103,6 +104,10 @@ const ExamList = () => {
                 params.set("page", "1");
                 router.push(`?${params.toString()}`);
               }}
+            /> */}
+            <SearchBar
+              placeholder="Tìm kiếm đề thi..."
+              isPagination
             />
           </div>
 

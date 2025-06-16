@@ -3,7 +3,7 @@ const prisma = require("../libs/prisma");
 
 const getDocumentById = async (id) => {
   return await prisma.document.findUnique({
-    where: { id },
+    where: { id: id, },
     include: {
       exam: {
         select: {

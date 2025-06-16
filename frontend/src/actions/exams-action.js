@@ -63,18 +63,15 @@ export const ApprovedExamsList = async ({ page = 1, query }) => {
 };
 
 //UI đề thi người gác
-export const approvedFull = async ({ page = 1, query }) => {
+export const approvedFull = async ({ page = 1, query, status }) => {
   try {
     const res = await instanceAPI.get("/exams/approved", {
-      params: { page, query },
+      params: { page, query, status },
     });
 
-    const allExams = res.data.data || [];
-    const approvedExams = allExams.filter((exam) => exam.status === "DA_DUYET");
-
     return {
-      data: approvedExams,
-      totalPage: res.data.totalPage || 1,
+      data: res.data.data,
+      totalPage: res.data.totalPage ,
     };
   } catch (error) {
     console.error(

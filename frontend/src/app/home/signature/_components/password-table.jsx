@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, EyeOff } from "lucide-react";
 import Notify from "./notify";
 
-import SearchBar from "../../_components/search-bar";
+// import SearchBar from "../../_components/search-bar";
+import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../_components/filter-department";
 import { NavPagination } from "@/components/nav-pagination";
 import { format } from "date-fns";
@@ -73,7 +74,7 @@ const PasswordList = ({ passwords, totalPage }) => {
       {/* Bộ lọc */}
       <div className="flex flex-wrap justify-between gap-4 mb-4">
         <div className="flex-1 min-w-[250px]">
-          <SearchBar
+          {/* <SearchBar
             searchQuery={query}
             setSearchQuery={(val) => {
               const params = new URLSearchParams(window.location.search);
@@ -81,7 +82,11 @@ const PasswordList = ({ passwords, totalPage }) => {
               params.set("page", "1");
               router.push(`?${params.toString()}`);
             }}
-          />
+          /> */}
+           <SearchBar
+                  placeholder="Tìm kiếm đề thi..."
+                  isPagination
+            />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel
@@ -114,13 +119,13 @@ const PasswordList = ({ passwords, totalPage }) => {
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-            <TableHead>Tên đề thi</TableHead>
-            <TableHead>Mật khẩu</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead>Người tạo</TableHead>
-            <TableHead>Phòng ban</TableHead>
-            <TableHead>Ngày gửi</TableHead>
-            <TableHead>Ngày duyệt</TableHead>
+            <TableHead className="min-w-[90px]">Tên đề thi</TableHead>
+            <TableHead className="min-w-[80px]">Mật khẩu</TableHead>
+            <TableHead className="min-w-[90px]">Trạng thái</TableHead>
+            <TableHead className="min-w-[90px]">Người tạo</TableHead>
+            <TableHead className="min-w-[90px]">Phòng ban</TableHead>
+            <TableHead className="min-w-[90px]">Ngày gửi</TableHead>
+            <TableHead className="min-w-[100px]">Ngày duyệt</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>

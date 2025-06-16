@@ -24,8 +24,10 @@ import {
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
 import { Card, CardContent } from "@/components/ui/card";
 import { currentUser } from "@/actions/auth-action";
+import { NavPagination } from "@/components/nav-pagination";
+import { useSearchParams } from "next/navigation";
 
-const ExamViewList = ({ page, query, token }) => {
+const ExamViewList = ({ query, token }) => {
   const [user, setUser] = useState(null)
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -34,6 +36,10 @@ const ExamViewList = ({ page, query, token }) => {
   const [open, setOpen] = useState(false);
   const [examToOpen, setExamToOpen] = useState(null);
   const [openedExamIds, setOpenedExamIds] = useState([]);
+  const [totalPage, setTotalPage] = useState(1);
+  const searchParams = useSearchParams();
+  
+  const page = Number(searchParams.get("page")) || 1;
 
   const currentPage = parseToNumber(page, 1);
 
@@ -50,11 +56,13 @@ const ExamViewList = ({ page, query, token }) => {
   useEffect(() => {
 
     const fetchExams = async () => {
-      const res = await approvedFull({ page: currentPage, query });
-      setData(res.data || []);
+      const {data, totalPage} = await approvedFull({ page, query, status: "DA_DUYET"});
+      setData(data);
+      setTotalPage(totalPage);
     };
     fetchExams();
-  }, [currentPage, query, user]);
+
+  }, [currentPage, query, user, page]);
 
   const handleOpen = async (exam) => {
     setSelectedExam(exam);
@@ -121,19 +129,19 @@ const ExamViewList = ({ page, query, token }) => {
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Tên đề thi
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] " >
                   Người tạo
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Khoa
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Trạng thái
                 </TableHead>
-                <TableHead >
+                <TableHead className="text-center min-w-[90px] ">
                   Thao tác
                 </TableHead>
               </TableRow>
@@ -224,6 +232,9 @@ const ExamViewList = ({ page, query, token }) => {
 
       {/* Component mở đề thi sau khi xác minh */}
       <ExamQuestion exam={examToOpen} onClose={() => setExamToOpen(null)} />
+        <div className="py-4">
+          <NavPagination totalPage={totalPage} />
+        </div>
     </div>
   );
 };

@@ -26,7 +26,7 @@ const NotificationContent = ({ title, message, isRead, createdAt }) => {
   }, [message]);
   return (
     <Alert variant={!isRead ? "green" : "default"}>
-      <AlertTitle className="line-clamp-1">
+      <AlertTitle>
         {title} - ({format(createdAt, "dd-MM-yyyy hh:mm")})
       </AlertTitle>
       <AlertDescription>
@@ -90,13 +90,13 @@ export const NotificationButton = () => {
               className="absolute -top-1 -right-1 text-xs 
           rounded-full bg-red-500 w-[18px] h-[18px] flex justify-center items-center text-white"
             >
-              {haveNotReadCount}
+              {haveNotReadCount > 99 ? "99+" : haveNotReadCount}
             </div>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" alignOffset={10} sideOffset={10} asChild>
-        <ScrollArea className="h-[450px] w-[450px] rounded-md p-4">
+        <ScrollArea className="h-[450px] lg:w-[450px] w-[350px] rounded-md p-4">
           <div className="text-md text-center font-bold mb-4">Thông báo</div>
           <div className="flex flex-col gap-2 items-center mb-4">
             {data.map((item, index) => {

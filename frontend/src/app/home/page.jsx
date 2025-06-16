@@ -20,7 +20,7 @@ const DashboardPage = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow flex items-center">
-        <div className="grid grid-cols-5 gap-6 p-8 max-w-6xl mx-auto w-full">
+        <div className="grid lg:grid-cols-5 sm:grid-cols-1 md:grid-cols-3 gap-6 p-8 max-w-6xl mx-auto w-full">
           {cards.map((card, index) => (
             <div
               key={index}

@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { getExams } from "@/actions/sign-action";
 
+
+
 import {
   Table,
   TableBody,
@@ -17,13 +19,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NavPagination } from "@/components/nav-pagination";
 
-import SearchBar from "../../../_components/search-bar";
+// import SearchBar from "../../../_components/search-bar";
+import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../../_components/filter-department";
 import FilterStatus from "../../../_components/filter-status";
 import Exam from "./exam";
 import ExamAnswer from "./exam-answer";
 import ApproveButton from "./approve-button";
 import RejectButton from "./reject-button";
+
 
 const statusMap = {
   DANG_CHO: "Đang chờ",
@@ -73,19 +77,6 @@ const ExamList = () => {
     setTotalPage(totalPage);
   };
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, totalPage } = await getExams({
-        page,
-        query,
-        status: status || undefined,
-        department,
-        month,
-        year,
-      });
-      setExams(data);
-      setTotalPage(totalPage);
-    };
-    fetchData();
     refetchExams();
   }, [page, query, status, department, month, year]);
 
@@ -95,7 +86,7 @@ const ExamList = () => {
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex justify-between gap-4">
           <div className="flex-1 min-w-[250px]">
-            <SearchBar
+            {/* <SearchBar
               searchQuery={query}
               setSearchQuery={(val) => {
                 const params = new URLSearchParams(window.location.search);
@@ -103,6 +94,10 @@ const ExamList = () => {
                 params.set("page", "1");
                 router.push(`?${params.toString()}`);
               }}
+            /> */}
+            <SearchBar
+              placeholder="Tìm kiếm đề thi..."
+              isPagination
             />
           </div>
 
@@ -139,17 +134,18 @@ const ExamList = () => {
       </div>
 
       {/* Bảng đề thi */}
+      <div className="w-full overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-            <TableHead className="text-center">Tên đề thi</TableHead>
-            <TableHead className="text-center">Trạng thái</TableHead>
-            <TableHead className="text-center">Người soạn đề</TableHead>
-            <TableHead className="text-center">Phòng ban</TableHead>
-            <TableHead className="text-center">Ngày gửi</TableHead>
-            <TableHead className="text-center">Ngày xác nhận</TableHead>
-            <TableHead className="text-center">Nội dung</TableHead>
-            <TableHead className="text-center">Xác nhận</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Tên đề thi</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Trạng thái</TableHead>
+            <TableHead className="text-center min-w-[115px] ">Người soạn đề</TableHead>
+            <TableHead className="text-center min-w-[90px] ">Phòng ban</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Ngày gửi</TableHead>
+            <TableHead className="text-center min-w-[115px] ">Ngày xác nhận</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Nội dung</TableHead>
+            <TableHead className="text-center min-w-[80px] ">Xác nhận</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -221,7 +217,7 @@ const ExamList = () => {
 
       <Exam exam={selectedExam} onClose={() => setSelectedExam(null)} />
       <ExamAnswer exam={selectedAnswer} onClose={() => setSelectedAnswer(null)} />
-
+      </div>
       {/* Phân trang */}
 
 <div className="py-4">

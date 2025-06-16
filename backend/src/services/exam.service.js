@@ -417,6 +417,10 @@ const examService = {
     if (!Object.values(Department).includes(department)) {
       department = undefined;
     }
+    // Validate status
+    if (!Object.values(ExamStatus).includes(status)) {
+      status = undefined;
+    }
 
     // Validate month
     const parsedMonth = parseInt(month);

@@ -10,7 +10,7 @@ export async function generateMetadata() {
 const ViewExamsPage = async ({ searchParams }) => {
   const cookie = await cookies();
   const token = cookie.get("token")?.value;
-  const { page = 1, query } = await searchParams;
+  const { page = 1, query, month, year, department} = await searchParams;
 
   return <ExamList page={page} query={query} token={token} />;
 };

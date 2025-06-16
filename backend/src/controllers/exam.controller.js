@@ -52,9 +52,9 @@ const examController = {
 
   getAllExams: async (req, res, next) => {
     try {
-      const { status } = req.query;
-      const exams = await examService.getAllExams({ status });
-      res.status(200).json({ data: exams });
+      const { status, page = 1, query = '', department } = req.query;
+      const {data, totalPage} = await examService.getExamsByStatus({ status, page, query, department });
+      res.status(200).json({ data, totalPage });
     } catch (error) {
       next(error);
     }
@@ -323,6 +323,31 @@ const examController = {
       next(error);
     }
   },
+
+  getOpenedExams: async (req, res, next) => {
+    try {
+      const {page = 1, query = '',department} = req.query;
+
+      const { data, totalPage } = await examService.getExamsByStatus({
+        page: Number(page),
+        query,
+        status: 'DA_DUYET', 
+        month: month ? Number(month) : undefined,
+        year: year ? Number(year) : undefined,
+        department,
+      });
+
+      return res.status(200).json({
+        data,
+        totalPage,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+
+
 };
 
 module.exports = examController;

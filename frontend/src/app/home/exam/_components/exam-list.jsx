@@ -24,8 +24,10 @@ import {
 import ExamQuestion from "../../sign/sign_exam/_components/exam";
 import { Card, CardContent } from "@/components/ui/card";
 import { currentUser } from "@/actions/auth-action";
+import { NavPagination } from "@/components/nav-pagination";
+import { useSearchParams } from "next/navigation";
 
-const ExamViewList = ({ page, query, token }) => {
+const ExamViewList = ({ query, token }) => {
   const [user, setUser] = useState(null)
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -34,6 +36,10 @@ const ExamViewList = ({ page, query, token }) => {
   const [open, setOpen] = useState(false);
   const [examToOpen, setExamToOpen] = useState(null);
   const [openedExamIds, setOpenedExamIds] = useState([]);
+  const [totalPage, setTotalPage] = useState(1);
+  const searchParams = useSearchParams();
+  
+  const page = Number(searchParams.get("page")) || 1;
 
   const currentPage = parseToNumber(page, 1);
 
@@ -50,11 +56,13 @@ const ExamViewList = ({ page, query, token }) => {
   useEffect(() => {
 
     const fetchExams = async () => {
-      const res = await approvedFull({ page: currentPage, query });
-      setData(res.data || []);
+      const {data, totalPage} = await approvedFull({ page, query, status: "DA_DUYET"});
+      setData(data);
+      setTotalPage(totalPage);
     };
     fetchExams();
-  }, [currentPage, query, user]);
+
+  }, [currentPage, query, user, page]);
 
   const handleOpen = async (exam) => {
     setSelectedExam(exam);
@@ -224,6 +232,9 @@ const ExamViewList = ({ page, query, token }) => {
 
       {/* Component mở đề thi sau khi xác minh */}
       <ExamQuestion exam={examToOpen} onClose={() => setExamToOpen(null)} />
+        <div className="py-4">
+          <NavPagination totalPage={totalPage} />
+        </div>
     </div>
   );
 };

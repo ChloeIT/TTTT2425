@@ -112,4 +112,10 @@ examRouter.get(
   examController.getWaitingExamByBanGiamHieu
 );
 
+// Lấy danh sách đề thi đã duyệt theo trang
+examRouter.get("/openedExam", 
+  requireLogin,
+  examController.getOpenedExams
+);
+
 module.exports = examRouter;

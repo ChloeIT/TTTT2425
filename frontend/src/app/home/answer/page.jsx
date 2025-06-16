@@ -1,5 +1,7 @@
+import ClientAnswerTonggle from "./components/ClientAnswerTonggle";
 import ClientAnswerTongKe from "./components/ClientAnswerTonggle";
 import { getAllDocumentsWithExam } from "@/actions/document-action";
+import { cookies } from "next/headers";
 
 
 export async function generateMetadata() {
@@ -7,9 +9,11 @@ export async function generateMetadata() {
 }
 
 const ViewExams = async () => {
-  const { data } = await getAllDocumentsWithExam();
-
-  return <ClientAnswerTongKe data={data} />;
+  
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  
+  return <ClientAnswerTonggle token = { token } />;
 };
 
 export default ViewExams;

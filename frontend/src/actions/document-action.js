@@ -38,25 +38,19 @@ export const getAllDocumentsWithExam = async () => {
   }
 };
 export const getExamsWithDocuments = async ({ page, query }) => {
-  const res = await fetch(
-    `http://localhost:5000/documents?page=${page}&query=${encodeURIComponent(query)}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    }
-  );
+   
+  const res = await instanceAPI.get("/documents", {
+    params: {
+      page,
+      query,
+    },
+    
+  });
+    
 
-  const contentType = res.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) {
-    const text = await res.text();
-    throw new Error("Server trả về nội dung không phải JSON:\n" + text.slice(0, 200));
-  }
-
-  const result = await res.json();
-
-  if (!res.ok) {
-    throw new Error(result.message || "Lỗi khi lấy danh sách đề thi");
+  const result = res.data;
+  if (!result || !result.data) {
+    return { data: [], totalPage: 1 };
   }
 
   return {

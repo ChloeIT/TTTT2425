@@ -30,7 +30,7 @@ const departmentMap = {
   XAY_DUNG_DANG: "Xây dựng Đảng",
 };
 
-const ClientAnswerTonggle = () => {
+const ClientAnswerTonggle = ({token}) => {
   const [loadingId, setLoadingId] = useState(null);
   const [exams, setExams] = useState([]);
   const [totalPage, setTotalPage] = useState(1);
@@ -61,6 +61,7 @@ const ClientAnswerTonggle = () => {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );

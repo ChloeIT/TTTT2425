@@ -8,7 +8,9 @@ const {
   endOfYear,
 } = require("date-fns");
 const { Department, ExamStatus } = require("../generated/prisma");
+const { cloudinary } = require("../libs/cloudinary");
 const LIMIT = 10;
+const MAX_EXAM_OPEN_COUNT = 3;
 
 const examService = {
   createExam: async ({
@@ -18,52 +20,16 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
-    // Correctly extract base URL
-    const extractBaseUrl = (signedUrl) => {
-      try {
-        const url = new URL(signedUrl);
-        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
-        const pathParts = url.pathname.split("/");
-        let adjustedPathParts = pathParts.filter((part) => part);
-        if (adjustedPathParts[0] === cloudName) {
-          adjustedPathParts = adjustedPathParts.slice(1);
-        }
-        adjustedPathParts = adjustedPathParts.filter(
-          (part) =>
-            !part.startsWith("s--") &&
-            !part.startsWith("v") &&
-            part !== "upload" &&
-            part !== "raw"
-        );
-        const publicIdPath = adjustedPathParts.join("/");
-        return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicIdPath}`;
-      } catch (error) {
-        throw new Error("Invalid URL format");
-      }
-    };
+    const questionFileUrl = new URL(questionFile);
+    const answerFileUrl = new URL(answerFile);
 
-    const baseQuestionFile = extractBaseUrl(questionFile);
-    const baseAnswerFile = extractBaseUrl(answerFile);
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+    const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
 
-    // // Gửi thông báo
-    // const bghUsers = await prisma.user.findMany({
-    //   where: {
-    //     role: "BAN_GIAM_HIEU",
-    //   },
-    // });
-
-    // const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
-    // const messageNotify = `Đề thi "${title}" đã được gửi bởi .`;
- 
-    // await Promise.all(
-    //   bghUsers.map((user) =>
-    //     notificationService.createNotificationAndSendMail({
-    //       userId: user.id,
-    //       title: titleNotify,
-    //       message: messageNotify,
-    //     })
-    //   )
-    // );
+    const baseQuestionFile =
+      basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
+    const baseAnswerFile =
+      basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
 
     return await prisma.exam.create({
       data: {
@@ -130,8 +96,31 @@ const examService = {
     });
   },
 
-  deleteExam: async (id) => {
-    return await prisma.exam.delete({
+  deleteExam: async (id, questionFile, answerFile) => {
+    // Extract public IDs for Cloudinary deletion
+    const extractPublicId = (url) => {
+      const parts = url.split("/");
+      const fileNameWithExt = parts.pop(); // e.g., "1749287013182_pdf.pdf"
+      const folderPath = parts.slice(parts.indexOf("exam_files")).join("/"); // e.g., "exam_files"
+      return `${folderPath}/${fileNameWithExt}`; // e.g., "exam_files/1749287013182_pdf.pdf"
+    };
+
+    const questionFilePublicId = extractPublicId(questionFile);
+    const answerFilePublicId = extractPublicId(answerFile);
+
+    // Delete files from Cloudinary
+    await Promise.all([
+      cloudinary.uploader.destroy(questionFilePublicId, {
+        resource_type: "raw",
+      }),
+      cloudinary.uploader.destroy(answerFilePublicId, { resource_type: "raw" }),
+    ]).catch((error) => {
+      console.error("Error deleting files from Cloudinary:", error);
+      // Optionally rethrow or handle non-critical errors (e.g., file already deleted)
+    });
+
+    // Delete the exam record from the database
+    await prisma.exam.delete({
       where: { id },
     });
   },
@@ -205,32 +194,44 @@ const examService = {
     return decryptedPassword === inputPassword;
   },
 
-  changeStatus: async (id, changeStatus) => {
-    console.log(id);
-    console.log(changeStatus);
-    // Cập nhật trạng thái sang DA_THI
+  changeStatus: async (id, changeStatus, user) => {
+  const exam = await prisma.exam.findUnique({ where: { id } });
+
+  if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
     const updatedExam = await prisma.exam.update({
       where: { id },
       data: {
         status: changeStatus,
-        updatedAt: new Date(),
+        updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
+        attemptCount: {
+          increment: 1,
+        },
       },
     });
-    
-    // notificationService.notifyOpenExam(
-    //   updatedExam.createdById,
-    //   updatedExam.title
-    // );
 
+    if (user) {
+      // notificationService.notifyOpenExam(
+      //   updatedExam.createdById,
+      //   updatedExam.title,
+      //   user.fullName,
+      //   user.department
+      // );
+    }
 
     return {
       id: updatedExam.id,
       title: updatedExam.title,
       questionFile: updatedExam.questionFile,
-      createdById: updatedExam.createdById
+      createdById: updatedExam.createdById,
+      attemptCount: updatedExam.attemptCount
     };
-  },
-  openExam: async (id, userId) => {
+  }
+
+  throw new Error("Vượt quá số lần mở đề cho phép.");
+},
+
+  
+  openExam: async (id, userId, fullName, department) => {
     // Kiểm tra trạng thái phải là DA_DUYET
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || exam.status !== "DA_DUYET") {
@@ -245,7 +246,6 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-
     // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
     /*
     await prisma.document.create({
@@ -259,12 +259,12 @@ const examService = {
     */
 
     // Tạo thông báo mở đề
-    notificationService.notifyOpenExam(userId, exam.title);
+    notificationService.notifyOpenExam(userId, exam.title, fullName, department);
 
     return {
       id: updatedExam.id,
       title: updatedExam.title,
-      questionFile: exam.questionFile,
+      questionFile: exam.questionFile, 
     };
   },
 
@@ -395,7 +395,13 @@ const examService = {
             },
           },
           document: true,
+          attemptCount: true
         },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       }),
       prisma.exam.count({
         where,

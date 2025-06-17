@@ -42,7 +42,7 @@ const ClientAnswerTonggle = ({token}) => {
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
-
+  
   const fetchExams = async () => {
     const { data, totalPage } = await getExamsWithDocuments({
       page: currentPage,
@@ -127,7 +127,15 @@ const ClientAnswerTonggle = ({token}) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                exams.map((exam) => (
+                exams
+                  .filter((exam) => {
+                    const createdAt = new Date(exam?.document?.createdAt);
+                    const now = new Date();
+                    const diffDays = (now - createdAt) / (1000 * 60 * 60 * 24);
+                    return !isNaN(createdAt) && diffDays <= 10;
+                  })
+                  .map((exam) => (
+
                   <TableRow key={exam.id}>
                     <TableCell className="text-center font-bold text-blue-800 dark:text-blue-300">
                       {exam?.title || "Không có tên đề thi"}

@@ -338,9 +338,17 @@ const examController = {
   deleteExam: async (req, res, next) => {
     try {
       const id = Number(req.params.id);
-      await examService.deleteExam(id);
+      const exam = await examService.getExamById(id);
+      if (!exam) {
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
+      }
+
+      // Delete exam and associated files from Cloudinary
+      await examService.deleteExam(id, exam.questionFile, exam.answerFile);
+
       res.status(200).json({ message: "Đã xóa đề thi thành công" });
     } catch (error) {
+      console.error("Error in deleteExam:", error);
       next(error);
     }
   },

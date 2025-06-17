@@ -149,3 +149,19 @@ export const statusChanged = async (examId, changeStatus) => {
     };
   }
 };
+
+export const deleteExam = async (examId) => {
+  try {
+    const res = await instanceAPI.delete(`/exams/${examId}`);
+    return {
+      ok: true,
+      message: res.data.message || "Đã xóa đề thi thành công",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error.response?.data?.error || "Lỗi hệ thống, không thể xóa đề thi",
+    };
+  }
+};

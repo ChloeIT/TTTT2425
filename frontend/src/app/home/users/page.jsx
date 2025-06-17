@@ -17,10 +17,14 @@ export async function generateMetadata() {
   };
 }
 const UsersPage = async ({ searchParams }) => {
-  const { page, query } = await searchParams;
+  const { page, query, isActive = true } = await searchParams;
   const currentPage = parseToNumber(page, 1);
 
-  const { data, totalPage } = await getUsers({ page: currentPage, query });
+  const { data, totalPage } = await getUsers({
+    page: currentPage,
+    query,
+    isActive,
+  });
   const isPermitted = await requireRole("BAN_GIAM_HIEU");
 
   if (!isPermitted) {

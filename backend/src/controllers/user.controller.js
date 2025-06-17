@@ -1,4 +1,5 @@
 const { Role } = require("../generated/prisma");
+const { parseBoolean } = require("../libs/utils");
 const authService = require("../services/auth.service");
 const notificationService = require("../services/notification.service");
 const userService = require("../services/user.service");
@@ -37,6 +38,15 @@ const userController = {
       if (!user) {
         throw new Error("Người dùng không tồn tại");
       }
+
+      //kiểm tra email có phải là email mới, nếu mới có tồn tại trong db thì báo lỗi
+      if (user.email !== email) {
+        const emailExist = await userService.findByEmail(email);
+        if (emailExist) {
+          throw new Error("Email đã được sử dụng, vui lòng đổi email khác");
+        }
+      }
+
       // Ban giám hiệu có thể cập nhật vai trò của ban giám hiệu khác
       // mà không thể cập nhật vai trò của chính mình
       if (
@@ -91,11 +101,13 @@ const userController = {
 
   getUsersPagination: async (req, res, next) => {
     try {
-      const { query } = req.query;
+      let { query } = req.query;
       const page = Number(req.query.page) || 1;
+      const isActive = parseBoolean(req.query.isActive) ?? true;
       const { data, totalPage } = await userService.getUsers({
         page,
         query,
+        isActive,
       });
       return res.status(200).json({
         data,

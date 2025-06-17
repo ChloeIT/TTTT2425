@@ -12,51 +12,41 @@ import { Badge } from "@/components/ui/badge";
 import { Toaster } from "react-hot-toast";
 import { SearchBar } from "@/components/search-bar";
 import { NavPagination } from "@/components/nav-pagination";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { getExamsWithDeanRole, getSignedExamFiles } from "@/actions/exams-action";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { getSignedExamFiles } from "@/actions/exams-action";
 import toast from "react-hot-toast";
 
-export default function ExamView({ department }) {
-  const [exams, setExams] = useState([]);
-  const [totalPage, setTotalPage] = useState(1);
-  const [fileUrls, setFileUrls] = useState({});
+export default function ExamView({ exams, totalPage }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-
-  const page = parseInt(searchParams.get("page") || "1", 10);
   const query = searchParams.get("query") || "";
+  const page = Number(searchParams.get("page")) || 1;
 
-  const fetchData = async () => {
-    const result = await getExamsWithDeanRole({
-      page,
-      query,
-      department,
-    });
-
-    setExams(result.data || []);
-    setTotalPage(result.totalPage || 1);
-  };
-
-  useEffect(() => {
-    fetchData();
-    const handleUploadSuccess = () => {
-      fetchData();
-    };
-    window.addEventListener("examUploadSuccess", handleUploadSuccess);
-    return () => window.removeEventListener("examUploadSuccess", handleUploadSuccess);
-  }, [page, query, department]);
+  const [fileUrls, setFileUrls] = useState({});
 
   const getStatusText = (status) => {
     switch (status) {
       case "DANG_CHO":
         return "ĐANG CHỜ";
-      case "TU_CHOI":
-        return "TỪ CHỐI";
-      case "DA_DUYET":
-        return "ĐÃ DUYỆT";
+    
       default:
         return status;
     }
+  };
+
+  const handleSearch = (val) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("query", val);
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", newPage.toString());
+    if (query) params.set("query", query);
+    router.push(`?${params.toString()}`);
   };
 
   const handleFetchFile = async (examId) => {
@@ -80,7 +70,13 @@ export default function ExamView({ department }) {
   return (
     <div className="mb-10">
       <Toaster position="top-right" />
-      <SearchBar placeholder="Tìm kiếm đề thi..." isPagination />
+
+      <SearchBar
+        placeholder="Tìm kiếm đề thi..."
+        searchQuery={query}
+        setSearchQuery={handleSearch}
+      />
+
       <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300 mt-6">
         Danh sách đề thi đang chờ duyệt
       </h2>
@@ -163,7 +159,11 @@ export default function ExamView({ department }) {
       </Table>
 
       <div className="py-4">
-        <NavPagination totalPage={totalPage} />
+        <NavPagination
+          totalPage={totalPage}
+          currentPage={page}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

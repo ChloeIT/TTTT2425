@@ -3,7 +3,7 @@ import ExamTable from "./_components/exam-table";
 import ExamView from "./_components/exam-view-list";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { getExams } from "@/actions/exams-action";
+import { getExams, getExamsWithDeanRole } from "@/actions/exams-action";
 import { requireRole, auth } from "@/lib/session";
 import { redirect } from "next/navigation";
 
@@ -13,7 +13,11 @@ export async function generateMetadata() {
   };
 }
 
-const ExamsUploadPage = async () => {
+const ExamsUploadPage = async ({ searchParams }) => {
+  const params = await searchParams;
+  const page = parseInt(params.page || "1", 10);
+  const query = params.query || "";
+
   const user = await auth();
   const role = user?.role;
   const department = user?.department;
@@ -24,13 +28,19 @@ const ExamsUploadPage = async () => {
   }
 
   let exams = [];
+  let examsDean = [];
+  let totalPageDean = 1;
 
   if (role === "GIANG_VIEN_RA_DE") {
     const result = await getExams();
-    if (!result.ok) {
-      throw new Error(result.message || "Failed to load exams");
-    }
+    if (!result.ok) throw new Error(result.message || "Failed to load exams");
     exams = result.data;
+  }
+
+  if (role === "TRUONG_KHOA") {
+    const resultDean = await getExamsWithDeanRole({ page, query, department });
+    examsDean = resultDean.data;
+    totalPageDean = resultDean.totalPage;
   }
 
   const examsDangCho =
@@ -78,7 +88,13 @@ const ExamsUploadPage = async () => {
           {role === "TRUONG_KHOA" && (
             <div className="px-6 py-6">
               <ExamUploadModal />
-              <ExamView department={department} />
+              <ExamView
+                exams={examsDean}
+                totalPage={totalPageDean}
+                page={page}
+                query={query}
+                department={department}
+              />
             </div>
           )}
         </CardContent>
@@ -86,5 +102,6 @@ const ExamsUploadPage = async () => {
     </div>
   );
 };
+
 
 export default ExamsUploadPage;

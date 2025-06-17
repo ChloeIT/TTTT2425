@@ -33,7 +33,7 @@ export const getUsers = async ({ page = 1, query, isActive }) => {
 export const createUser = async (values) => {
   try {
     const res = await instanceAPI.post("/register", values);
-    revalidatePath("/users");
+    revalidatePath("/home/users");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -43,7 +43,7 @@ export const createUser = async (values) => {
 export const editUser = async (userId, values) => {
   try {
     const res = await instanceAPI.patch(`/users/${userId}/edit`, values);
-    revalidatePath("/users");
+    revalidatePath("/home/users");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);

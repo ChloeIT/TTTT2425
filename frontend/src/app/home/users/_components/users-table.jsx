@@ -34,7 +34,7 @@ export const UsersTable = ({ data = [], totalPage }) => {
         <Button
           variant="success"
           onClick={() => {
-            updateSearchParams({ isActive: true });
+            updateSearchParams({ isActive: true, page: 1 });
           }}
         >
           Tài khoản đang hoạt động
@@ -42,7 +42,7 @@ export const UsersTable = ({ data = [], totalPage }) => {
         <Button
           variant="destroy"
           onClick={() => {
-            updateSearchParams({ isActive: false });
+            updateSearchParams({ isActive: false, page: 1 });
           }}
         >
           Tài khoản đã dừng

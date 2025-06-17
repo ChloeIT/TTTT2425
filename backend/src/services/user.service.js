@@ -125,6 +125,7 @@ const userService = {
               },
             ],
           }),
+          isActive,
         },
       }),
     ]);

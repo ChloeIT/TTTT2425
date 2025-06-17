@@ -13,7 +13,7 @@ export const createExam = async (formData) => {
     const res = await instanceAPI.post("/exams", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    revalidatePath("/home/examsUpload")
+    revalidatePath("/home/examsUpload");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -45,7 +45,6 @@ export async function getExamsWithDeanRole({
   query = "",
   department,
 } = {}) {
-
   try {
     const res = await instanceAPI.get("/exams/truongkhoa/ds", {
       params: {

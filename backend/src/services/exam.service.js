@@ -54,7 +54,7 @@ const examService = {
 
     // const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
     // const messageNotify = `Đề thi "${title}" đã được gửi bởi .`;
- 
+
     // await Promise.all(
     //   bghUsers.map((user) =>
     //     notificationService.createNotificationAndSendMail({
@@ -216,18 +216,17 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    
+
     // notificationService.notifyOpenExam(
     //   updatedExam.createdById,
     //   updatedExam.title
     // );
 
-
     return {
       id: updatedExam.id,
       title: updatedExam.title,
       questionFile: updatedExam.questionFile,
-      createdById: updatedExam.createdById
+      createdById: updatedExam.createdById,
     };
   },
   openExam: async (id, userId) => {
@@ -396,6 +395,11 @@ const examService = {
           },
           document: true,
         },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       }),
       prisma.exam.count({
         where,

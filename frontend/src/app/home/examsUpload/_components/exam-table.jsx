@@ -41,16 +41,6 @@ export default function ExamTable({ exams, title }) {
     }
   };
 
-  // Refetch exams when a new upload succeeds
-  useEffect(() => {
-    const handleRefresh = () => {
-      // Refetch logic could be implemented here if needed, but for now, rely on parent re-render
-      console.log("Exam uploaded, consider refetching if needed");
-    };
-    window.addEventListener("examUploadSuccess", handleRefresh);
-    return () => window.removeEventListener("examUploadSuccess", handleRefresh);
-  }, []);
-
   const getStatusText = (status) => {
     switch (status) {
       case "DANG_CHO":

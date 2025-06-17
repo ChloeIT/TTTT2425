@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { SearchBar } from "@/components/search-bar";
 import { getExamsWithDocuments } from "@/actions/document-action";
 
-
-import {
-  Card,
-  CardContent
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -23,8 +19,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { NavPagination } from "@/components/nav-pagination";
 import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
 
-
-
 const departmentMap = {
   MAC_DINH: "Mặc định",
   LY_LUAN_CO_SO: "Lý luận cơ sở",
@@ -32,7 +26,7 @@ const departmentMap = {
   XAY_DUNG_DANG: "Xây dựng Đảng",
 };
 
-const ClientAnswerTonggle = ({token}) => {
+const ClientAnswerTonggle = ({ token }) => {
   const [loadingId, setLoadingId] = useState(null);
   const [exams, setExams] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -42,7 +36,7 @@ const ClientAnswerTonggle = ({token}) => {
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
-  
+
   const fetchExams = async () => {
     const { data, totalPage } = await getExamsWithDocuments({
       page: currentPage,
@@ -56,40 +50,44 @@ const ClientAnswerTonggle = ({token}) => {
     fetchExams();
   }, [currentPage, query]);
 
- const handleGetSignedFile = async (documentId, type) => {
-  setLoadingId(`${documentId}-${type}`);
-  try {
-    const res = await fetch(
-      `http://localhost:5000/documents/${documentId}/signed-files`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const result = await res.json();
-    if (res.ok && result.data) {
-      const fileUrl = type === "question" ? result.data.questionFile : result.data.answerFile;
-      if (fileUrl) {
-        setPreviewUrl(fileUrl); 
-        setPreviewTitle(type === "question" ? "Đề thi" : "Đáp án");
+  const handleGetSignedFile = async (documentId, type) => {
+    setLoadingId(`${documentId}-${type}`);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/documents/${documentId}/signed-files`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const result = await res.json();
+      if (res.ok && result.data) {
+        const fileUrl =
+          type === "question"
+            ? result.data.questionFile
+            : result.data.answerFile;
+        if (fileUrl) {
+          setPreviewUrl(fileUrl);
+          setPreviewTitle(type === "question" ? "Đề thi" : "Đáp án");
+        } else {
+          alert(
+            `Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`
+          );
+        }
       } else {
-        alert(`Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`);
+        alert(result.message || "Không lấy được file.");
       }
-    } else {
-      alert(result.message || "Không lấy được file.");
+    } catch (err) {
+      console.error("Lỗi:", err);
+      alert("Có lỗi xảy ra khi lấy file.");
+    } finally {
+      setLoadingId(null);
     }
-  } catch (err) {
-    console.error("Lỗi:", err);
-    alert("Có lỗi xảy ra khi lấy file.");
-  } finally {
-    setLoadingId(null);
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
@@ -111,24 +109,38 @@ const ClientAnswerTonggle = ({token}) => {
           <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
-                <TableHead className="text-center min-w-[100px] ">Tên đề thi</TableHead>
-                <TableHead className="text-center min-w-[100px]">Người tạo</TableHead>
-                <TableHead className="text-center min-w-[100px]">Khoa</TableHead>
-                <TableHead className="text-center min-w-[100px]">Ngày ký</TableHead>
-                <TableHead className="text-center min-w-[100px]">Xem Đề thi</TableHead>
-                <TableHead className="text-center min-w-[100px]">Xem Đáp án</TableHead>
+                <TableHead className="text-center min-w-[100px] ">
+                  Tên đề thi
+                </TableHead>
+                <TableHead className="text-center min-w-[100px]">
+                  Người tạo
+                </TableHead>
+                <TableHead className="text-center min-w-[100px]">
+                  Khoa
+                </TableHead>
+                <TableHead className="text-center min-w-[100px]">
+                  Ngày ký
+                </TableHead>
+                <TableHead className="text-center min-w-[100px]">
+                  Xem Đề thi
+                </TableHead>
+                <TableHead className="text-center min-w-[100px]">
+                  Xem Đáp án
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {exams.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-4 text-gray-500 dark:text-gray-400"
+                  >
                     Không có dữ liệu
                   </TableCell>
                 </TableRow>
               ) : (
                 exams.map((exam) => (
-
                   <TableRow key={exam.id}>
                     <TableCell className="text-center font-bold text-blue-800 dark:text-blue-300">
                       {exam?.title || "Không có tên đề thi"}
@@ -141,27 +153,40 @@ const ClientAnswerTonggle = ({token}) => {
                     </TableCell>
                     <TableCell className="text-center text-sm text-gray-700 dark:text-gray-300">
                       {exam?.document?.createdAt
-                        ? format(new Date(exam.document.createdAt), "dd-MM-yyyy HH:mm")
+                        ? format(
+                            new Date(exam.document.createdAt),
+                            "dd-MM-yyyy HH:mm"
+                          )
                         : "Chưa ký"}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
                         className="w-full"
                         variant="default"
-                        onClick={() => handleGetSignedFile(exam?.document?.id, "question")}
-                        disabled={loadingId === `${exam?.document?.id}-question`}
+                        onClick={() =>
+                          handleGetSignedFile(exam?.document?.id, "question")
+                        }
+                        disabled={
+                          loadingId === `${exam?.document?.id}-question`
+                        }
                       >
-                        {loadingId === `${exam?.document?.id}-question` ? "Đang tải..." : "Xem Đề thi"}
+                        {loadingId === `${exam?.document?.id}-question`
+                          ? "Đang tải..."
+                          : "Xem Đề thi"}
                       </Button>
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
                         className="w-full"
                         variant="secondary"
-                        onClick={() => handleGetSignedFile(exam?.document?.id, "answer")}
+                        onClick={() =>
+                          handleGetSignedFile(exam?.document?.id, "answer")
+                        }
                         disabled={loadingId === `${exam?.document?.id}-answer`}
                       >
-                        {loadingId === `${exam?.document?.id}-answer` ? "Đang tải..." : "Xem Đáp án"}
+                        {loadingId === `${exam?.document?.id}-answer`
+                          ? "Đang tải..."
+                          : "Xem Đáp án"}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -169,20 +194,18 @@ const ClientAnswerTonggle = ({token}) => {
               )}
             </TableBody>
           </Table>
-           <div className="py-4">
-                  <NavPagination totalPage={totalPage} />
-                </div>
-              
-
+          <div className="py-4">
+            <NavPagination totalPage={totalPage} />
+          </div>
         </CardContent>
       </Card>
 
-    {previewUrl && (
-  <FullScreenPdfViewer
-    url={previewUrl}
-    onClose={() => setPreviewUrl(null)}
-  />
-)}
+      {previewUrl && (
+        <FullScreenPdfViewer
+          url={previewUrl}
+          onClose={() => setPreviewUrl(null)}
+        />
+      )}
     </div>
   );
 };

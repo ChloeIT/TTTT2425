@@ -58,7 +58,7 @@ export const UserActiveButton = ({ data, disabled }) => {
           className="min-w-[120px]"
           onClick={() => setOpen(true)}
         >
-          <span className="text-sm font-semibold">Kích hoạt</span>
+          <span className="text-sm font-semibold">Đang hoạt động</span>
         </Button>
       ) : (
         <Button

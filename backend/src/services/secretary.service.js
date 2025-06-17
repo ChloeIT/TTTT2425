@@ -198,6 +198,76 @@ const secretaryService = {
       message,
     });
   },
+
+  getSignedExamsWithDocuments: async ({
+    page = 1,
+    query,
+    month,
+    year,
+    department,
+  }) => {
+    const where = {
+      status: "DA_THI",
+      document: {
+        isNot: null,
+      },
+      ...(query && {
+        title: {
+          contains: query,
+        },
+      }),
+      ...(department && {
+        createdBy: {
+          department,
+        },
+      }),
+    };
+
+    if (month && year) {
+      const from = startOfMonth(new Date(year, month - 1));
+      const to = endOfMonth(new Date(year, month - 1));
+      where.createdAt = { gte: from, lte: to };
+    } else if (year) {
+      const from = startOfYear(new Date(year, 0));
+      const to = endOfYear(new Date(year, 0));
+      where.createdAt = { gte: from, lte: to };
+    }
+
+    const [exams, count] = await prisma.$transaction([
+      prisma.exam.findMany({
+        where,
+        include: {
+          createdBy: {
+            select: {
+              fullName: true,
+              email: true,
+              department: true,
+              username: true,
+            },
+          },
+          document: true, // vẫn giữ nếu cần check document isNot null
+        },
+        orderBy: {
+          updatedAt: "desc",
+        },
+        skip: (page - 1) * LIMIT,
+        take: LIMIT,
+      }),
+      prisma.exam.count({ where }),
+    ]);
+
+    const totalPage = Math.ceil(count / LIMIT);
+
+    console.log(
+      "[getSignedExamsWithDocuments] Exams:",
+      JSON.stringify(exams, null, 2)
+    );
+ 
+    return {
+      data: exams, 
+      totalPage,
+    };
+  },  
 };
 
 module.exports = secretaryService;

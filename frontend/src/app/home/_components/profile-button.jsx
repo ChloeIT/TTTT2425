@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useProfile } from "@/hooks/use-profile";
-import { User, User2, Users } from "lucide-react";
+import { User, User2, Users,ClipboardList ,KeyRound } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { EditProfileButton, EditProfileDialog } from "./edit-profile";
 import { useState } from "react";
@@ -71,13 +71,22 @@ export const ProfileButton = () => {
               </DropdownMenuItem>
             )}
             {TK_isPermitted && (
-              <DropdownMenuItem>
-                <div className="flex gap-2">
-                  <Users className="h-4 w-4" />
-                  <Link href={"/home/signature"}>Quản lý mật khẩu đề thi</Link>
-                </div>
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem>
+                  <div className="flex gap-2">
+                    <KeyRound className="h-4 w-4" />
+                    <Link href={"/home/signature"}>Quản lý mật khẩu đề thi</Link>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <div className="flex gap-2">
+                    <ClipboardList className="h-4 w-4"/>
+                    <Link href={"/home/signature/document"}>Quản lý danh sách đề thi đã ký</Link>
+                  </div>
+                </DropdownMenuItem>
+              </>
             )}
+
             <DropdownMenuItem>
               <EditProfileButton setOpen={() => setEditProfile(true)} />
             </DropdownMenuItem>

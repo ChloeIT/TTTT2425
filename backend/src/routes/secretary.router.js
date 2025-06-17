@@ -29,4 +29,12 @@ examRouter.post(
   secretaryController.sendNotification
 );
 
+examRouter.get(
+  "/documents",
+  requireLogin,
+  permitRoles("THU_KY"),
+  secretaryController.getSignedExamsWithDocuments
+);
+
+
 module.exports = examRouter;

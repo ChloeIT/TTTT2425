@@ -193,8 +193,7 @@ const examService = {
     const decryptedPassword = decrypt(exam.password);
     return decryptedPassword === inputPassword;
   },
-
-  changeStatus: async (id, changeStatus, user) => {
+changeStatus: async (id, changeStatus, user) => {
   const exam = await prisma.exam.findUnique({ where: { id } });
 
   if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
@@ -229,6 +228,7 @@ const examService = {
 
   throw new Error("Vượt quá số lần mở đề cho phép.");
 },
+
 
   
   openExam: async (id, userId, fullName, department) => {

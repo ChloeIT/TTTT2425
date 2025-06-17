@@ -13,7 +13,7 @@ export async function generateMetadata() {
 }
 
 const ArchivePage = async ({ searchParams }) => {
-  const { page, query, department, month, year } = await searchParams;
+  const { page, query, department, month, year } = searchParams;
   const currentPage = parseToNumber(page, 1);
 
   const { data, totalPage } = await getExams({
@@ -34,13 +34,13 @@ const ArchivePage = async ({ searchParams }) => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4 py-4 h-full">
-      <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow">
+    <div className="flex flex-col gap-y-4 py-4 h-full px-4 sm:px-6 lg:px-8">
+      <div className="px-4 py-4 bg-white dark:bg-gray-800 shadow rounded-lg">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
           Danh sách Đề đã thi
         </h1>
       </div>
-      <Card>
+      <Card className="w-full overflow-hidden">
         <CardHeader></CardHeader>
         <CardContent>
           <ExamList

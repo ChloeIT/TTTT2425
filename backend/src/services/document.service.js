@@ -1,9 +1,9 @@
-
 const prisma = require("../libs/prisma");
+const moment = require("moment");
 
 const getDocumentById = async (id) => {
   return await prisma.document.findUnique({
-    where: { id: id, },
+    where: { id: id },
     include: {
       exam: {
         select: {
@@ -28,7 +28,7 @@ const getDocumentById = async (id) => {
       },
     },
   });
-};  
+};
 const LIMIT = 10;
 const getDocuments = async () => {
   return await prisma.document.findMany({
@@ -50,22 +50,22 @@ const getDocuments = async () => {
     },
   });
 };
- const getExamsByStatusWithDocuments = async ({
+const getExamsByStatusWithDocuments = async ({
   page = 1,
   query,
   department,
   month,
   year,
 }) => {
+  const tenDaysAgo = moment().subtract(10, "days").startOf("day").toDate();
   const where = {
     ...(query && {
       title: {
         contains: query,
       },
     }),
-    document: {
-      is: {},
-    },
+
+    OR: [{ document: null }, { document: { createdAt: { gte: tenDaysAgo } } }],
     ...(department && {
       createdBy: {
         department,
@@ -73,30 +73,19 @@ const getDocuments = async () => {
     }),
   };
 
-  if (month && year) {
-    const from = startOfMonth(new Date(year, month - 1)); // JS month từ 0
-    const to = endOfMonth(new Date(year, month - 1));
-    where.createdAt = {
-      gte: from,
-      lte: to,
-    };
-  } else if (year) {
-    const from = startOfYear(new Date(year, 0));
-    const to = endOfYear(new Date(year, 0));
-    where.createdAt = {
-      gte: from,
-      lte: to,
-    };
-  }
-
   const [data, count] = await prisma.$transaction([
     prisma.exam.findMany({
       take: LIMIT,
       skip: (page - 1) * LIMIT,
       where,
-      orderBy: {
-        createdAt: 'desc', 
-      },
+      orderBy: [
+        {
+          document: {
+            createdAt: "desc",
+          },
+        },
+      ],
+
       select: {
         id: true,
         title: true,
@@ -130,7 +119,6 @@ const getDocuments = async () => {
     totalPage,
   };
 };
-
 
 module.exports = {
   getDocumentById,

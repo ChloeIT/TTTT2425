@@ -44,6 +44,26 @@ const secretaryController = {
       return res.status(500).json({ message: "Lỗi server khi gửi thông báo" });
     }
   },
+
+  getSignedExamsWithDocuments: async (req, res, next) => {
+    try {
+      const { department, month, page, query, year } =
+        secretaryService.validateQuerySignedExam(req);
+
+      const { data, totalPage } =
+        await secretaryService.getSignedExamsWithDocuments({
+          page,
+          query,
+          department,
+          month,
+          year,
+        });
+
+      return res.status(200).json({ data, totalPage });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 module.exports = secretaryController;

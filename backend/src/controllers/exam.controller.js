@@ -236,7 +236,7 @@ const examController = {
     }
   },
 
-  changeStatusExam: async (req, res, next) => {
+changeStatusExam: async (req, res, next) => {
   try {
     const examId = Number(req.params.examId);
     const { changeStatus } = req.body;

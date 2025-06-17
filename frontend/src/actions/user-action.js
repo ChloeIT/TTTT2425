@@ -8,12 +8,13 @@ const {
   errorResponse,
 } = require("@/lib/axios");
 
-export const getUsers = async ({ page = 1, query }) => {
+export const getUsers = async ({ page = 1, query, isActive }) => {
   try {
     const res = await instanceAPI.get("/users", {
       params: {
         page,
         query,
+        isActive,
       },
     });
 
@@ -32,7 +33,7 @@ export const getUsers = async ({ page = 1, query }) => {
 export const createUser = async (values) => {
   try {
     const res = await instanceAPI.post("/register", values);
-    revalidatePath("/users");
+    revalidatePath("/home/users");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -42,7 +43,7 @@ export const createUser = async (values) => {
 export const editUser = async (userId, values) => {
   try {
     const res = await instanceAPI.patch(`/users/${userId}/edit`, values);
-    revalidatePath("/users");
+    revalidatePath("/home/users");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);

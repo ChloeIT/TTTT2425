@@ -54,3 +54,36 @@ export async function notifyUserByEmail(email, password,titleExam) {
     throw error;
   }
 }
+
+
+//ds de da ky cho THU_KY
+export async function getSignedExamsWithDocuments({
+  page = 1,
+  query = "",
+  department="",
+  year="",
+  month="",
+} = {}) {
+  try {
+    const res = await instanceAPI.get("/secretary/documents", {
+      params: {
+        page,
+        query,
+        department,
+        year,
+        month,
+      },
+    });
+
+    return {
+      data: res.data.data || [],
+      totalPage: res.data.totalPage || 1,
+    };
+  } catch (error) {
+  
+    return {
+      data: [],
+      totalPage: 0,
+    };
+  }
+}

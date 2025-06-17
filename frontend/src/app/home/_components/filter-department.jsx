@@ -17,9 +17,13 @@ const FilterPanel = ({
     })),
   ];
 
+  const currentYear = new Date().getFullYear();
   const years = [
     { value: "", label: "Tất cả năm" },
-    ...[2023, 2024, 2025].map((y) => ({ value: y.toString(), label: `Năm ${y}` })),
+    ...Array.from({ length: 10 }, (_, i) => {
+      const year = currentYear - i;
+      return { value: year.toString(), label: `Năm ${year}` };
+    }),
   ];
 
   const departments = [
@@ -68,7 +72,6 @@ const FilterPanel = ({
         ))}
       </select>
     </div>
-
   );
 };
 

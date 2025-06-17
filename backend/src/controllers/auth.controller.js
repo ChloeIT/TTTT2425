@@ -52,7 +52,7 @@ const authController = {
         userService.findByUsername(username),
         userService.findByEmail(email),
       ]);
-      console.log(usernameExist);
+
       if (usernameExist) {
         throw new Error("username đã được sử dụng");
       } else if (emailExist) {

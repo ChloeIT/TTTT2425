@@ -56,7 +56,7 @@ export const UserCreateButton = () => {
     resolver: zodResolver(authSchema.registerSchema),
     defaultValues: {
       email: "",
-      department: undefined,
+      department: "MAC_DINH",
       fullName: "",
       password: "",
       username: "",
@@ -203,7 +203,7 @@ export const UserCreateButton = () => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn vai trò cho người dùng" />
+                        <SelectValue placeholder="Chọn khoa công tác cho người dùng" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

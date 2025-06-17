@@ -8,6 +8,7 @@ const {
   endOfYear,
 } = require("date-fns");
 const { Department, ExamStatus } = require("../generated/prisma");
+const { cloudinary } = require("../libs/cloudinary");
 const LIMIT = 10;
 
 const examService = {
@@ -18,52 +19,16 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
-    // Correctly extract base URL
-    const extractBaseUrl = (signedUrl) => {
-      try {
-        const url = new URL(signedUrl);
-        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
-        const pathParts = url.pathname.split("/");
-        let adjustedPathParts = pathParts.filter((part) => part);
-        if (adjustedPathParts[0] === cloudName) {
-          adjustedPathParts = adjustedPathParts.slice(1);
-        }
-        adjustedPathParts = adjustedPathParts.filter(
-          (part) =>
-            !part.startsWith("s--") &&
-            !part.startsWith("v") &&
-            part !== "upload" &&
-            part !== "raw"
-        );
-        const publicIdPath = adjustedPathParts.join("/");
-        return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicIdPath}`;
-      } catch (error) {
-        throw new Error("Invalid URL format");
-      }
-    };
+    const questionFileUrl = new URL(questionFile);
+    const answerFileUrl = new URL(answerFile);
 
-    const baseQuestionFile = extractBaseUrl(questionFile);
-    const baseAnswerFile = extractBaseUrl(answerFile);
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+    const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
 
-    // // Gửi thông báo
-    // const bghUsers = await prisma.user.findMany({
-    //   where: {
-    //     role: "BAN_GIAM_HIEU",
-    //   },
-    // });
-
-    // const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
-    // const messageNotify = `Đề thi "${title}" đã được gửi bởi .`;
- 
-    // await Promise.all(
-    //   bghUsers.map((user) =>
-    //     notificationService.createNotificationAndSendMail({
-    //       userId: user.id,
-    //       title: titleNotify,
-    //       message: messageNotify,
-    //     })
-    //   )
-    // );
+    const baseQuestionFile =
+      basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
+    const baseAnswerFile =
+      basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
 
     return await prisma.exam.create({
       data: {
@@ -130,8 +95,31 @@ const examService = {
     });
   },
 
-  deleteExam: async (id) => {
-    return await prisma.exam.delete({
+  deleteExam: async (id, questionFile, answerFile) => {
+    // Extract public IDs for Cloudinary deletion
+    const extractPublicId = (url) => {
+      const parts = url.split("/");
+      const fileNameWithExt = parts.pop(); // e.g., "1749287013182_pdf.pdf"
+      const folderPath = parts.slice(parts.indexOf("exam_files")).join("/"); // e.g., "exam_files"
+      return `${folderPath}/${fileNameWithExt}`; // e.g., "exam_files/1749287013182_pdf.pdf"
+    };
+
+    const questionFilePublicId = extractPublicId(questionFile);
+    const answerFilePublicId = extractPublicId(answerFile);
+
+    // Delete files from Cloudinary
+    await Promise.all([
+      cloudinary.uploader.destroy(questionFilePublicId, {
+        resource_type: "raw",
+      }),
+      cloudinary.uploader.destroy(answerFilePublicId, { resource_type: "raw" }),
+    ]).catch((error) => {
+      console.error("Error deleting files from Cloudinary:", error);
+      // Optionally rethrow or handle non-critical errors (e.g., file already deleted)
+    });
+
+    // Delete the exam record from the database
+    await prisma.exam.delete({
       where: { id },
     });
   },
@@ -216,18 +204,17 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-    
+
     // notificationService.notifyOpenExam(
     //   updatedExam.createdById,
     //   updatedExam.title
     // );
 
-
     return {
       id: updatedExam.id,
       title: updatedExam.title,
       questionFile: updatedExam.questionFile,
-      createdById: updatedExam.createdById
+      createdById: updatedExam.createdById,
     };
   },
   openExam: async (id, userId) => {
@@ -396,6 +383,11 @@ const examService = {
           },
           document: true,
         },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       }),
       prisma.exam.count({
         where,

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 const {
   default: instanceAPI,
@@ -13,7 +13,7 @@ export const createExam = async (formData) => {
     const res = await instanceAPI.post("/exams", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    revalidatePath("/home/examsUpload")
+    revalidatePath("/home/examsUpload");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -45,7 +45,6 @@ export async function getExamsWithDeanRole({
   query = "",
   department,
 } = {}) {
-
   try {
     const res = await instanceAPI.get("/exams/truongkhoa/ds", {
       params: {
@@ -54,7 +53,6 @@ export async function getExamsWithDeanRole({
         department,
       },
     });
-
     return {
       data: res.data.data || [],
       totalPage: res.data.totalPage || 1,
@@ -147,6 +145,23 @@ export const statusChanged = async (examId, changeStatus) => {
     return {
       ok: false,
       message: error?.response?.data?.error || "Đã xảy ra lỗi khi duyệt đề thi",
+    };
+  }
+};
+
+export const deleteExam = async (examId) => {
+  try {
+    const res = await instanceAPI.delete(`/exams/${examId}`);
+    revalidatePath("/home/examsUpload");
+    return {
+      ok: true,
+      message: res.data.message || "Đã xóa đề thi thành công",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error.response?.data?.error || "Lỗi hệ thống, không thể xóa đề thi",
     };
   }
 };

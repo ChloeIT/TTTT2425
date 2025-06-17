@@ -21,6 +21,7 @@ const ExamsUploadPage = async ({ searchParams }) => {
   const user = await auth();
   const role = user?.role;
   const department = user?.department;
+  const userId = user?.id; // Extract userId from auth
 
   const isAuthorized = await requireRole("TRUONG_KHOA", "GIANG_VIEN_RA_DE");
   if (!isAuthorized) {
@@ -76,10 +77,12 @@ const ExamsUploadPage = async ({ searchParams }) => {
                 <ExamTable
                   exams={examsDangCho}
                   title="Danh sách đề thi đang chờ duyệt"
+                  userId={userId} // Pass userId to ExamTable
                 />
                 <ExamTable
                   exams={examsTuChoi}
                   title="Danh sách đề thi bị từ chối"
+                  userId={userId} // Pass userId to ExamTable
                 />
               </div>
             </>
@@ -94,6 +97,7 @@ const ExamsUploadPage = async ({ searchParams }) => {
                 page={page}
                 query={query}
                 department={department}
+                userId={userId} // Pass userId to ExamView
               />
             </div>
           )}
@@ -102,6 +106,5 @@ const ExamsUploadPage = async ({ searchParams }) => {
     </div>
   );
 };
-
 
 export default ExamsUploadPage;

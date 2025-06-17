@@ -5,13 +5,12 @@ const { Department, ExamStatus } = require("../generated/prisma");
 const notificationService = require("../services/notification.service");
 const prisma = require("../libs/prisma");
 
-
-  const departmentMap = {
-    MAC_DINH: "Mặc định",
-    LY_LUAN_CO_SO: "Lý luận cơ sở",
-    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
-    XAY_DUNG_DANG: "Xây dựng Đảng",
-  };
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
 
 const examController = {
   createExam: async (req, res, next) => {
@@ -47,25 +46,27 @@ const examController = {
 
       // Log exam vừa tạo
       console.log("Created exam:", exam);
-       // Gửi thông báo
-    const bghUsers = await prisma.user.findMany({
-      where: {
-        role: "BAN_GIAM_HIEU",
-      },
-    });
+      // Gửi thông báo
+      const bghUsers = await prisma.user.findMany({
+        where: {
+          role: "BAN_GIAM_HIEU",
+        },
+      });
 
-    const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
-    const messageNotify = `Đề thi "${title}" đã được soạn bởi ${req.user.fullName} - ${departmentMap[req.user.department]}.`;
- 
-    await Promise.all(
-      bghUsers.map((user) =>
-        notificationService.createNotificationAndSendMail({
-          userId: user.id,
-          title: titleNotify,
-          message: messageNotify,
-        })
-      )
-    );
+      const titleNotify = `Thông báo đề thi ${title} đã được soạn `;
+      const messageNotify = `Đề thi "${title}" đã được soạn bởi ${
+        req.user.fullName
+      } - ${departmentMap[req.user.department]}.`;
+
+      await Promise.all(
+        bghUsers.map((user) =>
+          notificationService.createNotificationAndSendMail({
+            userId: user.id,
+            title: titleNotify,
+            message: messageNotify,
+          })
+        )
+      );
 
       // Gửi response thành công
       return res.status(201).json({ ok: true, data: exam });
@@ -240,16 +241,15 @@ const examController = {
       const examId = Number(req.params.examId);
       const { changeStatus } = req.body;
 
-
       const updatedExam = await examService.changeStatus(examId, changeStatus);
-      
+
       notificationService.notifyOpenExam(
         updatedExam.createdById,
         updatedExam.title,
         req.user.fullName,
         req.user.department
       );
-      
+
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -338,9 +338,17 @@ const examController = {
   deleteExam: async (req, res, next) => {
     try {
       const id = Number(req.params.id);
-      await examService.deleteExam(id);
+      const exam = await examService.getExamById(id);
+      if (!exam) {
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
+      }
+
+      // Delete exam and associated files from Cloudinary
+      await examService.deleteExam(id, exam.questionFile, exam.answerFile);
+
       res.status(200).json({ message: "Đã xóa đề thi thành công" });
     } catch (error) {
+      console.error("Error in deleteExam:", error);
       next(error);
     }
   },
@@ -425,7 +433,6 @@ const examController = {
         query = "",
         department,
       } = examService.validateQueryGetExamsByStatus(req);
-        console.log(req.query)
       const { data, totalPage } = await examService.getExamsByStatus({
         page: Number(page),
         query,

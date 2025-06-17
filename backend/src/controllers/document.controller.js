@@ -65,33 +65,33 @@ const getSignedDocumentFiles = async (req, res, next) => {
     console.error("Error in getSignedDocumentFiles:", err);
     next(err);
   }
-  
 };
 const getDocuments = async (req, res, next) => {
-   try {
-      const { department, month, page, query, year } =
-        examService.validateQueryGetExamsByStatus(req);
+  try {
+    const { department, month, page, query, year } =
+      examService.validateQueryGetExamsByStatus(req);
 
-      // truyền department=MAC_DINH...
-      //truyền month >=1 và <=12
-      //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
-      //status= DANG_CHO...
-      //để query
-     
-      const { data, totalPage } = await documentService.getExamsByStatusWithDocuments({
+    // truyền department=MAC_DINH...
+    //truyền month >=1 và <=12
+    //truyền year trong vòng 10 năm tính từ năm hiện tại 2025-2015
+    //status= DANG_CHO...
+    //để query
+
+    const { data, totalPage } =
+      await documentService.getExamsByStatusWithDocuments({
         page,
         query,
         department,
         month,
         year,
       });
-      return res.status(200).json({
-        data,
-        totalPage,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      data,
+      totalPage,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {

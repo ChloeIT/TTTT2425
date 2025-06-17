@@ -112,7 +112,12 @@ examRouter.patch(
   examController.changeStatusExam
 );
 
-// examRouter.delete("/:id", requireLogin, examController.deleteExam);
+examRouter.delete(
+  "/:id",
+  requireLogin,
+  permitRoles("VAN_THU", "BAN_GIAM_HIEU", "TRUONG_KHOA", "GIANG_VIEN_RA_DE"), // Restrict to authorized roles
+  examController.deleteExam
+);
 
 examRouter.get(
   "/waiting/ban-giam-hieu",
@@ -122,10 +127,7 @@ examRouter.get(
 );
 
 // Lấy danh sách đề thi đã duyệt theo trang
-examRouter.get("/openedExam", 
-  requireLogin,
-  examController.getOpenedExams
-);
+examRouter.get("/openedExam", requireLogin, examController.getOpenedExams);
 // ds đề theo trưởng khoa
 examRouter.get(
   "/truongkhoa/ds",

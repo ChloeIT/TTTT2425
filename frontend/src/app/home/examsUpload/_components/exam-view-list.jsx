@@ -10,12 +10,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "react-hot-toast";
-import { SearchBar } from "@/components/search-bar";
 import { NavPagination } from "@/components/nav-pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { getSignedExamFiles, deleteExam } from "@/actions/exams-action";
 import toast from "react-hot-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAction } from "@/hooks/use-action";
 
 export default function ExamView({
   exams,
@@ -25,10 +35,10 @@ export default function ExamView({
   department,
   userId,
 }) {
-  console.log(exams);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [fileUrls, setFileUrls] = useState({});
+  const [openDialogId, setOpenDialogId] = useState(null);
 
   const getStatusText = (status) => {
     switch (status) {
@@ -71,16 +81,21 @@ export default function ExamView({
     }
   };
 
+  const { action: deleteAction, isPending } = useAction();
   const handleDeleteExam = async (examId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa đề thi này?")) return;
-
-    const result = await deleteExam(examId);
-    if (result.ok) {
-      toast.success("Đã xóa đề thi thành công");
-      router.refresh();
-    } else {
-      toast.error(result.message || "Không thể xóa đề thi");
-    }
+    deleteAction(
+      {
+        fn: deleteExam,
+      },
+      examId,
+      () => {
+        toast.success("Đã xóa đề thi thành công");
+        router.refresh();
+      },
+      (error) => {
+        toast.error(error.message || "Không thể xóa đề thi");
+      }
+    );
   };
 
   const canDelete = (exam) => {
@@ -93,10 +108,6 @@ export default function ExamView({
       <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300 mt-6">
         Danh sách đề thi đang chờ duyệt
       </h2>
-      <div className="mb-4">
-        <SearchBar placeholder="Tìm kiếm đề thi..." onSearch={handleSearch} />
-      </div>
-
       <Table className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
         <TableHeader>
           <TableRow>
@@ -127,7 +138,8 @@ export default function ExamView({
                     </span>
                     {canDelete(exam) && (
                       <button
-                        onClick={() => handleDeleteExam(exam.id)}
+                        onClick={() => setOpenDialogId(exam.id)}
+                        disabled={isPending}
                         className="text-red-500 hover:text-red-700"
                       >
                         <svg
@@ -194,6 +206,34 @@ export default function ExamView({
                 <TableCell className="dark:text-gray-300">
                   {new Date(exam.createdAt).toLocaleString()}
                 </TableCell>
+                {openDialogId === exam.id && (
+                  <AlertDialog open={true} onOpenChange={setOpenDialogId}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Xác nhận hành động</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Bạn có chắc chắn muốn xóa đề thi "{exam.title}"?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setOpenDialogId(null)}
+                        >
+                          Huỷ bỏ
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            handleDeleteExam(exam.id);
+                            setOpenDialogId(null);
+                          }}
+                          disabled={isPending}
+                        >
+                          Xác nhận
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </TableRow>
             ))
           )}

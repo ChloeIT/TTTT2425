@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 const {
   default: instanceAPI,
@@ -53,7 +53,6 @@ export async function getExamsWithDeanRole({
         department,
       },
     });
-
     return {
       data: res.data.data || [],
       totalPage: res.data.totalPage || 1,
@@ -153,6 +152,7 @@ export const statusChanged = async (examId, changeStatus) => {
 export const deleteExam = async (examId) => {
   try {
     const res = await instanceAPI.delete(`/exams/${examId}`);
+    revalidatePath("/home/examsUpload");
     return {
       ok: true,
       message: res.data.message || "Đã xóa đề thi thành công",

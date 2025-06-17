@@ -14,10 +14,22 @@ import { getSignedExamFiles, deleteExam } from "@/actions/exams-action";
 import toast, { Toaster } from "react-hot-toast";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAction } from "@/hooks/use-action";
 
 export default function ExamTable({ exams, title, userId }) {
   const [fileUrls, setFileUrls] = useState({});
   const router = useRouter();
+  const [openDialogId, setOpenDialogId] = useState(null);
 
   // Function to fetch signed URLs using the action
   const fetchSignedUrls = async (examId) => {
@@ -43,17 +55,21 @@ export default function ExamTable({ exams, title, userId }) {
     }
   };
 
-  // Handle exam deletion
+  const { action: deleteAction, isPending } = useAction();
   const handleDeleteExam = async (examId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa đề thi này?")) return;
-
-    const result = await deleteExam(examId);
-    if (result.ok) {
-      toast.success("Đã xóa đề thi thành công");
-      router.refresh(); // Refresh the page to reflect the deletion
-    } else {
-      toast.error(result.message || "Không thể xóa đề thi");
-    }
+    deleteAction(
+      {
+        fn: deleteExam,
+      },
+      examId,
+      () => {
+        toast.success("Đã xóa đề thi thành công");
+        router.refresh();
+      },
+      (error) => {
+        toast.error(error.message || "Không thể xóa đề thi");
+      }
+    );
   };
 
   const getStatusText = (status) => {
@@ -67,12 +83,11 @@ export default function ExamTable({ exams, title, userId }) {
     }
   };
 
-  // Check if the current user is the creator (only for GIANG_VIEN_RA_DE)
   const canDelete = (exam) => {
     return (
-      title === "Danh sách đề thi đang chờ duyệt" || // Always allow for GIANG_VIEN_RA_DE
+      title === "Danh sách đề thi đang chờ duyệt" ||
       (title === "Danh sách đề thi bị từ chối" && userId === exam.createdById)
-    ); // Restrict for other roles
+    );
   };
 
   return (
@@ -117,7 +132,8 @@ export default function ExamTable({ exams, title, userId }) {
                 <div className="flex items-center gap-2">
                   {canDelete(exam) && (
                     <button
-                      onClick={() => handleDeleteExam(exam.id)}
+                      onClick={() => setOpenDialogId(exam.id)}
+                      disabled={isPending}
                       className="text-red-500 hover:text-red-700"
                     >
                       <svg
@@ -199,6 +215,32 @@ export default function ExamTable({ exams, title, userId }) {
                 <TableCell className="dark:text-gray-300">
                   {exam.note || "-"}
                 </TableCell>
+              )}
+              {openDialogId === exam.id && (
+                <AlertDialog open={true} onOpenChange={setOpenDialogId}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Xác nhận hành động</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Bạn có chắc chắn muốn xóa đề thi "{exam.title}"?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setOpenDialogId(null)}>
+                        Huỷ bỏ
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          handleDeleteExam(exam.id);
+                          setOpenDialogId(null);
+                        }}
+                        disabled={isPending}
+                      >
+                        Xác nhận
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </TableRow>
           ))}

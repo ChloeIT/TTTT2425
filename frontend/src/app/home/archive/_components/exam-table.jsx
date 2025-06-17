@@ -206,7 +206,7 @@ const ExamList = ({
             {filteredExams.map((exam) => {
               const updatedAt = new Date(exam.updatedAt);
               const timeDiffMs = currentTime - updatedAt;
-              const isWithin24Hours = timeDiffMs < 24 * 60 * 60 * 1000;
+              const isWithin24Hours = timeDiffMs < 6 * 60 * 60 * 1000;
               const hasDocument = !!exam.document;
 
               return (

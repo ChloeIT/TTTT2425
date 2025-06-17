@@ -13,7 +13,7 @@ export async function generateMetadata() {
 }
 
 const ArchivePage = async ({ searchParams }) => {
-  const { page, query, department, month, year } = searchParams;
+  const { page, query, department, month, year } = await searchParams;
   const currentPage = parseToNumber(page, 1);
 
   const { data, totalPage } = await getExams({

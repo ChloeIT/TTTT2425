@@ -353,6 +353,30 @@ const examController = {
     }
   },
 
+  deleteExamDocument: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const exam = await examService.getExamById(id);
+      if (!exam) {
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
+      }
+      if (!exam.document) {
+        return res
+          .status(400)
+          .json({ error: "Đề thi không có tài liệu để xóa" });
+      }
+
+      await examService.deleteExamDocument(id);
+
+      res
+        .status(200)
+        .json({ message: "Đã xóa tài liệu của đề thi thành công" });
+    } catch (error) {
+      console.error("Error in deleteExamDocument:", error);
+      next(error);
+    }
+  },
+
   getWaitingExamByBanGiamHieu: async (req, res, next) => {
     try {
       const { department, month, status, page, query, year } =
@@ -417,6 +441,10 @@ const examController = {
         month,
         year,
       });
+
+      // Sort data by updatedAt in descending order (newest first)
+      data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
       return res.status(200).json({
         data,
         totalPage,

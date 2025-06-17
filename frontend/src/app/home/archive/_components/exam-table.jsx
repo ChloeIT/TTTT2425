@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import UploadExamButton from "./upload-exam-button";
 import { SearchBar } from "@/components/search-bar";
 import FilterPanel from "../../_components/filter-department";
-import { getFile } from "@/actions/archive-action";
+import { getFile, deleteExamDocument } from "@/actions/archive-action";
 import {
   Table,
   TableBody,
@@ -14,10 +14,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { NavPagination } from "@/components/nav-pagination";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const statusMap = {
   DANG_CHO: "Đang chờ",
@@ -52,6 +62,7 @@ const ExamList = ({
   const [selectedDepartment, setSelectedDepartment] = useState(
     initialDepartment || ""
   );
+  const [openDialogId, setOpenDialogId] = useState(null);
 
   useEffect(() => {
     const queryParam = searchParams.get("query") || "";
@@ -124,6 +135,16 @@ const ExamList = ({
     }
   };
 
+  const handleDeleteDocument = async (examId) => {
+    const result = await deleteExamDocument(examId);
+    if (result.ok) {
+      toast.success("Xoá tài liệu thành công");
+    } else {
+      toast.success("Xoá tài liệu thất bại");
+      console.log(result.message);
+    }
+  };
+
   const currentTime = new Date();
   const filteredExams = exams
     .filter((exam) =>
@@ -142,14 +163,6 @@ const ExamList = ({
       (exam) =>
         !selectedDepartment || exam.createdBy?.department === selectedDepartment
     );
-
-  const handleSearch = (val) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("query", val);
-    params.set("page", "1");
-    router.push(`?${params.toString()}`);
-  };
-
   const handleFilterChange = (type, val) => {
     const params = new URLSearchParams(searchParams.toString());
     if (val) params.set(type, val);
@@ -160,6 +173,7 @@ const ExamList = ({
 
   return (
     <>
+      <Toaster position="top-right" />
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex flex-col lg:flex-row justify-between gap-4">
           <div className="w-full lg:w-auto lg:min-w-[250px]">
@@ -229,7 +243,7 @@ const ExamList = ({
                     <div className="flex flex-col justify-center items-center gap-2">
                       {isWithin24Hours && (
                         <Button variant="outline" disabled className="w-[90px]">
-                          Chưa đủ 24h
+                          Chưa đủ 6 tiếng
                         </Button>
                       )}
                       {!isWithin24Hours && (
@@ -264,22 +278,51 @@ const ExamList = ({
                             </Button>
                           ) : hasDocument ? (
                             <Button
+                              className="bg-red-100 text-red-700 hover:bg-red-200"
                               variant="outline"
-                              disabled
-                              className="w-[120px]"
+                              onClick={() => setOpenDialogId(exam.id)}
                             >
-                              Đã được đăng tải
+                              Xóa tài liệu
                             </Button>
                           ) : (
                             <UploadExamButton
                               exam={exam}
-                              pendingUploadExam={null} // Adjust as needed
-                              setPendingUploadExam={() => {}} // Adjust as needed
+                              pendingUploadExam={null}
+                              setPendingUploadExam={() => {}}
                             />
                           )}
                         </>
                       ) : (
                         <div className="w-[90px] h-10" />
+                      )}
+                      {openDialogId === exam.id && (
+                        <AlertDialog open={true} onOpenChange={setOpenDialogId}>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Xác nhận xoá</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Bạn có chắc chắn muốn xóa tài liệu của đề thi "
+                                {exam.title}" không? (Tài liệu sẽ phải được đăng
+                                tải lại)
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel
+                                onClick={() => setOpenDialogId(null)}
+                              >
+                                Trở lại
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={async () => {
+                                  await handleDeleteDocument(exam.id);
+                                  setOpenDialogId(null);
+                                }}
+                              >
+                                Tiếp tục
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                   </TableCell>

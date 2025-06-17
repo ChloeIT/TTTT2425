@@ -115,8 +115,15 @@ examRouter.patch(
 examRouter.delete(
   "/:id",
   requireLogin,
-  permitRoles("VAN_THU", "BAN_GIAM_HIEU", "TRUONG_KHOA", "GIANG_VIEN_RA_DE"), // Restrict to authorized roles
+  permitRoles("TRUONG_KHOA", "GIANG_VIEN_RA_DE"),
   examController.deleteExam
+);
+
+examRouter.delete(
+  "/:id/document",
+  requireLogin,
+  permitRoles("VAN_THU"),
+  examController.deleteExamDocument
 );
 
 examRouter.get(

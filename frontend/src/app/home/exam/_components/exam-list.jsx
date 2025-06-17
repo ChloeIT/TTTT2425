@@ -26,6 +26,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { currentUser } from "@/actions/auth-action";
 import { NavPagination } from "@/components/nav-pagination";
 import { useSearchParams } from "next/navigation";
+import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
+
 
 const ExamViewList = ({ query, token }) => {
   const [user, setUser] = useState(null)
@@ -42,6 +44,10 @@ const ExamViewList = ({ query, token }) => {
   const page = Number(searchParams.get("page")) || 1;
 
   const currentPage = parseToNumber(page, 1);
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewTitle, setPreviewTitle] = useState("");
+
 
   useEffect(()=> {
     const getCurrentUser = async()=> {
@@ -235,6 +241,14 @@ const ExamViewList = ({ query, token }) => {
         <div className="py-4">
           <NavPagination totalPage={totalPage} />
         </div>
+
+        {previewUrl && (
+          <FullScreenPdfViewer
+            url={previewUrl}
+            title={previewTitle}
+            onClose={() => setPreviewUrl(null)}
+          />
+        )}
     </div>
   );
 };

@@ -65,7 +65,7 @@ const getExamsByStatusWithDocuments = async ({
       },
     }),
 
-    OR: [{ document: null }, { document: { createdAt: { gte: tenDaysAgo } } }],
+    document: { createdAt: { gte: tenDaysAgo } },
     ...(department && {
       createdBy: {
         department,

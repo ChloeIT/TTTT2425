@@ -83,7 +83,7 @@ const userService = {
     });
     return user;
   },
-  getUsers: async ({ page = 1, query }) => {
+  getUsers: async ({ page = 1, query, isActive = true }) => {
     const [data, count] = await prisma.$transaction([
       prisma.user.findMany({
         take: LIMIT,
@@ -103,6 +103,7 @@ const userService = {
               },
             ],
           }),
+          isActive,
         },
         select: {
           ...userSelect,

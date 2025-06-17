@@ -15,9 +15,13 @@ import { UserEditButton } from "./user-edit";
 import { UserActiveButton } from "./user-active-buton";
 import { userDepartment, userRole } from "@/schemas/user.schema";
 import { useProfile } from "@/hooks/use-profile";
+import { Button } from "@/components/ui/button";
+import { useUpdateSearchParams } from "@/hooks/use-update-search-param";
 
 export const UsersTable = ({ data = [], totalPage }) => {
   const { user } = useProfile();
+  const { updateSearchParams } = useUpdateSearchParams();
+
   return (
     <>
       <div className="py-4 flex gap-2 lg:flex-row flex-col items-start lg:items-center">
@@ -25,6 +29,24 @@ export const UsersTable = ({ data = [], totalPage }) => {
           placeholder={"Tìm kiếm người dùng theo tên, email..."}
           isPagination={true}
         />
+      </div>
+      <div className="flex gap-x-2 py-4">
+        <Button
+          variant="success"
+          onClick={() => {
+            updateSearchParams({ isActive: true });
+          }}
+        >
+          Tài khoản đang hoạt động
+        </Button>
+        <Button
+          variant="destroy"
+          onClick={() => {
+            updateSearchParams({ isActive: false });
+          }}
+        >
+          Tài khoản đã dừng
+        </Button>
       </div>
       <Table>
         <TableHeader>

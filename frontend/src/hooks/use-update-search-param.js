@@ -9,7 +9,7 @@ export const useUpdateSearchParams = () => {
     const params = new URLSearchParams(searchParams);
 
     for (const key in values) {
-      if (!values[key]) {
+      if (values[key] == null || values[key] == undefined) {
         params.delete(key);
       } else {
         params.set(key, values[key]);

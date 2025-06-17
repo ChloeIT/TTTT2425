@@ -8,12 +8,13 @@ const {
   errorResponse,
 } = require("@/lib/axios");
 
-export const getUsers = async ({ page = 1, query }) => {
+export const getUsers = async ({ page = 1, query, isActive }) => {
   try {
     const res = await instanceAPI.get("/users", {
       params: {
         page,
         query,
+        isActive,
       },
     });
 

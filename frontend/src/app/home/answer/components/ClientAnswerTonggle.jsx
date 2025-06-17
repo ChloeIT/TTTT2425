@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NavPagination } from "@/components/nav-pagination";
+import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
+
 
 
 const departmentMap = {
@@ -33,6 +35,9 @@ const departmentMap = {
 const ClientAnswerTonggle = ({token}) => {
   const [loadingId, setLoadingId] = useState(null);
   const [exams, setExams] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewTitle, setPreviewTitle] = useState(""); // để hiển thị tiêu đề nếu cần
+
   const [totalPage, setTotalPage] = useState(1);
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
@@ -51,38 +56,40 @@ const ClientAnswerTonggle = ({token}) => {
     fetchExams();
   }, [currentPage, query]);
 
-  const handleGetSignedFile = async (documentId, type) => {
-    setLoadingId(`${documentId}-${type}`);
-    try {
-      const res = await fetch(
-        `http://localhost:5000/documents/${documentId}/signed-files`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const result = await res.json();
-      if (res.ok && result.data) {
-        const fileUrl = type === "question" ? result.data.questionFile : result.data.answerFile;
-        if (fileUrl) {
-          window.open(fileUrl, "_blank");
-        } else {
-          alert(`Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`);
-        }
-      } else {
-        alert(result.message || "Không lấy được file.");
+ const handleGetSignedFile = async (documentId, type) => {
+  setLoadingId(`${documentId}-${type}`);
+  try {
+    const res = await fetch(
+      `http://localhost:5000/documents/${documentId}/signed-files`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (err) {
-      console.error("Lỗi:", err);
-      alert("Có lỗi xảy ra khi lấy file.");
-    } finally {
-      setLoadingId(null);
+    );
+    const result = await res.json();
+    if (res.ok && result.data) {
+      const fileUrl = type === "question" ? result.data.questionFile : result.data.answerFile;
+      if (fileUrl) {
+        setPreviewUrl(fileUrl); 
+        setPreviewTitle(type === "question" ? "Đề thi" : "Đáp án");
+      } else {
+        alert(`Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`);
+      }
+    } else {
+      alert(result.message || "Không lấy được file.");
     }
-  };
+  } catch (err) {
+    console.error("Lỗi:", err);
+    alert("Có lỗi xảy ra khi lấy file.");
+  } finally {
+    setLoadingId(null);
+  }
+};
+
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
@@ -164,10 +171,17 @@ const ClientAnswerTonggle = ({token}) => {
            <div className="py-4">
                   <NavPagination totalPage={totalPage} />
                 </div>
+              
+
         </CardContent>
       </Card>
 
-     
+    {previewUrl && (
+  <FullScreenPdfViewer
+    url={previewUrl}
+    onClose={() => setPreviewUrl(null)}
+  />
+)}
     </div>
   );
 };

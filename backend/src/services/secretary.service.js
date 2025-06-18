@@ -236,7 +236,10 @@ const secretaryService = {
     const [exams, count] = await prisma.$transaction([
       prisma.exam.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          title: true,
+
           createdBy: {
             select: {
               fullName: true,
@@ -245,11 +248,20 @@ const secretaryService = {
               username: true,
             },
           },
-          document: true, // vẫn giữ nếu cần check document isNot null
+          document: {
+            select: {
+              questionFile: true,
+              answerFile: true,
+              createdAt: true,
+            },
+          },
         },
         orderBy: {
-          updatedAt: "desc",
-        },
+          document: {
+            createdAt: 'desc',
+          },
+        }
+        ,        
         skip: (page - 1) * LIMIT,
         take: LIMIT,
       }),
@@ -258,16 +270,16 @@ const secretaryService = {
 
     const totalPage = Math.ceil(count / LIMIT);
 
-    console.log(
-      "[getSignedExamsWithDocuments] Exams:",
-      JSON.stringify(exams, null, 2)
-    );
- 
+    // console.log(
+    //   "[getSignedExamsWithDocuments] Exams:",
+    //   JSON.stringify(exams, null, 2)
+    // );
+
     return {
-      data: exams, 
+      data: exams,
       totalPage,
     };
-  },  
+  },
 };
 
 module.exports = secretaryService;

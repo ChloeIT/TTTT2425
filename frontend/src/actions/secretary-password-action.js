@@ -1,6 +1,7 @@
 "use server";
 
 import instanceAPI from "@/lib/axios";
+const { successResponse, errorResponse } = require("@/lib/axios");
 
 export async function getSignedExams({
   page = 1,
@@ -41,12 +42,12 @@ export async function getUserEmail() {
     return [];
   }
 }
-export async function notifyUserByEmail(email, password,titleExam) {
+export async function notifyUserByEmail(email, password, titleExam) {
   try {
     const res = await instanceAPI.post("/secretary/notify", {
       email,
       password,
-      titleExam
+      titleExam,
     });
     return res.data;
   } catch (error) {
@@ -55,14 +56,13 @@ export async function notifyUserByEmail(email, password,titleExam) {
   }
 }
 
-
 //ds de da ky cho THU_KY
 export async function getSignedExamsWithDocuments({
   page = 1,
   query = "",
-  department="",
-  year="",
-  month="",
+  department = "",
+  year = "",
+  month = "",
 } = {}) {
   try {
     const res = await instanceAPI.get("/secretary/documents", {
@@ -80,10 +80,19 @@ export async function getSignedExamsWithDocuments({
       totalPage: res.data.totalPage || 1,
     };
   } catch (error) {
-  
     return {
       data: [],
       totalPage: 0,
     };
   }
 }
+
+export const getSignedExamFiles = async (examId) => {
+  console.log("call");
+  try {
+    const res = await instanceAPI.get(`/secretary/${examId}/files`);
+    return successResponse(res);
+  } catch (error) {
+    return errorResponse(error);
+  }
+};

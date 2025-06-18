@@ -83,7 +83,7 @@ const examController = {
   getAllExams: async (req, res, next) => {
     try {
       const { status, page = 1, query = "", department } = req.query;
-      const { data, totalPage } = await examService.getExamsByStatus({
+      const { data, totalPage } = await examService.getApproved_Tested({
         status,
         page,
         query,
@@ -229,32 +229,27 @@ const examController = {
         return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
       }
 
-      const updatedExam = await examService.openExam(id, userId);
+      const updatedExam = await examService.openExam(id, userId, req.user.fullName, req.user.department);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
     }
   },
 
-  changeStatusExam: async (req, res, next) => {
-    try {
-      const examId = Number(req.params.examId);
-      const { changeStatus } = req.body;
+changeStatusExam: async (req, res, next) => {
+  try {
+    const examId = Number(req.params.examId);
+    const { changeStatus } = req.body;
 
-      const updatedExam = await examService.changeStatus(examId, changeStatus);
+    const user = req.user;
+    const updatedExam = await examService.changeStatus(examId, changeStatus, user);
 
-      notificationService.notifyOpenExam(
-        updatedExam.createdById,
-        updatedExam.title,
-        req.user.fullName,
-        req.user.department
-      );
+    res.status(200).json({ data: updatedExam });
+  } catch (error) {
+    next(error);
+  }
+},
 
-      res.status(200).json({ data: updatedExam });
-    } catch (error) {
-      next(error);
-    }
-  },
 
   verifyExamPassword: async (req, res) => {
     try {

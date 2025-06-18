@@ -1,7 +1,11 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import { ApprovedExamsList, approvedFull, getAllExams, statusChanged } from "@/actions/exams-action";
+import {
+  ApprovedExamsList,
+  approvedFull,
+  getAllExams,
+  statusChanged,
+} from "@/actions/exams-action";
 import { parseToNumber } from "@/lib/utils";
 import {
   Dialog,
@@ -21,50 +25,53 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import ExamQuestion from "../../sign/sign_exam/_components/exam";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { currentUser } from "@/actions/auth-action";
 import { NavPagination } from "@/components/nav-pagination";
 import { useSearchParams } from "next/navigation";
+import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
 
 const ExamViewList = ({ query, token }) => {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
   const [data, setData] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [inputPassword, setInputPassword] = useState("");
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
-  const [examToOpen, setExamToOpen] = useState(null);
   const [openedExamIds, setOpenedExamIds] = useState([]);
   const [totalPage, setTotalPage] = useState(1);
-  const searchParams = useSearchParams();
-  
-  const page = Number(searchParams.get("page")) || 1;
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewTitle, setPreviewTitle] = useState("");
 
+  const searchParams = useSearchParams();
+  const page = Number(searchParams.get("page")) || 1;
   const currentPage = parseToNumber(page, 1);
 
-  useEffect(()=> {
-    const getCurrentUser = async()=> {
+  useEffect(() => {
+    const getCurrentUser = async () => {
       const res = await currentUser();
-      if(res.data){
-        setUser(res.data)
+      if (res.data) {
+        setUser(res.data);
       }
-    }
-    getCurrentUser()
-  },[])
+    };
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
-
     const fetchExams = async () => {
-      const {data, totalPage} = await approvedFull({ page, query, status: "DA_DUYET"});
+      const { data, totalPage } = await approvedFull({
+        page,
+        query
+      });
       setData(data);
+      console.log(data)
       setTotalPage(totalPage);
     };
     fetchExams();
-
   }, [currentPage, query, user, page]);
 
-  const handleOpen = async (exam) => {
+  const handleOpen = (exam) => {
     setSelectedExam(exam);
     setInputPassword("");
     setError("");
@@ -88,23 +95,47 @@ const ExamViewList = ({ query, token }) => {
           password: inputPassword,
         }),
       });
-
       const result = await res.json();
-      if (res.ok) {
-        const status = "DA_THI";
-        const changeStatusResult = await statusChanged(
-          selectedExam.id.toString(),
-          status
-        );
-
-        // console.log(changeStatusResult)
-        setOpen(false);
-        setExamToOpen(selectedExam);
-        setOpenedExamIds((prev) => [...prev, selectedExam.id]);
-      } else {
+      if (!res.ok) {
         setError(result.error || "Đã xảy ra lỗi");
+        return;
       }
+
+      // 2. Cập nhật trạng thái sang DA_THI
+      await statusChanged(selectedExam.id.toString(), "DA_THI");
+
+      // 3. Gọi API lấy signed URL
+      const fileRes = await fetch(`http://localhost:5000/exams/${selectedExam.id}/files`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      const fileData = await fileRes.json();
+      if (!fileRes.ok || !fileData?.data?.questionFile) {
+        setError("Không lấy được file đề thi.");
+        return;
+      }
+
+      // 4. Hiển thị PDF fullscreen
+      setPreviewUrl(fileData.data.questionFile);
+      setPreviewTitle(selectedExam.title);
+      setOpenedExamIds((prev) => [...prev, selectedExam.id]);
+      setOpen(false);
+      setData((prevData) =>
+        prevData.map((exam) =>
+          exam.id === selectedExam.id
+            ? {
+                ...exam,
+                attemptCount: Math.min((exam.attemptCount || 0) + 1, 3),
+                status: "DA_THI",
+              }
+            : exam
+        )
+      );
     } catch (err) {
+      console.error(err);
       setError("Lỗi kết nối tới server");
     }
   };
@@ -129,21 +160,11 @@ const ExamViewList = ({ query, token }) => {
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-                <TableHead className="text-center min-w-[90px] ">
-                  Tên đề thi
-                </TableHead>
-                <TableHead className="text-center min-w-[90px] " >
-                  Người tạo
-                </TableHead>
-                <TableHead className="text-center min-w-[90px] ">
-                  Khoa
-                </TableHead>
-                <TableHead className="text-center min-w-[90px] ">
-                  Trạng thái
-                </TableHead>
-                <TableHead className="text-center min-w-[90px] ">
-                  Thao tác
-                </TableHead>
+                <TableHead className="text-center min-w-[90px]">Tên đề thi</TableHead>
+                <TableHead className="text-center min-w-[90px]">Người tạo</TableHead>
+                <TableHead className="text-center min-w-[90px]">Khoa</TableHead>
+                <TableHead className="text-center min-w-[90px]">Trạng thái</TableHead>
+                <TableHead className="text-center min-w-[90px]">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -171,30 +192,24 @@ const ExamViewList = ({ query, token }) => {
                     <TableCell className="text-center">
                       {departmentMap[exam.createdBy?.department] || "Không rõ"}
                     </TableCell>
-
                     <TableCell className="text-center">
                       <Badge
                         variant="default"
-                        className={
-                          {
-                            DA_DUYET:
-                              "bg-green-500 text-white dark:bg-green-600",
-                            DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
-                          }[exam.status] ||
-                          "bg-gray-400 text-white dark:bg-gray-600"
-                        }
+                        className={{
+                          DA_DUYET: "bg-green-500 text-white dark:bg-green-600",
+                          DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
+                        }[exam.status] || "bg-gray-400 text-white dark:bg-gray-600"}
                       >
                         {exam.status === "DA_DUYET" ? "Đã duyệt" : "Đã thi"}
                       </Badge>
                     </TableCell>
-
                     <TableCell className="text-center">
                       <Button
                         variant="outline"
                         onClick={() => handleOpen(exam)}
-                        disabled={openedExamIds.includes(exam.id)}
+                        disabled={exam.attemptCount >= 3}
                       >
-                        Mở đề
+                        Mở đề ({exam.attemptCount || 0}/3)
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -202,7 +217,7 @@ const ExamViewList = ({ query, token }) => {
               )}
             </TableBody>
           </Table>
-        </CardContent>{" "}
+        </CardContent>
       </Card>
 
       {/* Dialog nhập mật khẩu */}
@@ -230,11 +245,18 @@ const ExamViewList = ({ query, token }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Component mở đề thi sau khi xác minh */}
-      <ExamQuestion exam={examToOpen} onClose={() => setExamToOpen(null)} />
-        <div className="py-4">
-          <NavPagination totalPage={totalPage} />
-        </div>
+      <div className="py-4">
+        <NavPagination totalPage={totalPage} />
+      </div>
+
+      {/* PDF Viewer */}
+      {previewUrl && (
+        <FullScreenPdfViewer
+          url={previewUrl}
+          title={previewTitle}
+          onClose={() => setPreviewUrl(null)}
+        />
+      )}
     </div>
   );
 };

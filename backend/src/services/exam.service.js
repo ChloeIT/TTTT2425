@@ -10,6 +10,7 @@ const {
 const { Department, ExamStatus } = require("../generated/prisma");
 const { cloudinary } = require("../libs/cloudinary");
 const LIMIT = 10;
+const MAX_EXAM_OPEN_COUNT = 3;
 
 const examService = {
   createExam: async ({
@@ -238,32 +239,45 @@ const examService = {
     const decryptedPassword = decrypt(exam.password);
     return decryptedPassword === inputPassword;
   },
+  changeStatus: async (id, changeStatus, user) => {
+    const exam = await prisma.exam.findUnique({ where: { id } });
 
-  changeStatus: async (id, changeStatus) => {
-    console.log(id);
-    console.log(changeStatus);
-    // Cập nhật trạng thái sang DA_THI
-    const updatedExam = await prisma.exam.update({
-      where: { id },
-      data: {
-        status: changeStatus,
-        updatedAt: new Date(),
-      },
-    });
+    if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
+      const updatedExam = await prisma.exam.update({
+        where: { id },
+        data: {
+          status: changeStatus,
+          updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
+          attemptCount: {
+            increment: 1,
+          },
+        },
+      });
 
-    // notificationService.notifyOpenExam(
-    //   updatedExam.createdById,
-    //   updatedExam.title
-    // );
+      if (user) {
+        // notificationService.notifyOpenExam(
+        //   updatedExam.createdById,
+        //   updatedExam.title,
+        //   user.fullName,
+        //   user.department
+        // );
+      }
 
-    return {
-      id: updatedExam.id,
-      title: updatedExam.title,
-      questionFile: updatedExam.questionFile,
-      createdById: updatedExam.createdById,
-    };
+      return {
+        id: updatedExam.id,
+        title: updatedExam.title,
+        questionFile: updatedExam.questionFile,
+        createdById: updatedExam.createdById,
+        attemptCount: updatedExam.attemptCount
+      };
+    }
+
+    throw new Error("Vượt quá số lần mở đề cho phép.");
   },
-  openExam: async (id, userId) => {
+
+
+  
+  openExam: async (id, userId, fullName, department) => {
     // Kiểm tra trạng thái phải là DA_DUYET
     const exam = await prisma.exam.findUnique({ where: { id } });
     if (!exam || exam.status !== "DA_DUYET") {
@@ -278,7 +292,6 @@ const examService = {
         updatedAt: new Date(),
       },
     });
-
     // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
     /*
     await prisma.document.create({
@@ -292,12 +305,12 @@ const examService = {
     */
 
     // Tạo thông báo mở đề
-    notificationService.notifyOpenExam(userId, exam.title);
+    notificationService.notifyOpenExam(userId, exam.title, fullName, department);
 
     return {
       id: updatedExam.id,
       title: updatedExam.title,
-      questionFile: exam.questionFile,
+      questionFile: exam.questionFile, 
     };
   },
 
@@ -428,6 +441,79 @@ const examService = {
             },
           },
           document: true,
+          attemptCount: true
+        },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+      }),
+      prisma.exam.count({
+        where,
+      }),
+    ]);
+    const totalPage = Math.ceil(count / LIMIT);
+
+    return {
+      data,
+      totalPage,
+    };
+  },
+
+  getApproved_Tested: async({ status, page, query, department
+  })=> {
+    const statusFilter = status ? { status }: {
+        status: {
+          in: ["DA_DUYET", "DA_THI"],
+        },
+      };
+    
+    const where = {
+      ...statusFilter,
+      attemptCount: {
+      gte: 0,
+      lte: 2,
+      },
+      ...(query && {
+        title: {
+          contains: query,
+        },
+      }),
+      ...(status && {
+        status,
+      }),
+      ...(department && {
+        createdBy: {
+          department,
+        },
+      }),
+    };
+    const [data, count] = await prisma.$transaction([
+      prisma.exam.findMany({
+        take: LIMIT,
+        skip: (page - 1) * LIMIT,
+        where,
+        select: {
+          id: true,
+          title: true,
+          questionFile: true,
+          answerFile: true,
+          createdAt: true,
+          updatedAt: true,
+          note: true,
+          status: true,
+          createdById: true,
+          createdBy: {
+            select: {
+              username: true,
+              fullName: true,
+              email: true,
+              department: true,
+            },
+          },
+          document: true,
+          attemptCount: true
         },
         orderBy: [
           {

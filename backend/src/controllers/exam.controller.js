@@ -12,6 +12,15 @@ const departmentMap = {
   XAY_DUNG_DANG: "Xây dựng Đảng",
 };
 
+// Extracted reusable function to avoid duplication
+const extractPublicId = (url) => {
+  const parts = url.split("/");
+  const fileNameWithExt = parts.pop();
+  const folderPath = parts.slice(parts.indexOf("exam_files")).join("/");
+  const publicId = `${folderPath}/${fileNameWithExt}`;
+  return publicId;
+};
+
 const examController = {
   createExam: async (req, res, next) => {
     try {
@@ -124,20 +133,11 @@ const examController = {
       if (!exam)
         return res.status(404).json({ error: "Không tìm thấy đề thi" });
 
-      // Improved public_id extraction with extension
-      const extractPublicId = (url) => {
-        const parts = url.split("/");
-        const fileNameWithExt = parts.pop(); // e.g., "1749287013182_pdf.pdf"
-        const folderPath = parts.slice(parts.indexOf("exam_files")).join("/"); // e.g., "exam_files"
-        const publicId = `${folderPath}/${fileNameWithExt}`; // e.g., "exam_files/1749287013182_pdf.pdf"
-        return publicId;
-      };
-
       const questionFilePublicId = extractPublicId(exam.questionFile);
       const answerFilePublicId = extractPublicId(exam.answerFile);
 
-      // Generate signed URLs with an expiration time (e.g., 10 minutes)
-      const expirationTime = Math.floor(Date.now() / 1000) + 600; // 10 minutes from now
+      // Generate signed URLs with an expiration time (e.g., 2 minutes)
+      const expirationTime = Math.floor(Date.now() / 1000) + 120; // 2 minutes from now
       const signedQuestionUrl = cloudinary.utils.api_sign_request(
         {
           public_id: questionFilePublicId,
@@ -159,8 +159,6 @@ const examController = {
         sign_url: true,
         timestamp: expirationTime,
         signature: signedQuestionUrl,
-        // Optionally specify the version if known (e.g., from the database URL)
-        // version: url.match(/v(\d+)/)?.[1], // Uncomment and adjust if version is needed
       });
 
       const answerUrl = cloudinary.url(answerFilePublicId, {
@@ -169,7 +167,6 @@ const examController = {
         sign_url: true,
         timestamp: expirationTime,
         signature: signedAnswerUrl,
-        // version: url.match(/v(\d+)/)?.[1], // Uncomment and adjust if version is needed
       });
 
       console.log(`Generated question URL: ${questionUrl}`); // Debug log
@@ -184,6 +181,73 @@ const examController = {
       });
     } catch (error) {
       console.error("Error in getSignedExamFiles:", error); // Debug log
+      next(error);
+    }
+  },
+
+  getSignedArchiveFiles: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const exam = await examService.getExamWithMetaById(id);
+      if (!exam)
+        return res.status(404).json({ error: "Không tìm thấy đề thi" });
+
+      const now = new Date(Date.now());
+      const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+      if (exam.status !== "DA_THI" || new Date(exam.updatedAt) > sixHoursAgo) {
+        return res.status(403).json({
+          error: "Đề thi không đủ điều kiện để truy cập (chưa thi đủ 6 tiếng)",
+        });
+      }
+
+      const questionFilePublicId = extractPublicId(exam.questionFile);
+      const answerFilePublicId = extractPublicId(exam.answerFile);
+
+      // Generate signed URLs with an expiration time (e.g., 2 minutes) using cloudinaryArchive
+      const expirationTime = Math.floor(Date.now() / 1000) + 120; // 2 minutes from now
+      const signedQuestionUrl = cloudinaryArchive.utils.api_sign_request(
+        {
+          public_id: questionFilePublicId,
+          timestamp: expirationTime,
+        },
+        process.env.CLOUDINARY_API_SECRET
+      );
+      const signedAnswerUrl = cloudinaryArchive.utils.api_sign_request(
+        {
+          public_id: answerFilePublicId,
+          timestamp: expirationTime,
+        },
+        process.env.CLOUDINARY_API_SECRET
+      );
+
+      const questionUrl = cloudinaryArchive.url(questionFilePublicId, {
+        resource_type: "raw",
+        secure: true,
+        sign_url: true,
+        timestamp: expirationTime,
+        signature: signedQuestionUrl,
+      });
+
+      const answerUrl = cloudinaryArchive.url(answerFilePublicId, {
+        resource_type: "raw",
+        secure: true,
+        sign_url: true,
+        timestamp: expirationTime,
+        signature: signedAnswerUrl,
+      });
+
+      console.log(`Generated archive question URL: ${questionUrl}`); // Debug log
+      console.log(`Generated archive answer URL: ${answerUrl}`); // Debug log
+
+      return res.status(200).json({
+        data: {
+          questionFile: questionUrl,
+          answerFile: answerUrl,
+          expiresAt: expirationTime * 1000, // Convert to milliseconds
+        },
+      });
+    } catch (error) {
+      console.error("Error in getSignedArchiveFiles:", error); // Debug log
       next(error);
     }
   },
@@ -229,27 +293,35 @@ const examController = {
         return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
       }
 
-      const updatedExam = await examService.openExam(id, userId, req.user.fullName, req.user.department);
+      const updatedExam = await examService.openExam(
+        id,
+        userId,
+        req.user.fullName,
+        req.user.department
+      );
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
     }
   },
 
-changeStatusExam: async (req, res, next) => {
-  try {
-    const examId = Number(req.params.examId);
-    const { changeStatus } = req.body;
+  changeStatusExam: async (req, res, next) => {
+    try {
+      const examId = Number(req.params.examId);
+      const { changeStatus } = req.body;
 
-    const user = req.user;
-    const updatedExam = await examService.changeStatus(examId, changeStatus, user);
+      const user = req.user;
+      const updatedExam = await examService.changeStatus(
+        examId,
+        changeStatus,
+        user
+      );
 
-    res.status(200).json({ data: updatedExam });
-  } catch (error) {
-    next(error);
-  }
-},
-
+      res.status(200).json({ data: updatedExam });
+    } catch (error) {
+      next(error);
+    }
+  },
 
   verifyExamPassword: async (req, res) => {
     try {

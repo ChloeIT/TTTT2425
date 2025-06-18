@@ -209,7 +209,7 @@ const ExamViewList = ({ query, token }) => {
                         onClick={() => handleOpen(exam)}
                         disabled={exam.attemptCount >= 3}
                       >
-                        Mở đề
+                        Mở đề ({exam.attemptCount || 0}/3)
                       </Button>
                     </TableCell>
                   </TableRow>

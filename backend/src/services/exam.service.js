@@ -480,9 +480,6 @@ const examService = {
           contains: query,
         },
       }),
-      ...(status && {
-        status,
-      }),
       ...(department && {
         createdBy: {
           department,
@@ -512,7 +509,6 @@ const examService = {
               department: true,
             },
           },
-          document: true,
           attemptCount: true
         },
         orderBy: [

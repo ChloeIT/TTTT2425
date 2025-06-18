@@ -35,10 +35,6 @@ export default function ExamUploadModal() {
       setQuestionFile(null);
       setAnswerFile(null);
       setOpen(false);
-      document.getElementById("questionFile").value = "";
-      document.getElementById("answerFile").value = "";
-      // Dispatch custom event to trigger refresh
-      // window.dispatchEvent(new Event("examUploadSuccess"));
     }
   };
 

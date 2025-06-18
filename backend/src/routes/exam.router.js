@@ -64,6 +64,13 @@ examRouter.get(
   examController.getSignedExamFiles
 );
 
+examRouter.get(
+  "/:id/archive-files",
+  requireLogin,
+  permitRoles("VAN_THU"), // Restrict to VAN_THU role for archive files
+  examController.getSignedArchiveFiles
+);
+
 examRouter.post(
   "/verify-password",
   requireLogin,

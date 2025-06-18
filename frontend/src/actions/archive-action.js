@@ -40,7 +40,7 @@ export const getExams = async ({
 
 export const getFile = async (examId) => {
   try {
-    const res = await instanceAPI.get(`/exams/${examId}/files`);
+    const res = await instanceAPI.get(`/exams/${examId}/archive-files`);
     console.log(res.data.data);
     return {
       ok: true,

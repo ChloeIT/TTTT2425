@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogTrigger,
@@ -22,7 +21,6 @@ export default function UploadExamButton({
   const [open, setOpen] = useState(false);
   const [questionFile, setQuestionFile] = useState(null);
   const [answerFile, setAnswerFile] = useState(null);
-  const router = useRouter();
   const { uploadDocument, loading } = useExamDocumentUpload(exam.id);
 
   const handleSubmit = async (e) => {
@@ -49,9 +47,6 @@ export default function UploadExamButton({
       document.getElementById("answerFile").value = "";
       if (setPendingUploadExam) setPendingUploadExam(null);
       toast.success("Đăng tải tài liệu thành công!");
-      setTimeout(() => {
-        router.refresh();
-      }, 1500);
     }
   };
 

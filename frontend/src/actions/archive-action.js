@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 const {
   default: instanceAPI,
   successResponse,
@@ -30,7 +31,6 @@ export const getExams = async ({
       totalPage: res.data.totalPage,
     };
   } catch (error) {
-    
     return {
       data: [],
       totalPage: 0,
@@ -69,8 +69,33 @@ export const uploadExamDocument = async (examId, formData) => {
     const res = await instanceAPI.patch(`/exams/${examId}/document`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    revalidatePath("/home/archive");
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
+  }
+};
+
+export const deleteExamDocument = async (examId) => {
+  try {
+    const res = await instanceAPI.delete(`/exams/${examId}/document`);
+    revalidatePath("/home/archive");
+    return {
+      ok: true,
+      success: true,
+      message: res.data.message || "Đã xóa tài liệu của đề thi thành công",
+    };
+  } catch (error) {
+    console.error(
+      "Lỗi khi gọi deleteExamDocument:",
+      error?.response?.data || error.message
+    );
+    return {
+      ok: false,
+      message:
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Không thể xóa tài liệu. Vui lòng thử lại sau.",
+    };
   }
 };

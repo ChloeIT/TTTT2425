@@ -125,6 +125,52 @@ const examService = {
     });
   },
 
+  deleteExamDocument: async (id) => {
+    const exam = await prisma.exam.findUnique({
+      where: { id },
+      include: { document: true },
+    });
+
+    if (!exam || !exam.document) {
+      throw new Error("Đề thi không có tài liệu để xóa");
+    }
+
+    // Extract public IDs for Cloudinary deletion
+    const extractPublicId = (url) => {
+      const parts = url.split("/");
+      const fileNameWithExt = parts.pop(); // e.g., "1749287013182_pdf.pdf"
+      const folderPath = parts.slice(parts.indexOf("exam_files")).join("/"); // e.g., "exam_files"
+      return `${folderPath}/${fileNameWithExt}`; // e.g., "exam_files/1749287013182_pdf.pdf"
+    };
+
+    const questionFilePublicId = extractPublicId(exam.document.questionFile);
+    const answerFilePublicId = extractPublicId(exam.document.answerFile);
+
+    await Promise.all([
+      cloudinary.uploader.destroy(questionFilePublicId, {
+        resource_type: "raw",
+      }),
+      cloudinary.uploader.destroy(answerFilePublicId, { resource_type: "raw" }),
+    ]).catch((error) => {
+      console.error("Error deleting files from Cloudinary:", error);
+    });
+
+    // Delete the document record from the database
+    await prisma.document.delete({
+      where: { examId: id },
+    });
+
+    // Update the exam to remove the document reference using disconnect
+    // await prisma.exam.update({
+    //   where: { id },
+    //   data: {
+    //     document: {
+    //       disconnect: true, // This removes the relationship without setting document to null
+    //     },
+    //   },
+    // });
+  },
+
   approveExam: async (id, rawPassword, userId) => {
     const existingExam = await prisma.exam.findUnique({
       where: { id },

@@ -193,41 +193,41 @@ const examService = {
     const decryptedPassword = decrypt(exam.password);
     return decryptedPassword === inputPassword;
   },
-changeStatus: async (id, changeStatus, user) => {
-  const exam = await prisma.exam.findUnique({ where: { id } });
+  changeStatus: async (id, changeStatus, user) => {
+    const exam = await prisma.exam.findUnique({ where: { id } });
 
-  if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
-    const updatedExam = await prisma.exam.update({
-      where: { id },
-      data: {
-        status: changeStatus,
-        updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
-        attemptCount: {
-          increment: 1,
+    if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
+      const updatedExam = await prisma.exam.update({
+        where: { id },
+        data: {
+          status: changeStatus,
+          updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
+          attemptCount: {
+            increment: 1,
+          },
         },
-      },
-    });
+      });
 
-    if (user) {
-      // notificationService.notifyOpenExam(
-      //   updatedExam.createdById,
-      //   updatedExam.title,
-      //   user.fullName,
-      //   user.department
-      // );
+      if (user) {
+        // notificationService.notifyOpenExam(
+        //   updatedExam.createdById,
+        //   updatedExam.title,
+        //   user.fullName,
+        //   user.department
+        // );
+      }
+
+      return {
+        id: updatedExam.id,
+        title: updatedExam.title,
+        questionFile: updatedExam.questionFile,
+        createdById: updatedExam.createdById,
+        attemptCount: updatedExam.attemptCount
+      };
     }
 
-    return {
-      id: updatedExam.id,
-      title: updatedExam.title,
-      questionFile: updatedExam.questionFile,
-      createdById: updatedExam.createdById,
-      attemptCount: updatedExam.attemptCount
-    };
-  }
-
-  throw new Error("Vượt quá số lần mở đề cho phép.");
-},
+    throw new Error("Vượt quá số lần mở đề cho phép.");
+  },
 
 
   
@@ -371,6 +371,78 @@ changeStatus: async (id, changeStatus, user) => {
       };
     }
 
+    const [data, count] = await prisma.$transaction([
+      prisma.exam.findMany({
+        take: LIMIT,
+        skip: (page - 1) * LIMIT,
+        where,
+        select: {
+          id: true,
+          title: true,
+          questionFile: true,
+          answerFile: true,
+          createdAt: true,
+          updatedAt: true,
+          note: true,
+          status: true,
+          createdById: true,
+          createdBy: {
+            select: {
+              username: true,
+              fullName: true,
+              email: true,
+              department: true,
+            },
+          },
+          document: true,
+          attemptCount: true
+        },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+      }),
+      prisma.exam.count({
+        where,
+      }),
+    ]);
+    const totalPage = Math.ceil(count / LIMIT);
+
+    return {
+      data,
+      totalPage,
+    };
+  },
+
+  getApproved_Tested: async({ status, page, query, department
+  })=> {
+    const statusFilter = status ? { status }: {
+        status: {
+          in: ["DA_DUYET", "DA_THI"],
+        },
+      };
+    
+    const where = {
+      ...statusFilter,
+      attemptCount: {
+      gte: 0,
+      lte: 2,
+      },
+      ...(query && {
+        title: {
+          contains: query,
+        },
+      }),
+      ...(status && {
+        status,
+      }),
+      ...(department && {
+        createdBy: {
+          department,
+        },
+      }),
+    };
     const [data, count] = await prisma.$transaction([
       prisma.exam.findMany({
         take: LIMIT,

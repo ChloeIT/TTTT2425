@@ -83,7 +83,7 @@ const examController = {
   getAllExams: async (req, res, next) => {
     try {
       const { status, page = 1, query = "", department } = req.query;
-      const { data, totalPage } = await examService.getExamsByStatus({
+      const { data, totalPage } = await examService.getApproved_Tested({
         status,
         page,
         query,

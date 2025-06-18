@@ -62,10 +62,10 @@ const ExamViewList = ({ query, token }) => {
     const fetchExams = async () => {
       const { data, totalPage } = await approvedFull({
         page,
-        query,
-        status: "DA_DUYET",
+        query
       });
       setData(data);
+      console.log(data)
       setTotalPage(totalPage);
     };
     fetchExams();
@@ -95,7 +95,6 @@ const ExamViewList = ({ query, token }) => {
           password: inputPassword,
         }),
       });
-
       const result = await res.json();
       if (!res.ok) {
         setError(result.error || "Đã xảy ra lỗi");
@@ -124,6 +123,17 @@ const ExamViewList = ({ query, token }) => {
       setPreviewTitle(selectedExam.title);
       setOpenedExamIds((prev) => [...prev, selectedExam.id]);
       setOpen(false);
+      setData((prevData) =>
+        prevData.map((exam) =>
+          exam.id === selectedExam.id
+            ? {
+                ...exam,
+                attemptCount: Math.min((exam.attemptCount || 0) + 1, 3),
+                status: "DA_THI",
+              }
+            : exam
+        )
+      );
     } catch (err) {
       console.error(err);
       setError("Lỗi kết nối tới server");
@@ -197,7 +207,7 @@ const ExamViewList = ({ query, token }) => {
                       <Button
                         variant="outline"
                         onClick={() => handleOpen(exam)}
-                        disabled={openedExamIds.includes(exam.id)}
+                        disabled={exam.attemptCount >= 3}
                       >
                         Mở đề
                       </Button>

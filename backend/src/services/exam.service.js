@@ -255,12 +255,12 @@ const examService = {
       });
 
       if (user) {
-        // notificationService.notifyOpenExam(
-        //   updatedExam.createdById,
-        //   updatedExam.title,
-        //   user.fullName,
-        //   user.department
-        // );
+        notificationService.notifyOpenExam(
+          updatedExam.createdById,
+          updatedExam.title,
+          user.fullName,
+          user.department
+        );
       }
 
       return {

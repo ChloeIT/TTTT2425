@@ -135,7 +135,7 @@ const userService = {
       totalPage,
     };
   },
-  updateUserProfile: async (userId, { fullName, username }) => {
+  updateUserProfile: async (userId, { fullName, username, email }) => {
     return await prisma.user.update({
       where: {
         id: userId,
@@ -143,6 +143,7 @@ const userService = {
       data: {
         fullName,
         username,
+        email,
       },
       select: {
         ...userSelect,

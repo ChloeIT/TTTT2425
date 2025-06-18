@@ -92,8 +92,21 @@ const ExamList = ({
     }
   };
 
-  const handleDownload = async (examId, fileType) => {
+  const handleDownload = async (examId, name, fileType) => {
     const result = await getFile(examId);
+
+    const normalizeVietnamese = (str) =>
+      str
+        .normalize("NFD") // tách chữ và dấu
+        .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+        .replace(/Đ/g, "D") // thay Đ
+        .replace(/đ/g, "d"); // thay đ
+
+    const safeTitle = normalizeVietnamese(name)
+      .replace(/[^\w\s-]/g, "") // xóa ký tự đặc biệt
+      .trim()
+      .replace(/\s+/g, "_"); // thay khoảng trắng bằng _
+
     if (result.ok) {
       const { questionFile, answerFile, expiresAt } = result.data;
       const url = fileType === "question" ? questionFile : answerFile;
@@ -116,8 +129,8 @@ const ExamList = ({
           const blobUrl = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = blobUrl;
-          link.download = `${examId}_${
-            fileType === "question" ? "question" : "answer"
+          link.download = `${safeTitle}_${
+            fileType === "question" ? "de_thi" : "dap_an"
           }.pdf`;
           link.rel = "noopener noreferrer";
           document.body.appendChild(link);
@@ -225,7 +238,7 @@ const ExamList = ({
 
               return (
                 <TableRow key={exam.id} className="min-h-[100px]">
-                  <TableCell className="text-center py-4 font-bold text-blue-800 dark:text-gray-400">
+                  <TableCell className="text-center py-4 font-bold text-blue-800 dark:text-white">
                     {exam.title}
                   </TableCell>
                   <TableCell className="text-center text-black dark:text-gray-400">
@@ -242,14 +255,20 @@ const ExamList = ({
                   <TableCell className="text-center text-black dark:text-gray-400">
                     <div className="flex flex-col justify-center items-center gap-2">
                       {isWithin24Hours && (
-                        <Button variant="outline" disabled className="w-[90px]">
+                        <Button
+                          variant="outline"
+                          disabled
+                          className="w-[120px]"
+                        >
                           Chưa đủ 6 tiếng
                         </Button>
                       )}
                       {!isWithin24Hours && (
                         <Button
                           variant="outline"
-                          onClick={() => handleDownload(exam.id, "question")}
+                          onClick={() =>
+                            handleDownload(exam.id, exam.title, "question")
+                          }
                         >
                           📄Tải đề thi
                         </Button>
@@ -257,7 +276,9 @@ const ExamList = ({
                       {!isWithin24Hours && (
                         <Button
                           variant="outline"
-                          onClick={() => handleDownload(exam.id, "answer")}
+                          onClick={() =>
+                            handleDownload(exam.id, exam.title, "answer")
+                          }
                         >
                           📝Tải đáp án
                         </Button>
@@ -272,9 +293,9 @@ const ExamList = ({
                             <Button
                               variant="outline"
                               disabled
-                              className="w-[90px]"
+                              className="w-[120px]"
                             >
-                              Chưa đủ 24h
+                              Chưa đủ 6 tiếng
                             </Button>
                           ) : hasDocument ? (
                             <Button

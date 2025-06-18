@@ -36,5 +36,11 @@ examRouter.get(
   secretaryController.getSignedExamsWithDocuments
 );
 
+examRouter.get(
+  "/:id/files",
+  requireLogin,
+  permitRoles("THU_KY"),
+  secretaryController.getSignedExamFiles
+);
 
 module.exports = examRouter;

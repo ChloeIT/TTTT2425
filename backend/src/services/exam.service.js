@@ -41,11 +41,18 @@ const examService = {
       },
     });
   },
-  //ds bai thi theo user
+ 
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
-      where: { createdById: userId },
-      include: { createdBy: true },
+      where: {
+        createdById: userId,
+        status: {
+          in: ["DANG_CHO", "TU_CHOI"], 
+        },
+      },
+      include: {
+        createdBy: true,
+      },
     });
   },
 
@@ -255,12 +262,12 @@ const examService = {
       });
 
       if (user) {
-        // notificationService.notifyOpenExam(
-        //   updatedExam.createdById,
-        //   updatedExam.title,
-        //   user.fullName,
-        //   user.department
-        // );
+        notificationService.notifyOpenExam(
+          updatedExam.createdById,
+          updatedExam.title,
+          user.fullName,
+          user.department
+        );
       }
 
       return {

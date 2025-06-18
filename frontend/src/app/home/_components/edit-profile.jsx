@@ -64,6 +64,7 @@ export const EditProfileDialog = ({
     if (data) {
       form.setValue("fullName", data.fullName);
       form.setValue("username", data.username);
+      form.setValue("email", data.email);
       form.setValue("department", data.department);
     }
   }, [data, isOpen]);
@@ -85,6 +86,25 @@ export const EditProfileDialog = ({
                   <FormControl>
                     <Input
                       placeholder={"Nhập username"}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={"Nhập email mới"}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isPending}

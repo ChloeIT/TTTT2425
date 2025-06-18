@@ -142,14 +142,14 @@ const ExamList = () => {
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-            <TableHead className="text-center">Tên đề thi</TableHead>
-            <TableHead className="text-center">Trạng thái</TableHead>
-            <TableHead className="text-center">Người soạn đề</TableHead>
-            <TableHead className="text-center">Phòng ban</TableHead>
-            <TableHead className="text-center">Ngày gửi</TableHead>
-            <TableHead className="text-center">Ngày xác nhận</TableHead>
-            <TableHead className="text-center">Nội dung</TableHead>
-            <TableHead className="text-center">Xác nhận</TableHead>
+            <TableHead className="text-center min-w-[90px]">Tên đề thi</TableHead>
+            <TableHead className="text-center min-w-[90px]">Trạng thái</TableHead>
+            <TableHead className="text-center min-w-[120px]">Người soạn đề</TableHead>
+            <TableHead className="text-center min-w-[90px]">Phòng ban</TableHead>
+            <TableHead className="text-center min-w-[90px]">Ngày gửi</TableHead>
+            <TableHead className="text-center min-w-[120px]">Ngày xác nhận</TableHead>
+            <TableHead className="text-center min-w-[90px]">Nội dung</TableHead>
+            <TableHead className="text-center min-w-[90px]">Xác nhận</TableHead>
           </TableRow>
         </TableHeader>
 

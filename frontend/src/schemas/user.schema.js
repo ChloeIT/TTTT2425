@@ -51,6 +51,15 @@ export const userSchema = {
       .min(6, "Độ dài của username ít nhất 6 ký tự")
       .max(20, "Độ dài của username tối đa 20 ký tự")
       .nullish(),
+    email: z
+      .string({
+        required_error: "Địa chỉ email là trường bắt buộc phải điền",
+        invalid_type_error: "Địa chỉ email bắt buộc phải là chuỗi ký tự",
+      })
+      .email({
+        message: "Địa chỉ email không hợp lệ",
+      })
+      .nullish(),
     fullName: z
       .string({
         required_error: "Họ tên người dùng là trường bắt buộc phải điền",

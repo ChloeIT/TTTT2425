@@ -77,7 +77,6 @@ const ExamViewList = ({ query, token }) => {
     setError("");
     setOpen(true);
   };
-
   const handleCheckPassword = async () => {
     if (!selectedExam) return;
 

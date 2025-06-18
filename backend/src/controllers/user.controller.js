@@ -7,17 +7,24 @@ const userService = require("../services/user.service");
 const userController = {
   editProfile: async (req, res, next) => {
     try {
-      const { username, fullName } = req.body;
+      const { username, fullName, email } = req.body;
       if (username && req.user.username !== username) {
         const usernameExist = await userService.findByUsername(username);
         if (usernameExist) {
           throw new Error("Username đã được sử dụng");
         }
       }
+      if (email && req.user.email !== email) {
+        const emailExist = await userService.findByEmail(email);
+        if (emailExist) {
+          throw new Error("Email đã được sử dụng");
+        }
+      }
 
       const user = await userService.updateUserProfile(req.user.id, {
         fullName,
         username,
+        email,
       });
       return res.status(200).json({
         data: {

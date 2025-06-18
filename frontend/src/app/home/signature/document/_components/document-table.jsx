@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { SearchBar } from "@/components/search-bar";
 import { NavPagination } from "@/components/nav-pagination";
 import { format } from "date-fns";
-import { getSignedExamFiles } from "@/actions/exams-action";
+import { getSignedExamFiles } from "@/actions/secretary-password-action";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import FilterPanel from "../../../_components/filter-department";
@@ -29,41 +29,44 @@ const departmentMap = {
 const DocumentList = ({ documents, totalPage }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const query = searchParams.get("query") || "";
+
   const department = searchParams.get("department") || "";
   const year = searchParams.get("year") || "";
   const month = searchParams.get("month") || "";
 
-  const [fileUrls, setFileUrls] = useState({});
+  const [fileUrls, setFileUrls] = useState({}); // Cache: { examId: { questionFile, answerFile } }
   const [selectedDepartment, setSelectedDepartment] = useState(department);
   const [selectedYear, setSelectedYear] = useState(year);
   const [selectedMonth, setSelectedMonth] = useState(month);
 
   const fetchSignedUrls = async (examId) => {
+    if (fileUrls[examId]) return fileUrls[examId];
+
     const result = await getSignedExamFiles(examId);
     if (result.ok) {
+      const data = result.data;
       setFileUrls((prev) => ({
         ...prev,
         [examId]: {
-          questionFile: result.data.questionFile,
-          answerFile: result.data.answerFile,
-          expiresAt: result.data.expiresAt,
+          questionFile: data.questionFile,
+          answerFile: data.answerFile,
         },
       }));
+      return data;
     } else {
-      toast.error(result.message || "Không thể tải file");
+      toast.error(result.message || "Không thể lấy link file");
+      return null;
     }
   };
 
-  const handleDownloadFile = async (url, title, type) => {
-    if (!url) {
-      toast.error("Không tìm thấy URL file.");
-      return;
-    }
+  const handleDownloadFile = async (examId, title, type) => {
+    const fileData = await fetchSignedUrls(examId);
+    if (!fileData) return;
 
+    const url = type === "question" ? fileData.questionFile : fileData.answerFile;
     const safeTitle = title?.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_") || "file";
-    const fileName = `${safeTitle} - ${type === "question" ? "De thi" : "Dap an"}.pdf`;
+    const fileName = `${safeTitle} - ${type === "question" ? "Đề thi" : "Đáp án"}.pdf`;
 
     try {
       const response = await fetch(url);
@@ -85,123 +88,81 @@ const DocumentList = ({ documents, totalPage }) => {
   const updateQueryParam = (key, val) => {
     const params = new URLSearchParams(window.location.search);
     val ? params.set(key, val) : params.delete(key);
-    params.set("page", "1"); // reset trang về 1
+    params.set("page", "1");
     router.push(`?${params.toString()}`);
-  };
-
-  const handleDepartmentChange = (val) => {
-    setSelectedDepartment(val);
-    updateQueryParam("department", val);
-  };
-
-  const handleYearChange = (val) => {
-    setSelectedYear(val);
-    updateQueryParam("year", val);
-  };
-
-  const handleMonthChange = (val) => {
-    setSelectedMonth(val);
-    updateQueryParam("month", val);
   };
 
   return (
     <>
-  
       {/* Bộ lọc */}
       <div className="flex justify-between items-start mb-4 flex-wrap gap-4">
         <SearchBar placeholder="Tìm kiếm đề thi..." isPagination />
-
         <div className="flex flex-wrap gap-2 items-center">
           <FilterPanel
             selectedDepartment={department}
-            setSelectedDepartment={(val) => {
-              const params = new URLSearchParams(window.location.search);
-              val ? params.set("department", val) : params.delete("department");
-              params.set("page", "1");
-              router.push(`?${params.toString()}`);
-            }}
+            setSelectedDepartment={(val) => updateQueryParam("department", val)}
             selectedMonth={month}
-            setSelectedMonth={(val) => {
-              const params = new URLSearchParams(window.location.search);
-              val ? params.set("month", val) : params.delete("month");
-              params.set("page", "1");
-              router.push(`?${params.toString()}`);
-            }}
+            setSelectedMonth={(val) => updateQueryParam("month", val)}
             selectedYear={year}
-            setSelectedYear={(val) => {
-              const params = new URLSearchParams(window.location.search);
-              val ? params.set("year", val) : params.delete("year");
-              params.set("page", "1");
-              router.push(`?${params.toString()}`);
-            }}
+            setSelectedYear={(val) => updateQueryParam("year", val)}
           />
         </div>
       </div>
 
-
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
-          {/* <TableHead className="min-w-[120px]">Tên đề thi</TableHead> */}
             <TableHead className="min-w-[120px]">Tên đề thi</TableHead>
             <TableHead className="min-w-[100px]">Trạng thái</TableHead>
             <TableHead className="min-w-[130px]">Người tạo</TableHead>
             <TableHead className="min-w-[130px]">Phòng ban</TableHead>
-
             <TableHead className="min-w-[130px]">Ngày duyệt</TableHead>
             <TableHead className="min-w-[180px]">File đã ký</TableHead>
+            {/* <TableHead className="min-w-[130px]">DT</TableHead>
+            <TableHead className="min-w-[180px]">DA</TableHead> */}
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {Array.isArray(documents) && documents.length > 0 ? (
-            documents.map((item) => {
-              const fileData = fileUrls[item.id] || {};
-              return (
-                <TableRow key={item.id}>
-                     {/* <TableCell>{item.id}</TableCell> */}
-                  <TableCell>{item.title}</TableCell>
-                  <TableCell>
-                    <Badge className="bg-green-500 text-white">Đã ký</Badge>
-                  </TableCell>
-                  <TableCell>{item.createdBy?.fullName || "Không rõ"}</TableCell>
-                  <TableCell>
-                    {departmentMap[item.createdBy?.department] || "Không rõ"}
-                  </TableCell>
-                 
-                  <TableCell>
-                    {item.updatedAt
-                      ? format(new Date(item.updatedAt), "dd/MM/yyyy HH:mm")
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        variant="link"
-                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-                        onClick={() =>
-                          handleDownloadFile(item.questionFile, item.title, "question")
-                        }
-                      >
-                        📄 File đề thi
-                      </Button>
-                      <Button
-                        variant="link"
-                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-                        onClick={() =>
-                          handleDownloadFile(item.answerFile, item.title, "answer")
-                        }
-                      >
-                        📄 File đáp án
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
+            documents.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.title}</TableCell>
+                <TableCell>
+                  <Badge className="bg-green-500 text-white">Đã ký</Badge>
+                </TableCell>
+                <TableCell>{item.createdBy?.fullName || "Không rõ"}</TableCell>
+                <TableCell>{departmentMap[item.createdBy?.department] || "Không rõ"}</TableCell>
+                <TableCell>
+                  {item.document?.createdAt
+                    ? format(new Date(item.document.createdAt), "dd/MM/yyyy HH:mm")
+                    : ""}
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="link"
+                      className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      onClick={() => handleDownloadFile(item.id, item.title, "question")}
+                    >
+                      📄 File đề thi
+                    </Button>
+                    <Button
+                      variant="link"
+                      className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      onClick={() => handleDownloadFile(item.id, item.title, "answer")}
+                    >
+                      📄 File đáp án
+                    </Button>
+                  </div>
+                </TableCell>
+                {/* <TableCell>{item.document?.questionFile || "Không rõ"}</TableCell>
+                <TableCell>{item.document?.answerFile || "Không rõ"}</TableCell> */}
+              </TableRow>
+            ))
           ) : (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-4">
+              <TableCell colSpan={6} className="text-center py-4">
                 Không có dữ liệu
               </TableCell>
             </TableRow>
@@ -209,7 +170,6 @@ const DocumentList = ({ documents, totalPage }) => {
         </TableBody>
       </Table>
 
-      {/* Phân trang */}
       <div className="py-4">
         <NavPagination totalPage={totalPage} />
       </div>

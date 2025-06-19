@@ -177,16 +177,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
               </Select>
             </div>
 
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                id="password"
-                type="text"
-                value={exam?.decryptedPassword || ""}
-                readOnly
-                placeholder="Mật khẩu sẽ hiển thị tại đây"
-              />
-            </div>
+           
           </div>
 
           <DialogFooter>

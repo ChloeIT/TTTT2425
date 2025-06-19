@@ -221,7 +221,10 @@ const examService = {
       throw new Error("Không tìm thấy đề thi");
     }
 
-    if (existingExam.status !== "DANG_CHO") {
+    if (
+      existingExam.status !== "DANG_CHO" &&
+      existingExam.status !== "DA_DUYET"
+    ) {
       throw new Error("Đề thi không hợp lệ");
     }
 
@@ -234,6 +237,13 @@ const examService = {
       },
     });
 
+    // Gửi thông báo và email bằng notificationService
+    await notificationService.notifyRejectExam(
+      updatedExam.createdById,
+      updatedExam.title,
+      message
+    );
+    
     const { password, ...examWithoutPassword } = updatedExam;
 
     return examWithoutPassword;

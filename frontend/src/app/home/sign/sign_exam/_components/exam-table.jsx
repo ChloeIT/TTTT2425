@@ -195,24 +195,27 @@ const ExamList = () => {
                 </div>
               </TableCell>
               <TableCell>
-                {exam.status === "DANG_CHO" ? (
-                  <div className="flex gap-2 justify-center">
-                    <ApproveButton
-                      exam={exam}
-                      pendingApproveExam={pendingApproveExam}
-                      setPendingApproveExam={setPendingApproveExam}
-                      onSuccess={refetchExams}
-                    />
-                    <RejectButton
-                      exam={exam}
-                      pendingRejectExam={pendingRejectExam}
-                      setPendingRejectExam={setPendingRejectExam}
-                      onSuccess={refetchExams}
-                    />
-                  </div>
-                ) : (
-                  <div className="h-10" />
-                )}
+                    {exam.status === "DANG_CHO" || exam.status === "DA_DUYET" ? (
+                      <div className="flex gap-2 justify-center">
+                        {exam.status === "DANG_CHO" && (
+                          <ApproveButton
+                            exam={exam}
+                            pendingApproveExam={pendingApproveExam}
+                            setPendingApproveExam={setPendingApproveExam}
+                            onSuccess={refetchExams}
+                          />
+                        )}
+                        <RejectButton
+                          exam={exam}
+                          pendingRejectExam={pendingRejectExam}
+                          setPendingRejectExam={setPendingRejectExam}
+                          onSuccess={refetchExams}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10" />
+                    )}
+
               </TableCell>
             </TableRow>
           ))}

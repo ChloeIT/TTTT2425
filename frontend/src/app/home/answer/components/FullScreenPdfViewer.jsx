@@ -46,9 +46,9 @@ export default function FullScreenPdfViewer({ url, onClose, title }) {
       {showConfirm && (
         <div className="fixed inset-0 z-[10002] bg-black/50 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-900 text-black dark:text-white p-6 rounded shadow max-w-sm w-full">
-            <h2 className="text-lg font-semibold mb-2">Xác nhận đóng đề thi</h2>
+            <h2 className="text-lg font-semibold mb-2">Xác nhận đóng </h2>
             <p className="text-sm mb-4">
-              Bạn có chắc chắn muốn đóng đề thi <strong>{title}</strong> không?
+              Bạn có chắc chắn muốn đóng <strong>{title}</strong> không?
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setShowConfirm(false)}>

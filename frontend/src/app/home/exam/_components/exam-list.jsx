@@ -62,10 +62,10 @@ const ExamViewList = ({ query, token }) => {
     const fetchExams = async () => {
       const { data, totalPage } = await approvedFull({
         page,
-        query
+        query,
       });
       setData(data);
-      console.log(data)
+      console.log(data);
       setTotalPage(totalPage);
     };
     fetchExams();
@@ -104,12 +104,15 @@ const ExamViewList = ({ query, token }) => {
       await statusChanged(selectedExam.id.toString(), "DA_THI");
 
       // 3. Gọi API lấy signed URL
-      const fileRes = await fetch(`http://localhost:5000/exams/${selectedExam.id}/files`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
+      const fileRes = await fetch(
+        `http://localhost:5000/exams/${selectedExam.id}/files`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        }
+      );
 
       const fileData = await fileRes.json();
       if (!fileRes.ok || !fileData?.data?.questionFile) {
@@ -159,11 +162,19 @@ const ExamViewList = ({ query, token }) => {
           <Table className="bg-white pt-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
-                <TableHead className="text-center min-w-[90px]">Tên đề thi</TableHead>
-                <TableHead className="text-center min-w-[90px]">Người tạo</TableHead>
+                <TableHead className="text-center min-w-[90px]">
+                  Tên đề thi
+                </TableHead>
+                <TableHead className="text-center min-w-[90px]">
+                  Người tạo
+                </TableHead>
                 <TableHead className="text-center min-w-[90px]">Khoa</TableHead>
-                <TableHead className="text-center min-w-[90px]">Trạng thái</TableHead>
-                <TableHead className="text-center min-w-[90px]">Thao tác</TableHead>
+                <TableHead className="text-center min-w-[90px]">
+                  Trạng thái
+                </TableHead>
+                <TableHead className="text-center min-w-[90px]">
+                  Thao tác
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -194,10 +205,14 @@ const ExamViewList = ({ query, token }) => {
                     <TableCell className="text-center">
                       <Badge
                         variant="default"
-                        className={{
-                          DA_DUYET: "bg-green-500 text-white dark:bg-green-600",
-                          DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
-                        }[exam.status] || "bg-gray-400 text-white dark:bg-gray-600"}
+                        className={
+                          {
+                            DA_DUYET:
+                              "bg-green-500 text-white dark:bg-green-600",
+                            DA_THI: "bg-blue-500 text-white dark:bg-blue-600",
+                          }[exam.status] ||
+                          "bg-gray-400 text-white dark:bg-gray-600"
+                        }
                       >
                         {exam.status === "DA_DUYET" ? "Đã duyệt" : "Đã thi"}
                       </Badge>

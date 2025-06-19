@@ -6,6 +6,7 @@ const {
   endOfMonth,
   startOfYear,
   endOfYear,
+  subMinutes,
 } = require("date-fns");
 const { Department, ExamStatus } = require("../generated/prisma");
 const { cloudinary } = require("../libs/cloudinary");
@@ -258,6 +259,7 @@ const examService = {
           attemptCount: {
             increment: 1,
           },
+          openAt: exam.attemptCount === 0 ? new Date() : undefined,
         },
       });
 
@@ -475,13 +477,18 @@ const examService = {
           in: ["DA_DUYET", "DA_THI"],
         },
       };
-    
+    const cutoffTime = subMinutes(new Date(), 180);
+
     const where = {
       ...statusFilter,
       attemptCount: {
       gte: 0,
       lte: 2,
       },
+      OR: [
+        { openAt: null }, // chưa mở lần nào thì vẫn hiển thị
+        { openAt: { gte: cutoffTime } }, // mở rồi nhưng vẫn trong 180 phút
+      ],
       ...(query && {
         title: {
           contains: query,

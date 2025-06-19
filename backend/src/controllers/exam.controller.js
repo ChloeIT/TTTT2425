@@ -4,6 +4,7 @@ const { cloudinary: cloudinaryArchive } = require("../libs/cloudinary_archive");
 const { Department, ExamStatus } = require("../generated/prisma");
 const notificationService = require("../services/notification.service");
 const prisma = require("../libs/prisma");
+const userService = require("../services/user.service");
 
 const departmentMap = {
   MAC_DINH: "Mặc định",
@@ -280,78 +281,34 @@ const examController = {
 
   openExam: async (req, res, next) => {
     try {
-      const id = Number(req.params.id);
-      const userId = req.user.id;
+      const examId = Number(req.params.examId);
+      const userId = Number(req.params.userId);
       const { password } = req.body;
 
+      const user = userService.findById(userId)
       if (!password) {
         return res.status(400).json({ error: "Cần có mật khẩu để mở đề thi" });
-      }
-
-      const isPasswordValid = await examService.verifyPassword(id, password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
-      }
-
-      const updatedExam = await examService.openExam(
-        id,
-        userId,
-        req.user.fullName,
-        req.user.department
-      );
-      res.status(200).json({ data: updatedExam });
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  changeStatusExam: async (req, res, next) => {
-    try {
-      const examId = Number(req.params.examId);
-      const { changeStatus } = req.body;
-
-      const user = req.user;
-      const updatedExam = await examService.changeStatus(
-        examId,
-        changeStatus,
-        user
-      );
-
-      res.status(200).json({ data: updatedExam });
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  verifyExamPassword: async (req, res) => {
-    try {
-      const examId = Number(req.body.examId);
-      const password = req.body.password;
-
-      if (!password) {
-        return res.status(400).json({ error: "Vui lòng nhập mật khẩu" });
       }
       if (!examId) {
         return res.status(400).json({ error: "Đề thi không tồn tại" });
       }
-
-      const isValid = await examService.verifyPassword(examId, password);
-      if (!isValid) {
-        return res.status(401).json({ error: "Mật khẩu không đúng" });
+      const isPasswordValid = await examService.verifyPassword(examId, password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
       }
 
-      // Lấy URL đề thi sau khi xác thực đúng
       const exam = await examService.getExamById(examId);
 
-      return res.json({
-        success: true,
-        fileUrl: exam.questionFile,
-      });
+      const updatedExam = await examService.openExam(
+        exam,
+        user
+      );
+      res.status(200).json({ data: updatedExam });
     } catch (error) {
-      console.error("Lỗi xác thực mật khẩu:", error);
-      return res.status(500).json({ error: "Lỗi hệ thống" });
+      next(error);
     }
   },
+
   //dang tai document (trang van thu)
   updateExamDocument: async (req, res, next) => {
     try {

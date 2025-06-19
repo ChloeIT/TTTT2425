@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 const {
   default: instanceAPI,
@@ -115,7 +116,16 @@ export const approvedFull = async ({ page = 1, query, status }) => {
 
 export const getSignedExamFiles = async (examId) => {
   try {
-    const res = await instanceAPI.get(`/exams/${examId}/files`);
+    const cookie = await cookies();
+    const token = cookie.get("token")?.value;
+    const res = await instanceAPI.get(`/exams/${examId}/files`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+      }
+    );
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -130,6 +140,37 @@ export const statusChanged = async (examId, changeStatus) => {
       {
         headers: {
           "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return {
+      ok: true,
+      success: true,
+      data: res.data.data,
+      message: "Duyệt đề thi thành công",
+    };
+  } catch (error) {
+    console.error("Lỗi approveExam:", error?.response?.data || error.message);
+    return {
+      ok: false,
+      message: error?.response?.data?.error || "Đã xảy ra lỗi khi duyệt đề thi",
+    };
+  }
+};
+
+export const openExam = async (examId, userId, password) => {
+  try {
+    console.log(userId)
+    const cookie = await cookies();
+    const token = cookie.get("token")?.value;
+    const res = await instanceAPI.patch(
+      `/exams/${examId}/${userId}/open`,
+      { password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
       }
     );

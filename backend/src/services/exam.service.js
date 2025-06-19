@@ -86,6 +86,9 @@ const examService = {
         questionFile: true,
         answerFile: true,
         document: true,
+        attemptCount: true,
+        openAt: true,
+        status: true
       },
     });
   },
@@ -257,14 +260,16 @@ const examService = {
     const decryptedPassword = decrypt(exam.password);
     return decryptedPassword === inputPassword;
   },
-  changeStatus: async (id, changeStatus, user) => {
-    const exam = await prisma.exam.findUnique({ where: { id } });
-
+  
+  openExam: async (exam, user) => {
+    console.log(exam)
+    if (!exam || exam.status !== "DA_DUYET") {
+      throw new Error("Đề thi chưa duyệt hoặc đã mở");
+    }
     if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
       const updatedExam = await prisma.exam.update({
-        where: { id },
+        where: { id: exam.id },
         data: {
-          status: changeStatus,
           updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
           attemptCount: {
             increment: 1,
@@ -281,56 +286,15 @@ const examService = {
           user.department
         );
       }
-
       return {
         id: updatedExam.id,
         title: updatedExam.title,
         questionFile: updatedExam.questionFile,
         createdById: updatedExam.createdById,
-        attemptCount: updatedExam.attemptCount
+        attemptCount: updatedExam.attemptCount 
       };
     }
 
-    throw new Error("Vượt quá số lần mở đề cho phép.");
-  },
-
-
-  
-  openExam: async (id, userId, fullName, department) => {
-    // Kiểm tra trạng thái phải là DA_DUYET
-    const exam = await prisma.exam.findUnique({ where: { id } });
-    if (!exam || exam.status !== "DA_DUYET") {
-      throw new Error("Đề thi chưa duyệt hoặc đã mở");
-    }
-
-    // Cập nhật trạng thái sang DA_THI
-    const updatedExam = await prisma.exam.update({
-      where: { id },
-      data: {
-        status: "DA_THI",
-        updatedAt: new Date(),
-      },
-    });
-    // Nếu sau này bạn muốn lưu đề vào Document, hãy bật phần này lên:
-    /*
-    await prisma.document.create({
-      data: {
-        questionFile: exam.questionFile,
-        answerFile: exam.answerFile,
-        examId: id,
-        createdAt: new Date(),
-      },
-    });
-    */
-
-    // Tạo thông báo mở đề
-    notificationService.notifyOpenExam(userId, exam.title, fullName, department);
-
-    return {
-      id: updatedExam.id,
-      title: updatedExam.title,
-      questionFile: exam.questionFile, 
-    };
   },
 
   updateExamDocument: async (id, { questionFile, answerFile }) => {

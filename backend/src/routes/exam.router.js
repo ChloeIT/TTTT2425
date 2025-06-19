@@ -71,12 +71,6 @@ examRouter.get(
   examController.getSignedArchiveFiles
 );
 
-examRouter.post(
-  "/verify-password",
-  requireLogin,
-  examController.verifyExamPassword
-);
-
 examRouter.patch(
   "/:id/approve",
   requireLogin,
@@ -94,7 +88,7 @@ examRouter.patch(
 );
 
 examRouter.patch(
-  "/:id/open",
+  "/:examId/:userId/open",
   requireLogin,
   validateData(openExamSchema),
   examController.openExam
@@ -110,13 +104,6 @@ examRouter.patch(
   ]),
   // validateUploadExamDocument,
   examController.updateExamDocument
-);
-
-examRouter.patch(
-  "/:examId/changeStatus",
-  requireLogin,
-  // validateData(openExamSchema),
-  examController.changeStatusExam
 );
 
 examRouter.delete(

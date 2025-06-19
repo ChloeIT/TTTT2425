@@ -60,30 +60,42 @@ const DocumentList = ({ documents, totalPage }) => {
     }
   };
 
-  const handleDownloadFile = async (examId, title, type) => {
-    const fileData = await fetchSignedUrls(examId);
-    if (!fileData) return;
-
-    const url = type === "question" ? fileData.questionFile : fileData.answerFile;
-    const safeTitle = title?.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_") || "file";
-    const fileName = `${safeTitle} - ${type === "question" ? "Đề thi" : "Đáp án"}.pdf`;
-
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      toast.error("Tải file thất bại.");
-      console.error(err);
-    }
-  };
+ 
+    const removeVietnameseTones = (str) => {
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, (m) => (m === "đ" ? "d" : "D"))
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "_")
+        .trim();
+    };
+  
+    const handleDownloadFile = async (examId, title, type) => {
+      const fileData = await fetchSignedUrls(examId);
+      if (!fileData) return;
+  
+      const url = type === "question" ? fileData.questionFile : fileData.answerFile;
+      const safeTitle = removeVietnameseTones(title || "file");
+      const fileName = `${safeTitle} - ${type === "question" ? "De_thi" : "Dap_an"}.pdf`;
+  
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (err) {
+        toast.error("Tải file thất bại.");
+        console.error(err);
+      }
+    };
+  
 
   const updateQueryParam = (key, val) => {
     const params = new URLSearchParams(window.location.search);

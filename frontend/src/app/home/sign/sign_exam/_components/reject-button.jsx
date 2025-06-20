@@ -79,11 +79,15 @@ const RejectButton = ({ exam, pendingRejectExam, setPendingRejectExam, onSuccess
         }}
       >
         <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              Xác nhận từ chối đề thi
-            </DialogTitle>
-          </DialogHeader>
+        <DialogHeader>
+          <DialogTitle className="text-center">
+            Xác nhận từ chối đề thi
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Đề thi: <span className="font-medium text-foreground">{exam.title}</span>
+          </p>
+        </DialogHeader>
+
 
           <Textarea
             placeholder="Nhập lý do từ chối đề thi..."

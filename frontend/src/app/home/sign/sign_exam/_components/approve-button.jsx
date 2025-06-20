@@ -82,10 +82,13 @@ const ApproveButton = ({ exam, pendingApproveExam, setPendingApproveExam, onSucc
       >
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="text-center">
-              Xác nhận duyệt đề thi
-            </DialogTitle>
-          </DialogHeader>
+          <DialogTitle className="text-center">
+            Xác nhận duyệt đề thi
+          </DialogTitle>
+          <p className="text-sm  text-muted-foreground mt-1">
+            Đề thi: <span className="font-medium text-foreground">{exam.title}</span>
+          </p>
+        </DialogHeader>
 
           <Input
             name="approve-exam-password"

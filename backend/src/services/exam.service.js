@@ -21,28 +21,28 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
-    const questionFileUrl = new URL(questionFile);
-    const answerFileUrl = new URL(answerFile);
-
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
-    const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
-
-    const baseQuestionFile =
-      basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
-    const baseAnswerFile =
-      basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
-
-    return await prisma.exam.create({
-      data: {
-        title,
-        status,
-        createdById,
-        questionFile: baseQuestionFile,
-        answerFile: baseAnswerFile,
-      },
-    });
+      const questionFileUrl = new URL(questionFile);
+      const answerFileUrl = new URL(answerFile);
+  
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+      const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
+  
+      const baseQuestionFile =
+        basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
+      const baseAnswerFile =
+        basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
+  
+      return await prisma.exam.create({
+        data: {
+          title,
+          status,
+          createdById,
+          questionFile: baseQuestionFile,
+          answerFile: baseAnswerFile,
+        },
+      });
   },
- 
+  
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: {
@@ -246,7 +246,7 @@ const examService = {
       updatedExam.title,
       message
     );
-    
+
     const { password, ...examWithoutPassword } = updatedExam;
 
     return examWithoutPassword;

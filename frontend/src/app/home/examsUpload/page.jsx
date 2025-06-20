@@ -32,7 +32,7 @@ const ExamsUploadPage = async ({ searchParams }) => {
   let examsDean = [];
   let totalPageDean = 1;
 
-  if (role === "GIANG_VIEN_RA_DE") {
+  if (role === "GIANG_VIEN_RA_DE" || role === "TRUONG_KHOA") {
     const result = await getExams();
     if (!result.ok) throw new Error(result.message || "Failed to load exams");
     exams = result.data;
@@ -52,11 +52,11 @@ const ExamsUploadPage = async ({ searchParams }) => {
       : [];
 
   const examsTuChoi =
-    role === "GIANG_VIEN_RA_DE"
-      ? exams
+   
+       exams
           .filter((e) => e.status === "TU_CHOI")
           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      : [];
+      ;
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
@@ -98,6 +98,7 @@ const ExamsUploadPage = async ({ searchParams }) => {
                 query={query}
                 department={department}
                 userId={userId} // Pass userId to ExamView
+                examsRejectedByMe={examsTuChoi}
               />
             </div>
           )}

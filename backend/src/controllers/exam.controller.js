@@ -195,7 +195,7 @@ const examController = {
 
       const now = new Date(Date.now());
       const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-      if (exam.status !== "DA_THI" || new Date(exam.updatedAt) > sixHoursAgo) {
+      if (exam.status !== "DA_THI" || new Date(exam.openAt) > sixHoursAgo) {
         return res.status(403).json({
           error: "Đề thi không đủ điều kiện để truy cập (chưa thi đủ 6 tiếng)",
         });
@@ -291,20 +291,20 @@ const examController = {
       }
       const isExamValid = await examService.canOpenExam(examId);
       if (!isExamValid) {
-        return res.status(401).json({error: "Đề thi không hợp lệ"})
+        return res.status(401).json({ error: "Đề thi không hợp lệ" });
       }
 
-      const isPasswordValid = await examService.verifyPassword(examId, password);
+      const isPasswordValid = await examService.verifyPassword(
+        examId,
+        password
+      );
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
       }
 
       const exam = await examService.getExamById(examId);
 
-      const updatedExam = await examService.openExam(
-        exam,
-        req.user
-      );
+      const updatedExam = await examService.openExam(exam, req.user);
       res.status(200).json({ data: updatedExam });
     } catch (error) {
       next(error);
@@ -468,8 +468,8 @@ const examController = {
         year,
       });
 
-      // Sort data by updatedAt in descending order (newest first)
-      data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      // Sort data by openAt in descending order (newest first)
+      data.sort((a, b) => new Date(b.openAt) - new Date(a.openAt));
 
       return res.status(200).json({
         data,

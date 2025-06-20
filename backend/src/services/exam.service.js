@@ -21,34 +21,34 @@ const examService = {
     questionFile,
     answerFile,
   }) => {
-      const questionFileUrl = new URL(questionFile);
-      const answerFileUrl = new URL(answerFile);
-  
-      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
-      const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
-  
-      const baseQuestionFile =
-        basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
-      const baseAnswerFile =
-        basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
-  
-      return await prisma.exam.create({
-        data: {
-          title,
-          status,
-          createdById,
-          questionFile: baseQuestionFile,
-          answerFile: baseAnswerFile,
-        },
-      });
+    const questionFileUrl = new URL(questionFile);
+    const answerFileUrl = new URL(answerFile);
+
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "drujd0cbj";
+    const basePath = `https://res.cloudinary.com/${cloudName}/raw/upload/`;
+
+    const baseQuestionFile =
+      basePath + questionFileUrl.pathname.split("/").slice(3).join("/");
+    const baseAnswerFile =
+      basePath + answerFileUrl.pathname.split("/").slice(3).join("/");
+
+    return await prisma.exam.create({
+      data: {
+        title,
+        status,
+        createdById,
+        questionFile: baseQuestionFile,
+        answerFile: baseAnswerFile,
+      },
+    });
   },
-  
+
   getExamsByUserId: async (userId) => {
     return await prisma.exam.findMany({
       where: {
         createdById: userId,
         status: {
-          in: ["DANG_CHO", "TU_CHOI"], 
+          in: ["DANG_CHO", "TU_CHOI"],
         },
       },
       include: {
@@ -88,7 +88,7 @@ const examService = {
         document: true,
         attemptCount: true,
         openAt: true,
-        status: true
+        status: true,
       },
     });
   },
@@ -260,7 +260,7 @@ const examService = {
     const decryptedPassword = decrypt(exam.password);
     return decryptedPassword === inputPassword;
   },
-  
+
   canOpenExam: async (examId) => {
     const cutoffTime = subMinutes(new Date(), 180);
     const examIsValid = await prisma.exam.findUnique({
@@ -272,8 +272,9 @@ const examService = {
           },
           {
             status: "DA_THI",
-            attemptCount: {lt: MAX_EXAM_OPEN_COUNT},
-            openAt: { gte: cutoffTime, // mở rồi nhưng vẫn trong 180 phút
+            attemptCount: { lt: MAX_EXAM_OPEN_COUNT },
+            openAt: {
+              gte: cutoffTime, // mở rồi nhưng vẫn trong 180 phút
             },
           },
         ],
@@ -281,7 +282,6 @@ const examService = {
     });
     return examIsValid;
   },
-
 
   openExam: async (exam, user) => {
     // if (!exam || exam.status !== "DA_DUYET") {
@@ -296,7 +296,7 @@ const examService = {
             increment: 1,
           },
           openAt: exam.attemptCount === 0 ? new Date() : undefined,
-          status: "DA_THI"
+          status: "DA_THI",
         },
       });
 
@@ -313,7 +313,7 @@ const examService = {
         title: updatedExam.title,
         questionFile: updatedExam.questionFile,
         createdById: updatedExam.createdById,
-        attemptCount: updatedExam.attemptCount 
+        attemptCount: updatedExam.attemptCount,
       };
     }
   },
@@ -433,6 +433,7 @@ const examService = {
           answerFile: true,
           createdAt: true,
           updatedAt: true,
+          openAt: true,
           note: true,
           status: true,
           createdById: true,
@@ -445,7 +446,7 @@ const examService = {
             },
           },
           document: true,
-          attemptCount: true
+          attemptCount: true,
         },
         orderBy: [
           {
@@ -465,20 +466,21 @@ const examService = {
     };
   },
 
-  getApproved_Tested: async({ status, page, query, department
-  })=> {
-    const statusFilter = status ? { status }: {
-        status: {
-          in: ["DA_DUYET", "DA_THI"],
-        },
-      };
+  getApproved_Tested: async ({ status, page, query, department }) => {
+    const statusFilter = status
+      ? { status }
+      : {
+          status: {
+            in: ["DA_DUYET", "DA_THI"],
+          },
+        };
     const cutoffTime = subMinutes(new Date(), 180);
 
     const where = {
       ...statusFilter,
       attemptCount: {
-      gte: 0,
-      lte: 2,
+        gte: 0,
+        lte: 2,
       },
       OR: [
         { openAt: null }, // chưa mở lần nào thì vẫn hiển thị
@@ -518,7 +520,7 @@ const examService = {
               department: true,
             },
           },
-          attemptCount: true
+          attemptCount: true,
         },
         orderBy: [
           {

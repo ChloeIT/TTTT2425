@@ -164,7 +164,7 @@ const ExamList = ({
       exam.title?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .filter((exam) => {
-      const date = new Date(exam.updatedAt);
+      const date = new Date(exam.openAt);
       const monthMatches =
         !selectedMonth ||
         (date.getMonth() + 1).toString().padStart(2, "0") === selectedMonth;
@@ -231,8 +231,8 @@ const ExamList = ({
           </TableHeader>
           <TableBody className="dark:border-gray-700">
             {filteredExams.map((exam) => {
-              const updatedAt = new Date(exam.updatedAt);
-              const timeDiffMs = currentTime - updatedAt;
+              const openAt = new Date(exam.openAt);
+              const timeDiffMs = currentTime - openAt;
               const isWithin24Hours = timeDiffMs < 6 * 60 * 60 * 1000;
               const hasDocument = !!exam.document;
 
@@ -250,7 +250,7 @@ const ExamList = ({
                       "Không rõ"}
                   </TableCell>
                   <TableCell className="text-center text-black dark:text-gray-400">
-                    {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
+                    {format(exam.openAt, "dd-MM-yyyy hh:mm")}
                   </TableCell>
                   <TableCell className="text-center text-black dark:text-gray-400">
                     <div className="flex flex-col justify-center items-center gap-2">

@@ -88,7 +88,7 @@ examRouter.patch(
 );
 
 examRouter.patch(
-  "/:examId/:userId/open",
+  "/:examId/open",
   requireLogin,
   validateData(openExamSchema),
   examController.openExam

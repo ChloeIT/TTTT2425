@@ -33,7 +33,12 @@ export default function DialogPassword({ setData, setPreviewUrl, setPreviewTitle
     if (!selectedExam) return;
 
     try {
-      const res = await openExam(selectedExam.id, user.id, inputPassword)
+      const res = await openExam(selectedExam.id, inputPassword)
+      console.log(res)
+      if (!res.ok) {
+        setError(res.message)
+        return;
+      }
       const resFile = await getSignedExamFiles(selectedExam.id)
       setPreviewUrl(resFile.data.questionFile);
       setPreviewTitle(selectedExam.title);

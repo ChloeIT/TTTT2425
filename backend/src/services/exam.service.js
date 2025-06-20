@@ -261,11 +261,32 @@ const examService = {
     return decryptedPassword === inputPassword;
   },
   
+  canOpenExam: async (examId) => {
+    const cutoffTime = subMinutes(new Date(), 180);
+    const examIsValid = await prisma.exam.findUnique({
+      where: {
+        id: examId,
+        OR: [
+          {
+            status: "DA_DUYET",
+          },
+          {
+            status: "DA_THI",
+            attemptCount: {lt: MAX_EXAM_OPEN_COUNT},
+            openAt: { gte: cutoffTime, // mở rồi nhưng vẫn trong 180 phút
+            },
+          },
+        ],
+      },
+    });
+    return examIsValid;
+  },
+
+
   openExam: async (exam, user) => {
-    console.log(exam)
-    if (!exam || exam.status !== "DA_DUYET") {
-      throw new Error("Đề thi chưa duyệt hoặc đã mở");
-    }
+    // if (!exam || exam.status !== "DA_DUYET") {
+    //   throw new Error("Đề thi chưa duyệt hoặc đã mở");
+    // }
     if (exam.attemptCount == 0 || exam.attemptCount < MAX_EXAM_OPEN_COUNT) {
       const updatedExam = await prisma.exam.update({
         where: { id: exam.id },
@@ -275,6 +296,7 @@ const examService = {
             increment: 1,
           },
           openAt: exam.attemptCount === 0 ? new Date() : undefined,
+          status: "DA_THI"
         },
       });
 
@@ -294,7 +316,6 @@ const examService = {
         attemptCount: updatedExam.attemptCount 
       };
     }
-
   },
 
   updateExamDocument: async (id, { questionFile, answerFile }) => {

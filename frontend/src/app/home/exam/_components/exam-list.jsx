@@ -25,6 +25,7 @@ const ExamViewList = ({ query, token }) => {
   const [inputPassword, setInputPassword] = useState("");
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
+  const [openedExamIds, setOpenedExamIds] = useState([]);
   const [totalPage, setTotalPage] = useState(1);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewTitle, setPreviewTitle] = useState("");
@@ -54,9 +55,6 @@ const ExamViewList = ({ query, token }) => {
     };
     fetchExams();
   }, [currentPage, query, user, page]);
-
-
-
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">

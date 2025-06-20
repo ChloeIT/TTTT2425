@@ -148,7 +148,7 @@ export const statusChanged = async (examId, changeStatus) => {
       ok: true,
       success: true,
       data: res.data.data,
-      message: "Duyệt đề thi thành công",
+      message: "Đề thi mở thành công",
     };
   } catch (error) {
     console.error("Lỗi approveExam:", error?.response?.data || error.message);
@@ -159,13 +159,12 @@ export const statusChanged = async (examId, changeStatus) => {
   }
 };
 
-export const openExam = async (examId, userId, password) => {
+export const openExam = async (examId, password) => {
   try {
-    console.log(userId)
     const cookie = await cookies();
     const token = cookie.get("token")?.value;
     const res = await instanceAPI.patch(
-      `/exams/${examId}/${userId}/open`,
+      `/exams/${examId}/open`,
       { password },
       {
         headers: {
@@ -179,7 +178,7 @@ export const openExam = async (examId, userId, password) => {
       ok: true,
       success: true,
       data: res.data.data,
-      message: "Duyệt đề thi thành công",
+      message: "Đề thi mở thành công",
     };
   } catch (error) {
     console.error("Lỗi approveExam:", error?.response?.data || error.message);

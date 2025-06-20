@@ -282,16 +282,18 @@ const examController = {
   openExam: async (req, res, next) => {
     try {
       const examId = Number(req.params.examId);
-      const userId = Number(req.params.userId);
       const { password } = req.body;
-
-      const user = userService.findById(userId)
       if (!password) {
         return res.status(400).json({ error: "Cần có mật khẩu để mở đề thi" });
       }
       if (!examId) {
         return res.status(400).json({ error: "Đề thi không tồn tại" });
       }
+      const isExamValid = await examService.canOpenExam(examId);
+      if (!isExamValid) {
+        return res.status(401).json({error: "Đề thi không hợp lệ"})
+      }
+
       const isPasswordValid = await examService.verifyPassword(examId, password);
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Mật khẩu không hợp lệ" });
@@ -301,7 +303,7 @@ const examController = {
 
       const updatedExam = await examService.openExam(
         exam,
-        user
+        req.user
       );
       res.status(200).json({ data: updatedExam });
     } catch (error) {

@@ -291,7 +291,7 @@ const examService = {
       const updatedExam = await prisma.exam.update({
         where: { id: exam.id },
         data: {
-          updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
+          // updatedAt: exam.attemptCount === 0 ? new Date() : undefined,
           attemptCount: {
             increment: 1,
           },

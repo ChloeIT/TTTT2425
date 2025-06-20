@@ -50,11 +50,10 @@ const ExamViewList = ({ query, token }) => {
         query,
       });
       setData(data);
-      console.log(data)
       setTotalPage(totalPage);
     };
     fetchExams();
-  }, [currentPage, query, user, page]);
+  }, [currentPage, query, user, page, previewUrl]);
 
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">

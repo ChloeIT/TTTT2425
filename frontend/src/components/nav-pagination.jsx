@@ -59,9 +59,7 @@ export const NavPagination = ({ totalPage }) => {
     params.set("page", `${page}`);
     router.replace(`${pathname}?${params.toString()}`);
   };
-  if (totalPage <= 1) {
-    return null;
-  }
+
   return (
     <Pagination>
       <PaginationContent>

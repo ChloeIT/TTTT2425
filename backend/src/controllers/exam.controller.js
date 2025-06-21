@@ -105,11 +105,26 @@ const examController = {
     }
   },
 
-  getExams: async (req, res, next) => {
+  getPendingExams: async (req, res, next) => {
     try {
       const userId = req.user.id;
-      const exams = await examService.getExamsByUserId(userId);
-      res.status(200).json({ data: exams });
+      const { query = "" } = req.query;
+      const data = await examService.getPendingExamsByUserId({ userId, query });
+      res.status(200).json({ data });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getRejectedExams: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { query = "" } = req.query;
+      const data = await examService.getRejectedExamsByUserId({
+        userId,
+        query,
+      });
+      res.status(200).json({ data });
     } catch (error) {
       next(error);
     }
@@ -482,16 +497,12 @@ const examController = {
 
   getExamsforDean: async (req, res, next) => {
     try {
-      const {
-        page = 1,
-        query = "",
-        department,
-      } = examService.validateQueryGetExamsByStatus(req);
+      const { page = 1, query = "" } =
+        examService.validateQueryGetExamsByStatus(req);
       const { data, totalPage } = await examService.getExamsByStatus({
         page: Number(page),
         query,
         status: "DANG_CHO",
-        department,
       });
 
       return res.status(200).json({

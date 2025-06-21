@@ -43,16 +43,76 @@ const examService = {
     });
   },
 
-  getExamsByUserId: async (userId) => {
+  getPendingExamsByUserId: async ({ userId, query = "" }) => {
     return await prisma.exam.findMany({
       where: {
         createdById: userId,
-        status: {
-          in: ["DANG_CHO", "TU_CHOI"],
+        status: "DANG_CHO",
+        ...(query && {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        }),
+      },
+      select: {
+        id: true,
+        title: true,
+        questionFile: true,
+        answerFile: true,
+        createdAt: true,
+        updatedAt: true,
+        note: true,
+        status: true,
+        createdById: true,
+        createdBy: {
+          select: {
+            username: true,
+            fullName: true,
+            email: true,
+            department: true,
+          },
         },
       },
-      include: {
-        createdBy: true,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
+
+  getRejectedExamsByUserId: async ({ userId, query = "" }) => {
+    return await prisma.exam.findMany({
+      where: {
+        createdById: userId,
+        status: "TU_CHOI",
+        ...(query && {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        }),
+      },
+      select: {
+        id: true,
+        title: true,
+        questionFile: true,
+        answerFile: true,
+        createdAt: true,
+        updatedAt: true,
+        note: true,
+        status: true,
+        createdById: true,
+        createdBy: {
+          select: {
+            username: true,
+            fullName: true,
+            email: true,
+            department: true,
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
       },
     });
   },

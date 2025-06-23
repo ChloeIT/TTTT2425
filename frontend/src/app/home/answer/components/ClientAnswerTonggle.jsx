@@ -14,7 +14,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { useSearchParams } from "next/navigation";
 import { NavPagination } from "@/components/nav-pagination";
 import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const departmentMap = {
   MAC_DINH: "Mặc định",
@@ -48,6 +49,7 @@ const ClientAnswerTonggle = ({ token }) => {
 
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+  const [documentType, setDocumentType] = useState(null);
   const [passwordInput, setPasswordInput] = useState("");
 
   const fetchExams = async () => {
@@ -87,29 +89,30 @@ const ClientAnswerTonggle = ({ token }) => {
           setPreviewUrl(fileUrl);
           setPreviewTitle(type === "question" ? "Đề thi" : "Đáp án");
         } else {
-          alert(
+          toast.error(
             `Không tìm thấy file ${type === "question" ? "đề thi" : "đáp án"}.`
           );
         }
       } else {
-        alert(result.message || "Không lấy được file.");
+        toast.error(result.message || "Không lấy được file.");
       }
     } catch (err) {
       console.error("Lỗi:", err);
-      alert("Có lỗi xảy ra khi lấy file.");
+      toast.error("Có lỗi xảy ra khi lấy file.");
     } finally {
       setLoadingId(null);
     }
   };
 
-  const handleRequestAnswerFile = (documentId) => {
+  const handleRequestAnswerFile = (documentId, type) => {
+    setDocumentType(type);
     setSelectedDocumentId(documentId);
     setShowPasswordDialog(true);
   };
 
   const handleVerifyPasswordAndOpenFile = async () => {
     if (!passwordInput) {
-      alert("Vui lòng nhập mật khẩu");
+      toast.error("Vui lòng nhập mật khẩu");
       return;
     }
 
@@ -133,17 +136,17 @@ const ClientAnswerTonggle = ({ token }) => {
       );
 
       const result = await res.json();
-
-      if (res.ok && result.success) {
-        await handleGetSignedFile(selectedDocumentId, "answer");
+      console.log("Password verification result:", result);
+      if (res.ok) {
+        await handleGetSignedFile(selectedDocumentId, documentType);
         setShowPasswordDialog(false);
         setPasswordInput("");
       } else {
-        alert(result.message || "Mật khẩu không đúng.");
+        toast.error(result.message || "Mật khẩu không đúng.");
       }
     } catch (err) {
       console.error(err);
-      alert("Lỗi xác thực mật khẩu.");
+      toast.error("Lỗi xác thực mật khẩu.");
     } finally {
       setLoadingId(null);
     }
@@ -158,10 +161,7 @@ const ClientAnswerTonggle = ({ token }) => {
       </div>
 
       <div className="py-4 flex gap-2 lg:flex-row flex-col items-start lg:items-center">
-        <SearchBar
-          placeholder={"Tìm kiếm người dùng theo tên, email..."}
-          isPagination={true}
-        />
+        <SearchBar placeholder={"Tìm kiếm đề thi..."} isPagination={true} />
       </div>
 
       <Card>
@@ -224,7 +224,10 @@ const ClientAnswerTonggle = ({ token }) => {
                         className="w-full"
                         variant="default"
                         onClick={() =>
-                          handleGetSignedFile(exam?.document?.id, "question")
+                          handleRequestAnswerFile(
+                            exam?.document?.id,
+                            "question"
+                          )
                         }
                         disabled={
                           loadingId === `${exam?.document?.id}-question`
@@ -240,7 +243,7 @@ const ClientAnswerTonggle = ({ token }) => {
                         className="w-full"
                         variant="secondary"
                         onClick={() =>
-                          handleRequestAnswerFile(exam?.document?.id)
+                          handleRequestAnswerFile(exam?.document?.id, "answer")
                         }
                         disabled={loadingId === `${exam?.document?.id}-answer`}
                       >

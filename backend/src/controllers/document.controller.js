@@ -1,5 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 const { ExamStatus } = require("../generated/prisma");
+const { use } = require("../libs/mail");
 const documentService = require("../services/document.service");
 const examService = require("../services/exam.service");
 const notificationService = require("../services/notification.service");
@@ -96,65 +97,28 @@ const getDocuments = async (req, res, next) => {
 };
 const verifyExamPassword = async (req, res) => {
   try {
-    const { examId, password } = req.body;
+    const { documentId, password } = req.body;
 
-    if (!examId || !password) {
-      return res.status(400).json({ message: "Missing examId or password" });
+    if (!documentId || !password) {
+      return res.status(400).json({ message: "Thiếu mật khẩu" });
     }
 
-    const isValid = await documentService.verifyPassword(examId, password);
+    const isValid = await documentService.verifyPassword(documentId, password);
 
     if (!isValid) {
       return res.status(401).json({ message: "Mật khẩu không chính xác" });
     }
-
-    return res.status(200).json({ message: "Xác minh thành công" });
-  } catch (error) {
-    console.error("Lỗi verifyExamPassword:", error);
-    return res.status(500).json({ message: "Lỗi máy chủ" });
-  }
-};
-const getAnswerWithPassword = async (req, res) => {
-  const { documentId, password } = req.body;
-
-  try {
-    const document = await prisma.document.findUnique({
-      where: { id: documentId },
-      include: {
-        exam: {
-          include: { createdBy: true },
-        },
-      },
-    });
-
-    if (!document || !document.exam) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Không tìm thấy đề thi." });
-    }
-
-    // So sánh mật khẩu
-    if (document.exam.password !== password) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Mật khẩu không đúng." });
-    }
-
-    // ✅ Gọi thông báo mở đáp án
-    await notificationService.notifyOpenAnswer(
-      document.exam.createdBy.id,
+    const document = await documentService.getDocumentById(documentId);
+    notificationService.notifyOpenAnswer(
+      req.user.id,
       document.exam.title,
       req.user.fullName,
       req.user.department
     );
-
-    return res.status(200).json({
-      success: true,
-      answerFile: document.answerFile,
-    });
-  } catch (err) {
-    console.error("Lỗi khi xác thực mật khẩu:", err);
-    return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
+    return res.status(200).json({ message: "Xác minh thành công" });
+  } catch (error) {
+    console.error("Lỗi verifyExamPassword:", error);
+    return res.status(500).json({ message: "Lỗi máy chủ" });
   }
 };
 
@@ -162,5 +126,4 @@ module.exports = {
   getSignedDocumentFiles,
   getDocuments,
   verifyExamPassword,
-  getAnswerWithPassword,
 };

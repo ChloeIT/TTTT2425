@@ -21,6 +21,11 @@ const createNotificationSchema = z.object({
       invalid_type_error: "Tên bài thi phải là chuỗi ký tự",
     })
     .min(1, "Tên bài thi là trường bắt buộc"),
+
+  type: z.enum(["question", "answer"], {
+    required_error: "Loại thông báo là bắt buộc",
+    invalid_type_error: "Loại thông báo phải là 'question' hoặc 'answer'",
+  }),
 });
 
 module.exports = {

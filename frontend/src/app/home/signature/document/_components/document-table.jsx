@@ -18,6 +18,8 @@ import { getSignedExamFiles } from "@/actions/secretary-password-action";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import FilterPanel from "../../../_components/filter-department";
+import Notify from "./notify";
+import { Eye, EyeOff } from "lucide-react";
 
 const departmentMap = {
   MAC_DINH: "Mặc định",
@@ -29,16 +31,23 @@ const departmentMap = {
 const DocumentList = ({ documents, totalPage }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const query = searchParams.get("query") || "";
 
+  const query = searchParams.get("query") || "";
   const department = searchParams.get("department") || "";
   const year = searchParams.get("year") || "";
   const month = searchParams.get("month") || "";
 
-  const [fileUrls, setFileUrls] = useState({}); // Cache: { examId: { questionFile, answerFile } }
-  const [selectedDepartment, setSelectedDepartment] = useState(department);
-  const [selectedYear, setSelectedYear] = useState(year);
-  const [selectedMonth, setSelectedMonth] = useState(month);
+  const [fileUrls, setFileUrls] = useState({});
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [selectedExam, setSelectedExam] = useState(null);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
+  const togglePasswordVisibility = (id) => {
+    setVisiblePasswords((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   const fetchSignedUrls = async (examId) => {
     if (fileUrls[examId]) return fileUrls[examId];
@@ -60,48 +69,56 @@ const DocumentList = ({ documents, totalPage }) => {
     }
   };
 
- 
-    const removeVietnameseTones = (str) => {
-      return str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[đĐ]/g, (m) => (m === "đ" ? "d" : "D"))
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "_")
-        .trim();
-    };
-  
-    const handleDownloadFile = async (examId, title, type) => {
-      const fileData = await fetchSignedUrls(examId);
-      if (!fileData) return;
-  
-      const url = type === "question" ? fileData.questionFile : fileData.answerFile;
-      const safeTitle = removeVietnameseTones(title || "file");
-      const fileName = `${safeTitle} - ${type === "question" ? "De_thi" : "Dap_an"}.pdf`;
-  
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-      } catch (err) {
-        toast.error("Tải file thất bại.");
-        console.error(err);
-      }
-    };
-  
+  const removeVietnameseTones = (str) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, (m) => (m === "đ" ? "d" : "D"))
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "_")
+      .trim();
+  };
+
+  const handleDownloadFile = async (examId, title, type) => {
+    const fileData = await fetchSignedUrls(examId);
+    if (!fileData) return;
+
+    const url = type === "question" ? fileData.questionFile : fileData.answerFile;
+    const safeTitle = removeVietnameseTones(title || "file");
+    const fileName = `${safeTitle} - ${type === "question" ? "De_thi" : "Dap_an"}.pdf`;
+
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (err) {
+      toast.error("Tải file thất bại.");
+      console.error(err);
+    }
+  };
 
   const updateQueryParam = (key, val) => {
     const params = new URLSearchParams(window.location.search);
     val ? params.set(key, val) : params.delete(key);
     params.set("page", "1");
     router.push(`?${params.toString()}`);
+  };
+
+  const handleOpenNotify = (exam) => {
+    setSelectedExam(exam);
+    setNotifyOpen(true);
+  };
+
+  const handleCloseNotify = () => {
+    setNotifyOpen(false);
+    setSelectedExam(null);
   };
 
   return (
@@ -125,13 +142,13 @@ const DocumentList = ({ documents, totalPage }) => {
         <TableHeader>
           <TableRow className="bg-gray-100 dark:bg-gray-800">
             <TableHead className="min-w-[120px]">Tên đề thi</TableHead>
+            {/* <TableHead className="min-w-[160px]">Mật khẩu</TableHead> */}
             <TableHead className="min-w-[100px]">Trạng thái</TableHead>
             <TableHead className="min-w-[130px]">Người tạo</TableHead>
             <TableHead className="min-w-[130px]">Phòng ban</TableHead>
             <TableHead className="min-w-[130px]">Ngày duyệt</TableHead>
             <TableHead className="min-w-[180px]">File đã ký</TableHead>
-            {/* <TableHead className="min-w-[130px]">DT</TableHead>
-            <TableHead className="min-w-[180px]">DA</TableHead> */}
+            <TableHead className="min-w-[140px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -140,11 +157,38 @@ const DocumentList = ({ documents, totalPage }) => {
             documents.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.title}</TableCell>
+
+                {/* <TableCell className="flex items-center justify-center gap-2 mt-5">
+                  {item.decryptedPassword ? (
+                    <>
+                      <span>
+                        {visiblePasswords[item.id]
+                          ? item.decryptedPassword
+                          : "••••••••"}
+                      </span>
+                      <button
+                        onClick={() => togglePasswordVisibility(item.id)}
+                        className="text-gray-600 hover:text-gray-900"
+                      >
+                        {visiblePasswords[item.id] ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="italic text-gray-400">Không có</span>
+                  )}
+                </TableCell> */}
+
                 <TableCell>
                   <Badge className="bg-green-500 text-white">Đã ký</Badge>
                 </TableCell>
                 <TableCell>{item.createdBy?.fullName || "Không rõ"}</TableCell>
-                <TableCell>{departmentMap[item.createdBy?.department] || "Không rõ"}</TableCell>
+                <TableCell>
+                  {departmentMap[item.createdBy?.department] || "Không rõ"}
+                </TableCell>
                 <TableCell>
                   {item.document?.createdAt
                     ? format(new Date(item.document.createdAt), "dd/MM/yyyy HH:mm")
@@ -168,13 +212,19 @@ const DocumentList = ({ documents, totalPage }) => {
                     </Button>
                   </div>
                 </TableCell>
-                {/* <TableCell>{item.document?.questionFile || "Không rõ"}</TableCell>
-                <TableCell>{item.document?.answerFile || "Không rõ"}</TableCell> */}
+                <TableCell>
+                  <Button
+                    onClick={() => handleOpenNotify(item)}
+                    className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition text-sm"
+                  >
+                    Gửi mật khẩu đáp án 
+                  </Button>
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
+              <TableCell colSpan={8} className="text-center py-4">
                 Không có dữ liệu
               </TableCell>
             </TableRow>
@@ -182,6 +232,7 @@ const DocumentList = ({ documents, totalPage }) => {
         </TableBody>
       </Table>
 
+      <Notify isOpen={notifyOpen} onClose={handleCloseNotify} exam={selectedExam} />
       <div className="py-4">
         <NavPagination totalPage={totalPage} />
       </div>

@@ -42,12 +42,13 @@ export async function getUserEmail() {
     return [];
   }
 }
-export async function notifyUserByEmail(email, password, titleExam) {
+export async function notifyUserByEmail(email, password, titleExam,type) {
   try {
     const res = await instanceAPI.post("/secretary/notify", {
       email,
       password,
       titleExam,
+      type
     });
     return res.data;
   } catch (error) {

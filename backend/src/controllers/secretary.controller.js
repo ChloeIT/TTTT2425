@@ -37,15 +37,22 @@ const secretaryController = {
 
   sendNotification: async (req, res) => {
     try {
-      const { email, password, titleExam } = req.body;
-
-      await secretaryService.notifyUserByEmail(email, password, titleExam);
+      const { email, password, titleExam, type } = req.body;
+  
+      if (type === "question") {
+        await secretaryService.notifyUserByEmail(email, password, titleExam);
+      }
+  
+      if (type === "answer") {
+        await secretaryService.notifyUserWithAnswer(email, password, titleExam);
+      }
+  
       return res.status(200).json({ message: `Đã gửi thông báo tới ${email}` });
     } catch (error) {
       console.error("sendNotification error:", error);
       return res.status(500).json({ message: "Lỗi server khi gửi thông báo" });
     }
-  },
+  },  
 
   getSignedExamsWithDocuments: async (req, res, next) => {
     try {
@@ -137,6 +144,7 @@ const secretaryController = {
       next(error);
     }
   },
+
 };
 
 module.exports = secretaryController;

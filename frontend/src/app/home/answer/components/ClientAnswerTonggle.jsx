@@ -277,7 +277,7 @@ const ClientAnswerTonggle = ({ token }) => {
           </DialogHeader>
           <div className="py-2">
             <Input
-              autoComplete="password"
+              autoComplete="new-password"
               type="password"
               placeholder="Nhập mật khẩu..."
               value={passwordInput}

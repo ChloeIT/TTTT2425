@@ -15,9 +15,18 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { NavPagination } from "@/components/nav-pagination";
 import FullScreenPdfViewer from "@/app/home/answer/components/FullScreenPdfViewer";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const departmentMap = {
   MAC_DINH: "Mặc định",
@@ -30,12 +39,16 @@ const ClientAnswerTonggle = ({ token }) => {
   const [loadingId, setLoadingId] = useState(null);
   const [exams, setExams] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [previewTitle, setPreviewTitle] = useState(""); // để hiển thị tiêu đề nếu cần
+  const [previewTitle, setPreviewTitle] = useState("");
 
   const [totalPage, setTotalPage] = useState(1);
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
+
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+  const [passwordInput, setPasswordInput] = useState("");
 
   const fetchExams = async () => {
     const { data, totalPage } = await getExamsWithDocuments({
@@ -89,6 +102,53 @@ const ClientAnswerTonggle = ({ token }) => {
     }
   };
 
+  const handleRequestAnswerFile = (documentId) => {
+    setSelectedDocumentId(documentId);
+    setShowPasswordDialog(true);
+  };
+
+  const handleVerifyPasswordAndOpenFile = async () => {
+    if (!passwordInput) {
+      alert("Vui lòng nhập mật khẩu");
+      return;
+    }
+
+    setLoadingId(`${selectedDocumentId}-answer`);
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/documents/verify-password`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            documentId: selectedDocumentId,
+            password: passwordInput,
+          }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        await handleGetSignedFile(selectedDocumentId, "answer");
+        setShowPasswordDialog(false);
+        setPasswordInput("");
+      } else {
+        alert(result.message || "Mật khẩu không đúng.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi xác thực mật khẩu.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-y-4 py-4 h-full">
       <div className="px-6 py-4 bg-white dark:bg-gray-800 shadow rounded-md">
@@ -109,7 +169,7 @@ const ClientAnswerTonggle = ({ token }) => {
           <Table className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
-                <TableHead className="text-center min-w-[100px] ">
+                <TableHead className="text-center min-w-[100px]">
                   Tên đề thi
                 </TableHead>
                 <TableHead className="text-center min-w-[100px]">
@@ -180,7 +240,7 @@ const ClientAnswerTonggle = ({ token }) => {
                         className="w-full"
                         variant="secondary"
                         onClick={() =>
-                          handleGetSignedFile(exam?.document?.id, "answer")
+                          handleRequestAnswerFile(exam?.document?.id)
                         }
                         disabled={loadingId === `${exam?.document?.id}-answer`}
                       >
@@ -206,6 +266,25 @@ const ClientAnswerTonggle = ({ token }) => {
           onClose={() => setPreviewUrl(null)}
         />
       )}
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nhập mật khẩu để xem đáp án</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <Input
+              type="password"
+              placeholder="Nhập mật khẩu..."
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleVerifyPasswordAndOpenFile}>Xác nhận</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

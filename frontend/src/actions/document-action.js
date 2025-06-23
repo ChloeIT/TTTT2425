@@ -38,15 +38,12 @@ export const getAllDocumentsWithExam = async () => {
   }
 };
 export const getExamsWithDocuments = async ({ page, query }) => {
-   
   const res = await instanceAPI.get("/documents", {
     params: {
       page,
       query,
     },
-    
   });
-    
 
   const result = res.data;
   if (!result || !result.data) {
@@ -59,3 +56,35 @@ export const getExamsWithDocuments = async ({ page, query }) => {
   };
 };
 
+export const openQuestionWithPassword = async (examId, password, token) => {
+  try {
+    const res = await instanceAPI.post(
+      "/documents/verify-password",
+      { examId, password },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result = res.data;
+    if (!result.success) {
+      return {
+        success: false,
+        message: result.message || "Mật khẩu không đúng.",
+      };
+    }
+
+    return {
+      success: true,
+      questionFile: result.data.questionFile,
+    };
+  } catch (error) {
+    console.error("Lỗi khi gọi API mở đề thi:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Lỗi khi kết nối tới server.",
+    };
+  }
+};

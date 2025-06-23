@@ -1,6 +1,7 @@
+// frontend/src/app/home/examsUpload/_components/exam-table.jsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -13,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { getSignedExamFiles, deleteExam } from "@/actions/exams-action";
 import toast, { Toaster } from "react-hot-toast";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -26,11 +26,38 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAction } from "@/hooks/use-action";
+import { Input } from "@/components/ui/input";
+import ClientPagination from "./pagination";
+
+const LIMIT = 3;
 
 export default function ExamTable({ exams, title, userId }) {
   const [fileUrls, setFileUrls] = useState({});
-  const router = useRouter();
   const [openDialogId, setOpenDialogId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const isRejectedTable = title === "Danh sách đề thi bị từ chối";
+
+  // Filter exams based on query
+  const filteredExams = useMemo(() => {
+    if (!query) return exams;
+    return exams.filter((exam) =>
+      exam.title.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [exams, query]);
+
+  // Calculate pagination
+  const totalPage = Math.ceil(filteredExams.length / LIMIT);
+  const paginatedExams = useMemo(() => {
+    const start = (currentPage - 1) * LIMIT;
+    return filteredExams.slice(start, start + LIMIT);
+  }, [filteredExams, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPage) {
+      setCurrentPage(newPage);
+    }
+  };
 
   const fetchSignedUrls = async (examId) => {
     const result = await getSignedExamFiles(examId);
@@ -59,6 +86,9 @@ export default function ExamTable({ exams, title, userId }) {
     try {
       await deleteExam(examId);
       toast.success("Đã xóa đề thi thành công");
+      if (paginatedExams.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     } catch (error) {
       toast.error(error.message || "Không thể xóa đề thi");
     }
@@ -88,34 +118,57 @@ export default function ExamTable({ exams, title, userId }) {
       <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
         {title}
       </h2>
+      <div className="py-4 flex gap-2 lg:flex-row flex-col items-start lg:items-center">
+        <Input
+          placeholder="Tìm kiếm đề thi theo tiêu đề..."
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="max-w-sm"
+        />
+      </div>
       <Table className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
         <TableHeader>
-          <TableRow>
-            <TableHead>Tên đề thi</TableHead>
-            <TableHead>Nội dung</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead>Ngày tạo</TableHead>
-            {title === "Danh sách đề thi bị từ chối" && (
-              <TableHead>Ngày cập nhật</TableHead>
+          <TableRow className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 bg-gray-100 border-gray-200">
+            <TableHead className="min-w-[165px] text-center">
+              Tên đề thi
+            </TableHead>
+            <TableHead className="min-w-[135px] text-center">
+              Nội dung
+            </TableHead>
+            <TableHead className="min-w-[90px] text-center">
+              Trạng thái
+            </TableHead>
+            <TableHead className="min-w-[100px] text-center">
+              Ngày tạo
+            </TableHead>
+            {isRejectedTable && (
+              <TableHead className="min-w-[100px] text-center">
+                Ngày cập nhật
+              </TableHead>
             )}
-            {title === "Danh sách đề thi bị từ chối" && (
-              <TableHead>Ghi chú</TableHead>
+            {isRejectedTable && (
+              <TableHead className="min-w-[130px] text-center">
+                Ghi chú
+              </TableHead>
             )}
             <TableHead>Hành động</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exams.length === 0 && (
+          {paginatedExams.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={title === "Danh sách đề thi bị từ chối" ? 7 : 6}
+                colSpan={isRejectedTable ? 7 : 5}
                 className="text-center py-4 text-gray-500 dark:text-gray-400"
               >
                 Không có dữ liệu
               </TableCell>
             </TableRow>
           )}
-          {exams.map((exam) => (
+          {paginatedExams.map((exam) => (
             <TableRow key={exam.id} className="dark:border-gray-700">
               <TableCell>
                 <span className="px-3 text-lg font-bold dark:text-gray-100">
@@ -169,14 +222,14 @@ export default function ExamTable({ exams, title, userId }) {
                 </Badge>
               </TableCell>
               <TableCell className="dark:text-gray-300">
-                {format(exam.createdAt, "dd-MM-yyyy hh:mm")}
+                {format(new Date(exam.createdAt), "dd-MM-yyyy HH:mm")}
               </TableCell>
-              {title === "Danh sách đề thi bị từ chối" && (
+              {isRejectedTable && (
                 <TableCell className="dark:text-gray-300">
-                  {format(exam.updatedAt, "dd-MM-yyyy hh:mm")}
+                  {format(new Date(exam.updatedAt), "dd-MM-yyyy HH:mm")}
                 </TableCell>
               )}
-              {title === "Danh sách đề thi bị từ chối" && (
+              {isRejectedTable && (
                 <TableCell className="dark:text-gray-300">
                   {exam.note || "-"}
                 </TableCell>
@@ -224,6 +277,18 @@ export default function ExamTable({ exams, title, userId }) {
           ))}
         </TableBody>
       </Table>
+      {filteredExams.length === 0 && (
+        <div className="my-4 text-muted-foreground flex justify-center">
+          Không có dữ liệu...
+        </div>
+      )}
+      {totalPage > 1 && (
+        <ClientPagination
+          currentPage={currentPage}
+          totalPage={totalPage}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 }

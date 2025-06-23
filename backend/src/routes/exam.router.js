@@ -52,8 +52,8 @@ examRouter.get(
   examController.getExamsForArchive
 );
 
-//lấy danh sách đề thi theo người soạn ( user hiện tại đang đăng nhập)
-examRouter.get("/", requireLogin, examController.getExams);
+examRouter.get("/pending", requireLogin, examController.getPendingExams);
+examRouter.get("/rejected", requireLogin, examController.getRejectedExams);
 
 examRouter.get("/:id", requireLogin, examController.getExamById);
 

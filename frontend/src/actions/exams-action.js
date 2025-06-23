@@ -21,12 +21,14 @@ export const createExam = async (formData) => {
   }
 };
 
-export const getExams = async () => {
+export const getPendingExams = async ({ query = "" } = {}) => {
   try {
-    const res = await instanceAPI.get("/exams");
+    const res = await instanceAPI.get("/exams/pending", {
+      params: { query },
+    });
     return {
       ok: true,
-      data: res.data.data,
+      data: res.data.data || [],
     };
   } catch (error) {
     if (error.response && error.response.status === 401) {
@@ -36,22 +38,40 @@ export const getExams = async () => {
       ok: false,
       message:
         error.response?.data?.error ||
-        "Lỗi hệ thống, không thể lấy danh sách đề thi",
+        "Lỗi hệ thống, không thể lấy danh sách đề thi đang chờ",
     };
   }
 };
+
+export const getRejectedExams = async ({ query = "" } = {}) => {
+  try {
+    const res = await instanceAPI.get("/exams/rejected", {
+      params: { query },
+    });
+    return {
+      ok: true,
+      data: res.data.data || [],
+    };
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      return { ok: false, unauthenticated: true };
+    }
+    return {
+      ok: false,
+      message:
+        error.response?.data?.error ||
+        "Lỗi hệ thống, không thể lấy danh sách đề thi bị từ chối",
+    };
+  }
+};
+
 //lấy ds đề trưởng khoa
-export async function getExamsWithDeanRole({
-  page = 1,
-  query = "",
-  department,
-} = {}) {
+export async function getExamsWithDeanRole({ page = 1, query = "" } = {}) {
   try {
     const res = await instanceAPI.get("/exams/truongkhoa/ds", {
       params: {
         page,
         query,
-        department,
       },
     });
     return {
@@ -118,14 +138,12 @@ export const getSignedExamFiles = async (examId) => {
   try {
     const cookie = await cookies();
     const token = cookie.get("token")?.value;
-    const res = await instanceAPI.get(`/exams/${examId}/files`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-      }
-    );
+    const res = await instanceAPI.get(`/exams/${examId}/files`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return successResponse(res);
   } catch (error) {
     return errorResponse(error);
@@ -169,7 +187,7 @@ export const openExam = async (examId, password) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
       }
     );

@@ -2,8 +2,8 @@
 
 import { updateReadNotifications } from "@/actions/notification-action";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -12,9 +12,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAction } from "@/hooks/use-action";
 import { useNotification } from "@/hooks/use-notification";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-import { Bell } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bell, Search } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 const NotificationContent = ({ title, message, isRead, createdAt }) => {
@@ -45,11 +47,31 @@ const NotificationContent = ({ title, message, isRead, createdAt }) => {
     </Alert>
   );
 };
-const LoadMoreNotificationButton = ({ onClick, disabled }) => {
+const PaginationButton = ({
+  hasNextPage,
+  getNextPage,
+  hasPreviousPage,
+  getPreviousPage,
+}) => {
   return (
-    <Button variant="success" size="sm" onClick={onClick} disabled={disabled}>
-      Tải thêm thông báo
-    </Button>
+    <div className="flex gap-x-2">
+      <Button
+        variant="blue"
+        size="sm"
+        disabled={!hasPreviousPage}
+        onClick={getPreviousPage}
+      >
+        <ArrowLeft />
+      </Button>
+      <Button
+        variant="blue"
+        size="sm"
+        disabled={!hasNextPage}
+        onClick={getNextPage}
+      >
+        <ArrowRight />
+      </Button>
+    </div>
   );
 };
 const MarkReadNotificationButton = ({ onClick, disabled }) => {
@@ -59,6 +81,18 @@ const MarkReadNotificationButton = ({ onClick, disabled }) => {
     </Button>
   );
 };
+const InputSearch = ({ handleSearch }) => {
+  return (
+    <div className={cn("relative w-full px-2 my-2")}>
+      <Search className="absolute left-4 top-2 h-4 w-4 text-muted-foreground" />
+      <Input
+        placeholder={"Nhập tiêu đề, nội dung thông báo..."}
+        className={cn("pl-8 h-8")}
+        onChange={(e) => handleSearch(e.target.value)}
+      />
+    </div>
+  );
+};
 
 export const NotificationButton = () => {
   const {
@@ -66,7 +100,10 @@ export const NotificationButton = () => {
     haveNotReadCount,
     hasNextPage,
     getNextPage,
+    hasPreviousPage,
+    getPreviousPage,
     markNotificationHaveRead,
+    handleSearch,
   } = useNotification();
 
   const { action } = useAction();
@@ -97,7 +134,13 @@ export const NotificationButton = () => {
       </PopoverTrigger>
       <PopoverContent align="end" alignOffset={10} sideOffset={10} asChild>
         <ScrollArea className="h-[450px] lg:w-[450px] w-[350px] rounded-md p-4">
-          <div className="text-md text-center font-bold mb-4">Thông báo</div>
+          <div className="text-md text-center font-bold my-2">Thông báo</div>
+          <div className="text-sm text-center text-muted-foreground my-2">
+            Thông báo chỉ tồn tại trong vòng 30 ngày. Nếu cần thông báo hơn 30
+            ngày, vui lòng kiểm tra mail.
+          </div>
+          <InputSearch handleSearch={handleSearch} />
+
           <div className="flex flex-col gap-2 items-center mb-4">
             {data.map((item, index) => {
               return (
@@ -120,9 +163,11 @@ export const NotificationButton = () => {
               disabled={haveNotReadCount === 0}
               onClick={() => handleMarkRead()}
             />
-            <LoadMoreNotificationButton
-              onClick={() => getNextPage()}
-              disabled={!hasNextPage()}
+            <PaginationButton
+              getNextPage={getNextPage}
+              getPreviousPage={getPreviousPage}
+              hasNextPage={hasNextPage()}
+              hasPreviousPage={hasPreviousPage()}
             />
           </div>
         </ScrollArea>

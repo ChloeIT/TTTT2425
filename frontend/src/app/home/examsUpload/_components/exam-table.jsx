@@ -29,7 +29,7 @@ import { useAction } from "@/hooks/use-action";
 import { Input } from "@/components/ui/input";
 import ClientPagination from "./pagination";
 
-const LIMIT = 3;
+const LIMIT = 10;
 
 export default function ExamTable({ exams, title, userId }) {
   const [fileUrls, setFileUrls] = useState({});

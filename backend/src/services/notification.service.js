@@ -17,7 +17,13 @@ const notificationService = {
   },
 
   sendNotificationMail: async (userId, subject, message) => {
-    const user = await userService.findById(userId);
+    //fix: chỉ gửi mail cho những tài khoản active thôi, tài khoản ngừng thì không gửi
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        isActive: true,
+      },
+    });
     if (!user) {
       return; // User not found
     }

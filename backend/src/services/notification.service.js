@@ -41,6 +41,15 @@ const notificationService = {
   },
 
   createNotification: async ({ userId, title, message }) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        isActive: true,
+      },
+    });
+    if (!user) {
+      return; // User not found
+    }
     return await prisma.notification.create({
       data: {
         userId,

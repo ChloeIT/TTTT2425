@@ -198,6 +198,21 @@ const secretaryService = {
       message,
     });
   },
+  notifyUserWithAnswer: async (email, password, titleExam) => {
+    const user = await userService.findByEmail(email);
+    if (!user) {
+      throw new Error(`User với email ${email} không tồn tại`);
+    }
+
+    const title = `Thông báo mật khẩu đáp án đề thi ${titleExam}`;
+    const message = `Bạn nhận được mật khẩu đáp án đề thi: ${password}. Vui lòng bảo mật thông tin này.`;
+
+    await notificationService.createNotificationAndSendMail({
+      userId: user.id,
+      title,
+      message,
+    });
+  },
 
   getSignedExamsWithDocuments: async ({
     page = 1,
@@ -207,7 +222,7 @@ const secretaryService = {
     department,
   }) => {
     const where = {
-      status: "DA_THI",
+      status: ExamStatus.DA_THI,
       document: {
         isNot: null,
       },
@@ -239,7 +254,7 @@ const secretaryService = {
         select: {
           id: true,
           title: true,
-
+          password: true, 
           createdBy: {
             select: {
               fullName: true,
@@ -258,25 +273,30 @@ const secretaryService = {
         },
         orderBy: {
           document: {
-            createdAt: 'desc',
+            createdAt: "desc",
           },
-        }
-        ,        
+        },
         skip: (page - 1) * LIMIT,
         take: LIMIT,
       }),
       prisma.exam.count({ where }),
     ]);
 
-    const totalPage = Math.ceil(count / LIMIT);
+    const examsWithDecryptedPasswords = exams.map((exam) => {
+      const { password, ...rest } = exam;
+      return {
+        ...rest,
+        decryptedPassword: password ? decrypt(password) : null,
+      };
+    });
 
+    const totalPage = Math.ceil(count / LIMIT);
     // console.log(
     //   "[getSignedExamsWithDocuments] Exams:",
     //   JSON.stringify(exams, null, 2)
     // );
-
     return {
-      data: exams,
+      data: examsWithDecryptedPasswords,
       totalPage,
     };
   },

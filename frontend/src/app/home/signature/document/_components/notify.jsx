@@ -92,7 +92,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
         selectedEmail,
         exam.decryptedPassword,
         exam.title,
-        "question",
+        "answer"
       );
       toast.success("Gửi thông báo thành công!");
       setTimeout(() => {
@@ -118,8 +118,8 @@ const Notify = ({ isOpen, onClose, exam }) => {
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-lg sm:w-full">
           <DialogHeader>
-            <DialogTitle>Gửi mật khẩu đề thi : {exam?.title}</DialogTitle>
-            <DialogDescription>Vui lòng chọn email phù hợp</DialogDescription>
+            <DialogTitle>Gửi mật khẩu đáp án đề thi : {exam?.title}</DialogTitle>
+              <DialogDescription>Vui lòng chọn email phù hợp</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">

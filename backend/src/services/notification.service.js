@@ -4,12 +4,12 @@ const moment = require("moment");
 const userService = require("./user.service");
 const LIMIT = 10;
 
-  const departmentMap = {
-    MAC_DINH: "Mặc định",
-    LY_LUAN_CO_SO: "Lý luận cơ sở",
-    NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
-    XAY_DUNG_DANG: "Xây dựng Đảng",
-  };
+const departmentMap = {
+  MAC_DINH: "Mặc định",
+  LY_LUAN_CO_SO: "Lý luận cơ sở",
+  NHA_NUOC_PHAP_LUAT: "Nhà nước và pháp luật",
+  XAY_DUNG_DANG: "Xây dựng Đảng",
+};
 
 const notificationService = {
   getToday: () => {
@@ -55,10 +55,7 @@ const notificationService = {
         where: { userId },
         take: LIMIT,
         skip: (page - 1) * LIMIT,
-        orderBy: [
-          { isRead: "asc" },
-          { createdAt: "desc" },
-        ],
+        orderBy: [{ isRead: "asc" }, { createdAt: "desc" }],
       }),
       prisma.notification.count({ where: { userId } }),
       prisma.notification.count({ where: { userId, isRead: false } }),
@@ -102,7 +99,9 @@ const notificationService = {
 
   notifyOpenExam: async function (userId, examTitle, fullName, department) {
     const title = `Đề thi ${examTitle} đã được mở`;
-    const message = `Đề thi ${examTitle} đã được mở vào lúc ${this.getToday()} bởi GV  ${fullName} - ${departmentMap[department]}`;
+    const message = `Đề thi ${examTitle} đã được mở vào lúc ${this.getToday()} bởi GV  ${fullName} - ${
+      departmentMap[department]
+    }`;
 
     // Thông báo cho người mở đề
     await this.createNotification({ userId, title, message });
@@ -128,6 +127,23 @@ const notificationService = {
       message,
     });
     await this.sendNotificationMail(userId, title, message);
+  },
+
+  notifyOpenAnswer: async function (userId, examTitle, fullName, department) {
+    const title = `Đáp án đề thi ${examTitle} đã được mở`;
+    const message = `Đáp án của đề thi ${examTitle} đã được mở vào lúc ${this.getToday()} bởi GV ${fullName} - ${
+      departmentMap[department]
+    }`;
+
+    await this.createNotification({ userId, title, message });
+    await this.sendNotificationMail(userId, title, message);
+
+    const usersBanGiamHieu = await userService.getAllUserWithRoleBanGiamHieu();
+    await Promise.all(
+      usersBanGiamHieu.map((user) =>
+        this.createNotification({ userId: user.id, title, message })
+      )
+    );
   },
 };
 

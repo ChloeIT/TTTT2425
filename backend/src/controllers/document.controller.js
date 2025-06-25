@@ -1,7 +1,9 @@
 const cloudinary = require("cloudinary").v2;
 const { ExamStatus } = require("../generated/prisma");
+const { use } = require("../libs/mail");
 const documentService = require("../services/document.service");
 const examService = require("../services/exam.service");
+const notificationService = require("../services/notification.service");
 
 const getSignedDocumentFiles = async (req, res, next) => {
   try {
@@ -93,8 +95,35 @@ const getDocuments = async (req, res, next) => {
     next(error);
   }
 };
+const verifyExamPassword = async (req, res) => {
+  try {
+    const { documentId, password } = req.body;
+
+    if (!documentId || !password) {
+      return res.status(400).json({ message: "Thiếu mật khẩu" });
+    }
+
+    const isValid = await documentService.verifyPassword(documentId, password);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Mật khẩu không chính xác" });
+    }
+    const document = await documentService.getDocumentById(documentId);
+    notificationService.notifyOpenAnswer(
+      req.user.id,
+      document.exam.title,
+      req.user.fullName,
+      req.user.department
+    );
+    return res.status(200).json({ message: "Xác minh thành công" });
+  } catch (error) {
+    console.error("Lỗi verifyExamPassword:", error);
+    return res.status(500).json({ message: "Lỗi máy chủ" });
+  }
+};
 
 module.exports = {
   getSignedDocumentFiles,
   getDocuments,
+  verifyExamPassword,
 };

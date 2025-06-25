@@ -180,7 +180,7 @@ const PasswordList = ({ passwords, totalPage }) => {
                   onClick={() => handleOpenNotify(item)}
                   className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition min-w-[110px]"
                 >
-                  Gửi thông báo
+                  Gửi mật khẩu đề thi
                 </button>
               </TableCell>
             </TableRow>

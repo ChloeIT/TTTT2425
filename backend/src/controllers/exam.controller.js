@@ -384,8 +384,12 @@ const examController = {
         return res.status(404).json({ error: "Không tìm thấy đề thi" });
       }
 
-      // Delete exam and associated files from Cloudinary
-      await examService.deleteExam(id, exam.questionFile, exam.answerFile);
+      await examService.deleteExam(
+        id,
+        exam.questionFile,
+        exam.answerFile,
+        req.user.id
+      );
 
       res.status(200).json({ message: "Đã xóa đề thi thành công" });
     } catch (error) {

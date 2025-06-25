@@ -167,7 +167,26 @@ const examService = {
     });
   },
 
-  deleteExam: async (id, questionFile, answerFile) => {
+  deleteExam: async (id, questionFile, answerFile, userId) => {
+    const exam = await prisma.exam.findUnique({
+      where: { id },
+      select: { status: true, createdById: true },
+    });
+
+    if (!exam) {
+      throw new Error("Không tìm thấy đề thi");
+    }
+
+    // Kiểm tra trạng thái và quyền sở hữu
+    if (exam.status !== "DANG_CHO" && exam.status !== "TU_CHOI") {
+      throw new Error(
+        "Chỉ có thể xóa đề thi ở trạng thái ĐANG CHỜ hoặc TỪ CHỐI"
+      );
+    }
+    if (exam.createdById !== userId) {
+      throw new Error("Bạn chỉ có thể xóa đề thi do chính bạn tạo");
+    }
+
     // Extract public IDs for Cloudinary deletion
     const extractPublicId = (url) => {
       const parts = url.split("/");
@@ -187,7 +206,6 @@ const examService = {
       cloudinary.uploader.destroy(answerFilePublicId, { resource_type: "raw" }),
     ]).catch((error) => {
       console.error("Error deleting files from Cloudinary:", error);
-      // Optionally rethrow or handle non-critical errors (e.g., file already deleted)
     });
 
     // Delete the exam record from the database

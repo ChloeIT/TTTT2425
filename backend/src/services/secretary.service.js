@@ -161,6 +161,9 @@ const secretaryService = {
 
   getAllUserEmails: async () => {
     const users = await prisma.user.findMany({
+      where: {
+        isActive: true, 
+      },
       select: {
         email: true,
         department: true,

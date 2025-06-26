@@ -188,9 +188,11 @@ const userService = {
   },
 
   getAllUserWithRoleBanGiamHieu: async () => {
+    //fix: chỉ gửi mail cho những tài khoản active thôi, tài khoản ngừng thì không gửi
     return await prisma.user.findMany({
       where: {
         role: "BAN_GIAM_HIEU",
+        isActive: true,
       },
       select: {
         id: true,

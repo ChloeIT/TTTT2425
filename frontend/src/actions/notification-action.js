@@ -2,11 +2,12 @@
 
 import instanceAPI, { errorResponse, successResponse } from "@/lib/axios";
 
-export const getNotifications = async ({ page = 1 }) => {
+export const getNotifications = async ({ page = 1, query }) => {
   try {
     const res = await instanceAPI.get("/notifications", {
       params: {
         page,
+        query,
       },
     });
 

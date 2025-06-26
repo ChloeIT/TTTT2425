@@ -1,5 +1,6 @@
 import { getNotifications } from "@/actions/notification-action";
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
 export const useNotification = () => {
   const [data, setData] = useState([]);
@@ -7,13 +8,14 @@ export const useNotification = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [haveNotReadCount, setHaveNotReadCount] = useState(0);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const fetchNotification = () => {
       startTransition(() => {
-        getNotifications({ page: currentPage })
+        getNotifications({ page: currentPage, query })
           .then(({ data, totalPage, haveNotReadCount }) => {
-            setData((prev) => [...prev, ...data]);
+            setData(data);
             setTotalPage(totalPage);
             setHaveNotReadCount(haveNotReadCount);
           })
@@ -26,31 +28,32 @@ export const useNotification = () => {
     };
 
     fetchNotification();
-  }, [currentPage]);
+  }, [currentPage, query]);
   const hasNextPage = useCallback(() => {
-    if (currentPage >= totalPage) {
-      return false;
-    } else {
-      return true;
-    }
+    return currentPage < totalPage;
+  }, [currentPage, totalPage]);
+  const hasPreviousPage = useCallback(() => {
+    return currentPage > 1;
   }, [currentPage, totalPage]);
   const getNextPage = () => {
     if (hasNextPage()) {
       setCurrentPage((prev) => prev + 1);
     }
   };
+  const getPreviousPage = () => {
+    if (hasPreviousPage()) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const markNotificationHaveRead = () => {
-    setData((prev) => {
-      return prev.map((item) => {
-        return {
-          ...item,
-          isRead: true,
-        };
-      });
-    });
+    setCurrentPage(1);
     setHaveNotReadCount(0);
   };
+  const handleSearch = useDebounceCallback((term) => {
+    setCurrentPage(1);
+    setQuery(term);
+  }, 300);
 
   return {
     data,
@@ -59,6 +62,9 @@ export const useNotification = () => {
     isPending,
     hasNextPage,
     getNextPage,
+    hasPreviousPage,
+    getPreviousPage,
     markNotificationHaveRead,
+    handleSearch,
   };
 };

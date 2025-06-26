@@ -17,7 +17,13 @@ const notificationService = {
   },
 
   sendNotificationMail: async (userId, subject, message) => {
-    const user = await userService.findById(userId);
+    //fix: chỉ gửi mail cho những tài khoản active thôi, tài khoản ngừng thì không gửi
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        isActive: true,
+      },
+    });
     if (!user) {
       return; // User not found
     }
@@ -35,6 +41,15 @@ const notificationService = {
   },
 
   createNotification: async ({ userId, title, message }) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        isActive: true,
+      },
+    });
+    if (!user) {
+      return; // User not found
+    }
     return await prisma.notification.create({
       data: {
         userId,
@@ -49,15 +64,34 @@ const notificationService = {
     await this.sendNotificationMail(userId, title, message);
   },
 
-  getNotificationPagination: async (userId, { page = 1 }) => {
+  getNotificationPagination: async (userId, { page = 1, query }) => {
+    const where = {
+      userId,
+      ...(query && {
+        OR: [
+          {
+            title: {
+              contains: query,
+            },
+          },
+          {
+            message: {
+              contains: query,
+            },
+          },
+        ],
+      }),
+    };
     const [data, count, haveNotReadCount] = await prisma.$transaction([
       prisma.notification.findMany({
-        where: { userId },
+        where,
         take: LIMIT,
         skip: (page - 1) * LIMIT,
         orderBy: [{ isRead: "asc" }, { createdAt: "desc" }],
       }),
-      prisma.notification.count({ where: { userId } }),
+      prisma.notification.count({
+        where,
+      }),
       prisma.notification.count({ where: { userId, isRead: false } }),
     ]);
 
@@ -144,6 +178,21 @@ const notificationService = {
         this.createNotification({ userId: user.id, title, message })
       )
     );
+  },
+
+  deleteNotifications: async (userId) => {
+    try {
+      await prisma.notification.deleteMany({
+        where: {
+          userId,
+          isRead: true,
+          createdAt: {
+            // xóa khi quá 30 ngày kể từ ngày hiện tại
+            lt: moment().subtract(30, "days"),
+          },
+        },
+      });
+    } catch (error) {}
   },
 };
 

@@ -107,9 +107,14 @@ const authController = {
     try {
       const { email } = req.body;
       const user = await userService.findByEmail(email);
+      //fix: chỉ gửi mail cho tài khoản active
       if (!user) {
         throw new Error("Người dùng không tồn tại");
       }
+      if (!user.isActive) {
+        throw new Error("Người dùng không tồn tại");
+      }
+
       const forgotPassword = await authService.createForgotPasswordOtp(
         user.id,
         user.email

@@ -97,7 +97,7 @@ const Notify = ({ isOpen, onClose, exam }) => {
       toast.success("Gửi thông báo thành công!");
       setTimeout(() => {
         onClose();
-      }, 1500);
+      }, 1200);
     } catch (error) {
       console.error("Gửi thất bại:", error);
       toast.error("Gửi thông báo thất bại. Vui lòng thử lại.");

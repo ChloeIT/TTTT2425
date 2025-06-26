@@ -319,7 +319,7 @@ const examService = {
     });
 
     // Gửi thông báo và email bằng notificationService
-    await notificationService.notifyRejectExam(
+    notificationService.notifyRejectExam(
       updatedExam.createdById,
       updatedExam.title,
       message
